@@ -7,6 +7,8 @@ import enumerate_b
 import b_sessions
 import datetime
 
+# MASTER 
+
 
 class Player:
 
