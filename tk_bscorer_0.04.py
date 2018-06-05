@@ -122,6 +122,30 @@ class Application(tk.Tk):
                 self.add_bench_menus(player)
             self.colour_dict = b_scorer.colour_sorter(b_scorer.all_current_players)
 
+        # If program crashed or exited otherwise normally, reload all data
+        try:
+            pickle_in = open("board_data.obj","rb")
+            board_data = pickle.load(pickle_in)
+            b_scorer.every_player = board_data["every_player"]
+            b_scorer.all_current_players = board_data["all_current_players"]
+            b_scorer.absent_players = board_data["absent_players"]
+            b_scorer.total_rounds = board_data["total_rounds"]
+            b_scorer.bench = board_data["bench"]
+            b_scorer.courts = board_data["courts"]
+            b_scorer.today_session = board_data["today_session"]
+            self.colour_dict = board_data["colour_dict"]
+            self.confirm_button.configure(state = board_data["confirm_state"])
+            for player in b_scorer.bench:
+                self.add_bench_menus(player)
+                self.bench_popup_menus =  board_data["bench_menus"]
+                self.court_menus = board_data["court_menus"]
+                self.space_menus = board_data["space_menus"]
+            pickle_in.close()
+
+            # If it hasn't been saved before, or was blanked when it quit
+        except KeyError or FileNotFoundError or EOFError:
+            pass
+
         self.update_board()
 
     # Save the current state, in order 
