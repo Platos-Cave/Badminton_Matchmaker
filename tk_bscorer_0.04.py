@@ -126,6 +126,10 @@ class Application(tk.Tk):
         try:
             pickle_in = open("board_data.obj","rb")
             board_data = pickle.load(pickle_in)
+        except FileNotFoundError:
+            board_data = {}
+
+        try:
             b_scorer.every_player = board_data["every_player"]
             b_scorer.all_current_players = board_data["all_current_players"]
             b_scorer.absent_players = board_data["absent_players"]
@@ -141,9 +145,8 @@ class Application(tk.Tk):
                 self.court_menus = board_data["court_menus"]
                 self.space_menus = board_data["space_menus"]
             pickle_in.close()
-
             # If it hasn't been saved before, or was blanked when it quit
-        except KeyError or FileNotFoundError or EOFError:
+        except KeyError: # board_data was blanked on exit
             pass
 
         self.update_board()
@@ -162,11 +165,12 @@ class Application(tk.Tk):
         board_data["today_session"] = b_scorer.today_session
         board_data["colour_dict"] = self.colour_dict
         # For some reason, wouldn't work otherwise
-        if self.confirm_button["state"] == "disabled":
+        button_state = str(self.confirm_button["state"])
+        if button_state == "disabled":
             board_data["confirm_state"] = "disabled"
         else:
             board_data["confirm_state"] = "normal"
-            
+
         pickle.dump(board_data, pickle_in)
         pickle_in.close()
 
@@ -372,7 +376,7 @@ class Application(tk.Tk):
                 every_pi.close()
 
     # Remove player from the game night
-    def remove_player_entirely(self, court_number, index, player):
+    def remove_player_entirely(self, court_number, index, player = None):
 
         are_you_sure = tk.messagebox.askyesno("Are you sure?",
                             "Are you sure this player is leaving?")
@@ -476,7 +480,7 @@ class Application(tk.Tk):
         self.update_board()
 
     #Ensure player isn't put onto the next game
-    def keep_player_off(self, court_number, index, player):
+    def keep_player_off(self, court_number, index, player = None):
 
         # Differentiating between players on the court and the bench
         if court_number == None:
@@ -491,7 +495,7 @@ class Application(tk.Tk):
             player.keep_off = True
 
 
-    def view_player_stats(self, court_number, index = None, player = None):
+    def view_player_stats(self, court_number, index, player = None):
 
         # That is, if it's called from the court
         if player is None:
@@ -543,9 +547,9 @@ class CourtFrame(tk.Frame):
                                             label="Return to Bench")
             self.popup_menus[i].add_command(command = lambda
                 index = i: controller.remove_player_entirely(self.court_number,
-                                      index, None), label="Remove From Night")
+                                      index), label="Remove From Night")
             self.popup_menus[i].add_command(command = lambda
-                index = i: controller.keep_player_off(self.court_number, index, None))
+                index = i: controller.keep_player_off(self.court_number, index))
 
 
         self.labels[0].grid(row = 0, column = 0, sticky="nsew", padx=1, pady=1)
@@ -1057,15 +1061,7 @@ class PlayerStats(tk.Toplevel):
                     if player.name == other_player:
                         player.opponent_affinities.append(self.player.name)
 
-
-
-
-
-
         player_saved = tk.messagebox.showinfo("Success", "Player's affinity added!")
-
-
-
 
 
 class GameStats(tk.Toplevel):
@@ -1122,9 +1118,7 @@ class GameStats(tk.Toplevel):
         if are_you_sure is True:
 
             # Ensure all entries are floats, then update the new weightings
-
-            # Need to stop the first from being negative, as can't raise to negative power
-
+            # Double imported naming seems wonky
             try:
                 b_scorer.enumerate_b.scoring_vars[0] = float(self.bal_entry.get())
                 b_scorer.enumerate_b.scoring_vars[1] = float(self.seg_entry.get())
