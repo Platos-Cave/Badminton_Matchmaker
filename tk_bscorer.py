@@ -2,7 +2,7 @@
 readable by the players themselves.'''
 
 import tkinter as tk
-from tkinter import Tk, ttk, Frame, Menu, messagebox
+from tkinter import Tk, ttk, Frame, Menu, messagebox, Scrollbar
 from tkinter.messagebox import showinfo, askyesno, showerror
 import b_scorer
 import pickle
@@ -23,6 +23,11 @@ class Application(tk.Tk):
         self.bench_popup_menus = {}
         self.court_menus = {}
         self.space_menus = {}
+
+        start_menu = Menu(self)
+        self.config(menu=start_menu)
+
+        start_menu.add_cascade(label="Help", command = lambda: self.help())
 
         self.court_labels = [ttk.Label(text="Court {}".format(i + 1),
                                        background=bg_colour,
@@ -150,6 +155,10 @@ class Application(tk.Tk):
             pass
 
         self.update_board()
+
+    def help(self):
+        """produces help popup"""
+        self.help_menu = HelpMenu(self)
 
 
     def autosave(self):
@@ -1055,6 +1064,30 @@ class GameStats(tk.Toplevel):
                                   b_scorer.enumerate_b.scoring_vars['Mixing'])
             self.aff_entry.insert(0,
                                   b_scorer.enumerate_b.scoring_vars['Affinity'])
+
+class HelpMenu(tk.Toplevel):
+    def __init__(self, controller):
+
+        tk.Toplevel.__init__(self, controller)
+
+        self.controller = controller
+        self.title("User Guide")
+
+        readme = open('user_guide.txt', 'r')
+        readme_contents = readme.read()
+        readme.close()
+
+        self.text_widget = tk.Text(self, height=40, width=80, wrap=tk.WORD)
+        self.text_widget.insert(1.0, readme_contents)
+
+        self.scrollbar = Scrollbar(self)
+        self.text_widget.config(yscrollcommand=self.scrollbar.set)
+        self.scrollbar.config(command=self.text_widget.yview)
+
+        self.rowconfigure(0, weight=1)
+        self.columnconfigure(0, weight=1)
+        self.text_widget.grid(column = 0, row = 0, sticky = "NSEW")
+        self.scrollbar.grid(column=1, row=0, sticky="NSW")
 
 
 if __name__ == '__main__':
