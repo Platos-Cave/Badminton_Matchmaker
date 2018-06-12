@@ -1,8 +1,5 @@
-'''I want to to store data about the games that were played in a given
-night, as well as other factors.'''
-
-import datetime
-
+"""I want to to store data about the games that were played in a given
+night, as well as other factors."""
 
 class Session:
     def __init__(self, date, start_time):
