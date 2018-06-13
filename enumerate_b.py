@@ -33,8 +33,6 @@ import itertools
 import operator
 import pickle
 
-import time
-
 # The user can adjust the weightings of elements of score_courts()
 try:
     score_in = open("score_pi.obj", "rb")
