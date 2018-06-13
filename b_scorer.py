@@ -7,8 +7,6 @@ import enumerate_b
 import b_sessions
 import datetime
 
-# PYBRANCH
-
 class Player:
     def __init__(self, name, sex, ability,
                  partner_affinities=[], opponent_affinities=[]):
