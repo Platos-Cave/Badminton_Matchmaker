@@ -11,5 +11,5 @@ Screenshot:
 
 (Players have an ability from 1-9, where 9 is highest. 
 The sample players have an ability corresponding to the first letter of their 
-name for easier visualisation).
+name for easier visualisation).  
 (The two sides of the court are top-and-bottom. Partnerships are left-to-right).
