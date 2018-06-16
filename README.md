@@ -9,7 +9,8 @@ Screenshot:
 
 ![image](https://user-images.githubusercontent.com/39753397/41449783-42970f50-70b7-11e8-86d2-d4fe56065666.png)
 
+(The two sides of the court are top-and-bottom. Partnerships are left-to-right).  
+  
 (Players have an ability from 1-9, where 9 is highest. 
 The sample players have an ability corresponding to the first letter of their 
 name for easier visualisation).  
-(The two sides of the court are top-and-bottom. Partnerships are left-to-right).
