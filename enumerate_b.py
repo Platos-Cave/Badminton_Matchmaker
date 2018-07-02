@@ -33,21 +33,53 @@ import itertools
 import operator
 import pickle
 
-import time
+import datetime
 
 # The user can adjust the weightings of elements of score_courts()
 try:
     score_in = open("score_pi.obj", "rb")
     scoring_vars = pickle.load(score_in)
-    # because old version was a list
-    if isinstance(scoring_vars, list):
-        scoring_vars = {'Balance': 5.0, 'Ability_Seg': 2.0, 'Mixing': 1.0,
-                        'Affinity': 6.0, 'Shuffle': 0}
+    # replace old version
+    if len(scoring_vars) <10:
+        scoring_vars = {('Balance', "Default"): 5.0, ('Ability_Seg', "Default"): 2.0,
+                        ('Mixing', "Default"): 1.5,
+                        ('Affinity', "Default"): 4.0, ('Shuffle', "Default"): 0,
+                        ('Balance', 'Tuesday'): 5.0, ('Ability_Seg',
+                                                      'Tuesday'): 2.0,
+                        ('Mixing', 'Tuesday'): 2.0, ('Affinity',
+                                                     'Tuesday'): 4.0,
+                        ('Shuffle', 'Tuesday'): 0, ('Balance', 'Thursday'):
+                            6.0,
+                        ('Ability_Seg', 'Thursday'): 3.0,
+                        ('Mixing', 'Thursday'): 1.5,
+                        ('Affinity', 'Thursday'): 5.0,
+                        ('Shuffle', 'Thursday'): 1}
+
     score_in.close()
 except FileNotFoundError:
-    # scoring_vars = [5.0, 2.0, 1.0, 6.0, 0]
-    scoring_vars = {'Balance': 5.0, 'Ability_Seg': 2.0, 'Mixing': 1.0,
-                    'Affinity': 6.0, 'Shuffle': 0}
+    scoring_vars = {('Balance', "Default"): 5.0,
+                    ('Ability_Seg', "Default"): 2.0,
+                    ('Mixing', "Default"): 1.5,
+                    ('Affinity', "Default"): 4.0, ('Shuffle', "Default"): 0,
+                    ('Balance', 'Tuesday'): 5.0, ('Ability_Seg',
+                                                  'Tuesday'): 2.0,
+                    ('Mixing', 'Tuesday'): 2.0, ('Affinity',
+                                                 'Tuesday'): 4.0,
+                    ('Shuffle', 'Tuesday'): 0, ('Balance', 'Thursday'):
+                        6.0,
+                    ('Ability_Seg', 'Thursday'): 3.0,
+                    ('Mixing', 'Thursday'): 1.5,
+                    ('Affinity', 'Thursday'): 5.0,
+                    ('Shuffle', 'Thursday'): 1}
+
+# what score profile to use
+day_of_week = datetime.datetime.today().weekday()
+if day_of_week == 1:
+    profile = "Tuesday"
+elif day_of_week == 3:
+    profile = "Thursday"
+else:
+    profile = "Default"
 
 # Integers standing in for players
 players = [i for i in range(12)]
@@ -109,11 +141,11 @@ def score_court(court, trial_players):
 
     abilities = [player.ability for player in new_court]
     # The imbalance between team abilities. High imbalance = highly penalised
-    score += ((scoring_vars['Balance'] * (
+    score += ((scoring_vars[('Balance', profile)] * (
                 sum(abilities[0:2]) - sum(abilities[2:4]))) ** 2)
     # It is generally better to not have strong and weak players in the same
     #  game even if balanced, so this formula penalises that.
-    score += scoring_vars['Ability_Seg'] * (
+    score += scoring_vars[('Ability_Seg', profile)] * (
                 (max(abilities) - min(abilities)) ** 1.5)
 
     # We then want to penalise playing the same people over and over.
@@ -148,12 +180,12 @@ def score_court(court, trial_players):
             base_score = 0
             for i, game in enumerate(player.played_against):
                 if o_player in game:
-                    base_score += scoring_vars['Mixing'] * 2 * (
+                    base_score += scoring_vars[('Mixing', profile)] * 2 * (
                     (1 / (1 + discount_rate) ** (player.total_games - i - 1)))
                     count += 0.2
             for i, game in enumerate(player.played_with):
                 if o_player in game:
-                    base_score = + scoring_vars['Mixing'] * (
+                    base_score = + scoring_vars[('Mixing', profile)] * (
                                 1 / (1 + discount_rate) ** (
                                     player.total_games - i - 1))
                     count += 0.1
@@ -163,25 +195,25 @@ def score_court(court, trial_players):
             score += base_score * (count)
             # Subtract affinity variable from score
             if o_player.name in player.opponent_affinities:
-                score -= scoring_vars['Affinity']
+                score -= scoring_vars[('Affinity', profile)]
 
         for o_player in partner:
             count = 1
             base_score = 0
             for i, game in enumerate(player.played_against):
                 if o_player in game:
-                    base_score += scoring_vars['Mixing'] * (
+                    base_score += scoring_vars[('Mixing', profile)] * (
                                 1 / (1 + discount_rate) ** (
                                     player.total_games - i - 1))
                     count += 0.1
             for i, game in enumerate(player.played_with):
                 if o_player in game:
-                    base_score += scoring_vars['Mixing'] * 2 * (
+                    base_score += scoring_vars[('Mixing', profile)] * 2 * (
                     (1 / (1 + discount_rate) ** (player.total_games - i - 1)))
                     count += 0.2
             score += base_score * (count)
             if o_player.name in player.partner_affinities:
-                score -= scoring_vars['Affinity']
+                score -= scoring_vars[('Affinity', profile)]
 
     return score
 
