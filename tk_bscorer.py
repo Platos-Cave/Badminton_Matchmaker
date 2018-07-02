@@ -7,6 +7,7 @@ from tkinter.messagebox import showinfo, askyesno, showerror
 import b_scorer
 import pickle
 import random
+import datetime
 
 class Application(tk.Tk):
     """The main application"""
@@ -75,11 +76,16 @@ class Application(tk.Tk):
                                        command=self.start)
         self.confirm_button = ttk.Button(self, text="Confirm Board",
                                          command=self.confirm)
+        self.undo_confirm_button = ttk.Button(self, text="Undo Confirm",
+                                         command=self.undo_confirm)
+
         self.game_weighting_button = ttk.Button(self,
                                                 text="Change Automatic Rules",
                                                 command=self.edit_game_weightings)
         self.empty_courts_button = ttk.Button(self, text="Empty Courts",
                                               command=self.empty_courts)
+
+        self.undo_confirm_button.configure(state="disabled")
 
         for i, court in enumerate(self.court_labels):
             court.grid(column=(5 * i) + 2, row=2, sticky='nsew',
@@ -114,6 +120,8 @@ class Application(tk.Tk):
                                padx=1, pady=1)
         self.confirm_button.grid(column=13, row=16, sticky='nsew',
                                  padx=1, pady=1)
+        self.undo_confirm_button.grid(column=14, row=16, sticky='nsew',
+                                 padx=1, pady=1)
         self.empty_courts_button.grid(column=13, row=17, sticky='nsew',
                                       padx=1, pady=1)
         self.game_weighting_button.grid(column=12, row=17, sticky='nsew',
@@ -144,15 +152,16 @@ class Application(tk.Tk):
             b_scorer.today_session = board_data["today_session"]
             self.colour_dict = board_data["colour_dict"]
             self.confirm_button.configure(state=board_data["confirm_state"])
-            for player in b_scorer.bench:
+            if str(board_data["confirm_state"]) == "disabled":
+                self.undo_confirm_button.configure(state = "normal")
+            elif str(board_data["confirm_state"]) == "normal":
+                self.undo_confirm_button.configure(state="disabled")
+            for player in b_scorer.all_current_players:
                 self.add_bench_menus(player)
-                self.bench_popup_menus = board_data["bench_menus"]
-                self.court_menus = board_data["court_menus"]
-                self.space_menus = board_data["space_menus"]
             pickle_in.close()
             # If it hasn't been saved before, or was blanked when it quit
         except KeyError:  # board_data was blanked on exit
-            pass
+             pickle_in.close()
 
         self.update_board()
 
@@ -175,6 +184,7 @@ class Application(tk.Tk):
         board_data["courts"] = b_scorer.courts
         board_data["today_session"] = b_scorer.today_session
         board_data["colour_dict"] = self.colour_dict
+
         # For some reason, wouldn't work otherwise
         button_state = str(self.confirm_button["state"])
         if button_state == "disabled":
@@ -184,6 +194,10 @@ class Application(tk.Tk):
 
         pickle.dump(board_data, pickle_in)
         pickle_in.close()
+
+        every_pi = open('every_player_pi_2.obj', 'wb')
+        pickle.dump(b_scorer.every_player, every_pi)
+        every_pi.close()
 
     def confirm_quit(self):
         answer = tk.messagebox.askokcancel("Confirm Quit",
@@ -216,7 +230,15 @@ class Application(tk.Tk):
         if are_you_sure is True:
             b_scorer.empty_courts()
             self.confirm_button.configure(state="normal")
+            self.undo_confirm_button.configure(state="disabled")
             self.update_board()
+
+    def quick_pay(self, player):
+        player.pay_fee()
+        self.bench_grid()
+        # replace menu
+        self.add_bench_menus(player)
+
 
     def add_bench_menus(self, player):
         """Creates the pop-up menus for a given player (for the bench,
@@ -230,11 +252,17 @@ class Application(tk.Tk):
         # The methods call the court names and numbers, which are invalid here
         # Seems ugly, can't figure out how to get to >80 characters without
         # making it even uglier
-        self.bench_popup_menus[player].add_command(command=lambda: self.view_player_stats(None, None, player), label="View Player Stats")
+        self.bench_popup_menus[player].add_command(command=lambda: self.view_player_stats(None, None, player),
+                                                   label="View Player Profile")
         self.bench_popup_menus[player].add_command(command=lambda: self.remove_player_entirely(None, None, player),
                                                    label="Remove From Night")
         self.bench_popup_menus[player].add_command(command=lambda: self.keep_player_off(None, None, player),
                                                    label="Keep Player Off Next Round")
+        if not player.paid_tonight:
+            self.bench_popup_menus[player].add_command(
+            command = lambda: self.quick_pay(player),
+            label="Pay Tonight's Fee")
+
         self.bench_popup_menus[player].add_cascade(menu=self.court_menus[player],
                                                    label="Pin to Court...", )
         # Add menu options for manually adding players to courts
@@ -285,6 +313,14 @@ class Application(tk.Tk):
         for i, label in enumerate(self.bench_labels):
             player = b_scorer.bench[i]
 
+            # players who owe money get their name italicised
+            if player.money_owed > 0:
+                # turn font into list to modify it, then back to tuple.
+                # seems dirty?
+                new_font = list(custom_font)
+                new_font[2] = 'bold italic'
+                self.bench_labels[i].config(font = tuple(new_font))
+
             label.bind("<ButtonPress-3>", lambda event, player=player: self.show_bench_options(event, player))
             self.bench_labels[i].config(background=self.colour_dict[player])
 
@@ -319,6 +355,7 @@ class Application(tk.Tk):
         selected = self.abs_plyr_cbox.get()
         existing = [player.name for player in b_scorer.every_player]
         currents = [player.name for player in b_scorer.all_current_players]
+
 
         if selected == "Select or type-in name...":
             error = tk.messagebox.showerror("Error",
@@ -393,11 +430,6 @@ class Application(tk.Tk):
                 # Save to pickle
                 self.autosave()
 
-                every_pi = open('every_player_pi_2.obj', 'wb')
-                pickle.dump(b_scorer.every_player, every_pi)
-                every_pi.close()
-
-
     def remove_player_entirely(self, court_number, index, player=None):
         """Return a current player to absent players, then update relevant
         information"""
@@ -438,6 +470,7 @@ class Application(tk.Tk):
             b_scorer.generate_new_game()
             self.update_board()
             self.confirm_button.configure(state="normal")
+            self.undo_confirm_button.configure(state="disabled")
 
     def confirm(self):
         """Call b_scorer's confirm_game() function, update and autosave"""
@@ -454,8 +487,25 @@ class Application(tk.Tk):
             self.update_board()
             # Disabled to stop you accidentally pressing it multiple times
             self.confirm_button.configure(state="disabled")
+            self.undo_confirm_button.configure(state="normal")
 
             self.autosave()
+
+    def undo_confirm(self):
+        """In case you made a mistake confirming"""
+        are_you_sure = tk.messagebox.askyesno("Are you sure?",
+                                              "Are you sure you want to undo "
+                                              "the confirmation?")
+
+        if are_you_sure is True:
+            b_scorer.undo_confirm()
+            self.colour_dict = b_scorer.colour_sorter(
+                b_scorer.all_current_players)
+            self.update_board()
+            self.undo_confirm_button.configure(state="disabled")
+            self.confirm_button.configure(state="normal")
+            self.autosave()
+
 
 
     def update_board(self):
@@ -467,7 +517,9 @@ class Application(tk.Tk):
         for i, court in enumerate(self.court_frames):
             for j, label in enumerate(court.labels):
                 try:
-                    label.config(text=b_scorer.courts[i].spaces[j].name)
+                    name = b_scorer.courts[i].spaces[j].name
+                    label.config(text=name, font=("Helvetica", 32, 'bold'))
+
                 except AttributeError:  # if there is no-one in that space
                     label.config(text="-")
 
@@ -520,7 +572,7 @@ class Application(tk.Tk):
 
 
     def keep_player_off(self, court_number, index, player=None):
-        """Ensure player isn't put onto the next game"""
+        """Ensure player isn't put onto the next game. Should probably be in """
 
         # Differentiating between players on the court and the bench
         if court_number is None:
@@ -586,7 +638,7 @@ class CourtFrame(tk.Frame):
             self.popup_menus.append(Menu(self, tearoff=0))
             self.popup_menus[i].add_command(command=lambda
                 index=i: controller.view_player_stats(self.court_number, index),
-                                            label="View Player Stats")
+                                            label="View Player Profile")
             self.popup_menus[i].add_command(command=lambda
                 index=i: controller.return_to_bench(self.court_number, index),
                                             label="Return to Bench")
@@ -607,7 +659,7 @@ class CourtFrame(tk.Frame):
             self.grid_columnconfigure(column, weight=1)
 
         for row in range(2):
-            self.grid_rowconfigure(2, weight=1)
+            self.grid_rowconfigure(row, weight=1)
 
 
 class BenchFrame(tk.Frame):
@@ -631,11 +683,13 @@ class PlayerStats(tk.Toplevel):
         if self.new is True:
             self.title("Create New Player")
         else:
-            self.title("Player Stats")
+            self.title("Player Profile")
 
         self.name_label = ttk.Label(self, text="Name")
         self.sex_label = ttk.Label(self, text="Sex")
         self.ability_label = ttk.Label(self, text="Ability (1-9)")
+        self.membership_label = ttk.Label(self, text = "Membership Status")
+        self.owed_label =  ttk.Label(self, text = "Money Owed ($)")
         self.partner_aff_label = ttk.Label(self, text="Partner Affinities")
         self.opp_aff_label = ttk.Label(self, text="Opponent Affinities")
         self.partner_aff_box = ttk.Combobox(self, width=8)
@@ -666,12 +720,14 @@ class PlayerStats(tk.Toplevel):
         self.ability_combobox = ttk.Combobox(self, width=8,
                                              values=[i for i in range(1, 10)],
                                              state='readonly')
-        self.sex_combobox.current(0)
-        self.ability_combobox.current(4)
-
-        # So new players can get affs saved when their objects don't exist yet
-        self.partner_affs = []
-        self.opp_affs = []
+        self.membership_cbox = ttk.Combobox(self, width=8,
+                                             values=["Casual", "Member (no "
+                                                    "feathers)", "Member ("
+                                                    "incl. feathers)"],
+                                                state='readonly')
+        self.owed_entry = ttk.Entry(self, width = 11)
+        self.pay_owed_button = ttk.Button(self, text = "Pay Off", command =
+                                          self.pay_off)
 
         self.games_played_label = ttk.Label(self, text="Actual Games Played")
         self.games_played_number = ttk.Label(self, text="0")
@@ -687,6 +743,16 @@ class PlayerStats(tk.Toplevel):
 
         self.save_player_button = ttk.Button(self, text="Save New Player",
                                              command=self.save_player)
+        
+        self.sex_combobox.current(0)
+        self.ability_combobox.current(4)
+        self.membership_cbox.current(0)
+        self.owed_entry.insert(0, 0)
+                
+        # So new players can get affs saved when their objects don't exist yet
+        # Should move
+        self.partner_affs = []
+        self.opp_affs = []
 
         # If current player, upload their existing stats
 
@@ -702,6 +768,19 @@ class PlayerStats(tk.Toplevel):
                 self.sex_combobox.current(2)
 
             self.ability_combobox.current(self.player.ability - 1)
+
+            # Isn't very extensible
+            if self.player.membership == "Casual":
+                self.membership_cbox.current(0)
+                # self.player.money_owed +=
+            elif self.player.membership == "Member (no feathers)":
+                self.membership_cbox.current(1)
+            else:
+                self.membership_cbox.current(2)
+
+            self.owed_entry.delete(0, "end")
+            self.owed_entry.insert(0, self.player.money_owed)
+
 
             self.partner_affs = self.player.partner_affinities
             self.partner_aff_box.config(values=self.partner_affs)
@@ -731,32 +810,45 @@ class PlayerStats(tk.Toplevel):
         self.sex_combobox.grid(column=1, row=2, columnspan=3, sticky='ew')
         self.ability_label.grid(column=0, row=3)
         self.ability_combobox.grid(column=1, row=3, columnspan=3, sticky='ew')
-        self.partner_aff_label.grid(column=0, row=4)
-        self.partner_aff_box.grid(column=1, row=4, columnspan=3, sticky='ew')
-        self.new_partner_aff.grid(column=1, row=5, sticky='ew')
-        self.save_par_aff_butn.grid(column=2, row=5, sticky='ew')
-        self.del_partner_aff.grid(column=3, row=5, sticky='ew')
+        self.membership_label.grid(column=0, row = 4)
+        self.membership_cbox.grid(column=1, row = 4, columnspan=3, sticky='ew')
+        self.owed_label.grid(column = 0, row = 5)
+        self.owed_entry.grid(column = 1, row = 5)
+        self.pay_owed_button.grid(column = 2, row = 5)
+        self.partner_aff_label.grid(column=0, row=7)
+        self.partner_aff_box.grid(column=1, row=7, columnspan=3, sticky='ew')
+        self.new_partner_aff.grid(column=1, row=8, sticky='ew')
+        self.save_par_aff_butn.grid(column=2, row=8, sticky='ew')
+        self.del_partner_aff.grid(column=3, row=8, sticky='ew')
 
-        self.opp_aff_label.grid(column=0, row=6)
-        self.opp_aff_box.grid(column=1, row=6, columnspan=3, sticky='ew')
-        self.new_opp_aff.grid(column=1, row=7)
-        self.save_opp_aff_butn.grid(column=2, row=7)
-        self.del_opp_aff.grid(column=3, row=7)
+        self.opp_aff_label.grid(column=0, row=9)
+        self.opp_aff_box.grid(column=1, row=9, columnspan=3, sticky='ew')
+        self.new_opp_aff.grid(column=1, row=10, sticky='ew')
+        self.save_opp_aff_butn.grid(column=2, row=10, sticky='ew')
+        self.del_opp_aff.grid(column=3, row=10,  sticky='ew')
 
         # Games played. Irrelevant for new players
         if self.new is False:
-            self.games_played_label.grid(column=0, row=8)
-            self.games_played_number.grid(column=2, row=8)
-            self.late_penalty_label.grid(column=0, row=9)
-            self.late_penalty_entry.grid(column=2, row=9)
-            self.games_total_label.grid(column=0, row=10)
-            self.games_total_number.grid(column=2, row=10)
+            self.games_played_label.grid(column=0, row=11)
+            self.games_played_number.grid(column=2, row=11)
+            self.late_penalty_label.grid(column=0, row=12)
+            self.late_penalty_entry.grid(column=2, row=12)
+            self.games_total_label.grid(column=0, row=13)
+            self.games_total_number.grid(column=2, row=13)
 
-        self.player_notes_label.grid(column=1, row=11, columnspan=2)
-        self.player_notes.grid(column=0, row=12, columnspan=6,
+        self.player_notes_label.grid(column=1, row=14, columnspan=2)
+        self.player_notes.grid(column=0, row=15, columnspan=6,
                                padx=5, pady=5, sticky='nsew')
 
-        self.save_player_button.grid(column=1, row=13, columnspan=3)
+        self.save_player_button.grid(column=1, row=16, columnspan=3)
+
+
+    def pay_off(self):
+        """only clears entry widget"""
+        self.owed_entry.delete(0, "end")
+        self.owed_entry.insert(0, 0)
+
+
 
     def new_partner_affinity(self):
         """Simply clears the combobox"""
@@ -769,7 +861,9 @@ class PlayerStats(tk.Toplevel):
     # Should be able to combine the next two methods
     def del_partner_affinity(self):
         are_you_sure = tk.messagebox.askyesno("Are you sure?",
-                                              "Are you sure you want to delete this affinity?")
+                                              "Are you sure you want to "
+                                              "delete this affinity?",
+                                              parent = self)
 
         if are_you_sure is True:
 
@@ -792,7 +886,9 @@ class PlayerStats(tk.Toplevel):
 
     def del_opp_affinity(self):
         are_you_sure = tk.messagebox.askyesno("Are you sure?",
-                                              "Are you sure you want to delete this affinity?")
+                                              "Are you sure you want to "
+                                              "delete this affinity?",
+                                              parent = self)
 
         if are_you_sure is True:
 
@@ -818,37 +914,52 @@ class PlayerStats(tk.Toplevel):
         """If the player is existing, then update their stats. If new,
         create a new player and add them to bench"""
 
+        name = self.name_entry.get()
+        # Check if name is already taken, unless it's already this name
+        if not self.new and self.player.name == name:
+            pass
+        elif name in [player.name for player in b_scorer.every_player]:
+            error = tk.messagebox.showerror("Error",
+                                            "Error: player with identical"
+                                            " name found."
+                                            " Please enter a new name.",
+                                            parent=self)
+            return
+
+        # money currently must be an integer
+        try:
+            owed = int(self.owed_entry.get())
+        except ValueError:
+            tk.messagebox.showerror("Error", "Error: Money owed must be an "
+                                             "integer.", parent=self)
+            return
+
         are_you_sure = tk.messagebox.askyesno("Are you sure?",
                                               "Are you sure you want to save"
-                                              " this player?")
+                                              " this player?",  parent = self)
         if are_you_sure is False:
             return
 
-        name = self.name_entry.get()
         sex = self.sex_combobox.get()
         ability = int(self.ability_combobox.get())
+        membership =  self.membership_cbox.get()
         notes = self.player_notes.get("1.0", "end-1c")
 
         #If the player is New:
         #Create the player, add them to "every player" and "absent players"
         #Then call the add_player function from b_scorer to add them
         #to the bench with their respective games etc
-        if self.new is True:
-
-            if name in [player.name for player in b_scorer.every_player]:
-                error = tk.messagebox.showerror("Error",
-                                                "Error: player with identical"
-                                                " name found."
-                                                " Please enter a new name")
-                return
+        if self.new:
 
             New_Player = b_scorer.Player(name, sex, ability)
             New_Player.player_notes = notes
             New_Player.partner_affinities = self.partner_affs
             New_Player.opponent_affinities = self.opp_affs
+            New_Player.membership = membership
             b_scorer.every_player.append(New_Player)
             b_scorer.absent_players.append(New_Player)
             b_scorer.add_player(New_Player)
+            New_Player.money_owed = owed
             self.controller.colour_dict = b_scorer.colour_sorter(
                 b_scorer.all_current_players)
             self.controller.add_bench_menus(New_Player)
@@ -867,7 +978,8 @@ class PlayerStats(tk.Toplevel):
                 late_penalty = float(self.late_penalty_entry.get())
             except ValueError:
                 tk.messagebox.showerror("Error", "Please enter a valid "
-                                                 "lateness penalty")
+                                                 "lateness penalty",
+                                                  parent = self)
                 return
 
             # if the player's name is changed, update all the affinities
@@ -892,6 +1004,8 @@ class PlayerStats(tk.Toplevel):
             self.player.sex = sex
             self.player.ability = ability
             self.player.player_notes = notes
+            self.player.membership = membership
+            self.player.money_owed = owed
 
             self.player.penalty_games = late_penalty
             self.player.adjusted_games = self.player.total_games + late_penalty
@@ -916,20 +1030,23 @@ class PlayerStats(tk.Toplevel):
             other_player = self.opp_aff_box.get()
 
         if other_player not in all_names:
-            not_found = tk.messagebox.showerror("Error", "Player name not found")
+            not_found = tk.messagebox.showerror("Error", "Player name not "
+                                                         "found", parent = self)
             return
 
         if side == "partner":
             if other_player in self.partner_affs:
                 already_aff = tk.messagebox.showerror("Error",
                                                       "Player already has "
-                                                      "this affinity.")
+                                                      "this affinity.",
+                                                      parent = self)
                 return
         elif side == "opponent":
             if other_player in self.opp_affs:
                 already_aff = tk.messagebox.showerror("Error",
                                                       "Player already has "
-                                                      "this affinity.")
+                                                      "this affinity.",
+                                                      parent = self)
                 return
 
         # Not very elegant
@@ -954,7 +1071,8 @@ class PlayerStats(tk.Toplevel):
                 self.player.opponent_affinities = self.opp_affs
 
         player_saved = tk.messagebox.showinfo("Success",
-                                              "Player's affinity added!")
+                                              "Player's affinity added!",
+                                              parent = self)
 
 class GameStats(tk.Toplevel):
     """A Toplevel popup which allows the user to modify the weightings given to
@@ -966,31 +1084,41 @@ class GameStats(tk.Toplevel):
         self.controller = controller
         self.title("Weightings for Game Scoring Algorithm")
 
+        self.profile_label = ttk.Label(self, text="Profile:")
         self.bal_label = ttk.Label(self, text="Game Balance Weighting")
         self.seg_label = ttk.Label(self, text="Ability Segregation Weighting")
         self.mix_label = ttk.Label(self, text="Player Mixing Weighting")
         self.aff_label = ttk.Label(self, text="Player Affinity Weighting")
-
         self.shuffle_label = ttk.Label(self, text="Shuffle Algorithm")
 
+        self.profile_combo = ttk.Combobox(self, width = 10, state = 'readonly',
+                                          values=["Default", "Tuesday",
+                                             "Thursday"])
         self.bal_entry = ttk.Entry(self, width=4)
         self.seg_entry = ttk.Entry(self, width=4)
         self.mix_entry = ttk.Entry(self, width=4)
         self.aff_entry = ttk.Entry(self, width=4)
-        self.shuffle_combo = ttk.Combobox(self, width=10,
+        self.shuffle_combo = ttk.Combobox(self, width=10, state = 'readonly',
                                           values=["Random", "Segregated"])
 
-        self.bal_entry.insert(0, b_scorer.enumerate_b.scoring_vars['Balance'])
-        self.seg_entry.insert(0, b_scorer.enumerate_b.scoring_vars['Ability_Seg'])
-        self.mix_entry.insert(0, b_scorer.enumerate_b.scoring_vars['Mixing'])
-        self.aff_entry.insert(0, b_scorer.enumerate_b.scoring_vars['Affinity'])
-        self.shuffle_combo.current(b_scorer.enumerate_b.scoring_vars['Shuffle'])
 
-        self.default_button = ttk.Button(self, text="Return to Default",
-                                         command=self.return_default_weightings)
+        # self.bal_entry.insert(0, b_scorer.enumerate_b.scoring_vars['Balance'])
+        # self.seg_entry.insert(0, b_scorer.enumerate_b.scoring_vars['Ability_Seg'])
+        # self.mix_entry.insert(0, b_scorer.enumerate_b.scoring_vars['Mixing'])
+        # self.aff_entry.insert(0, b_scorer.enumerate_b.scoring_vars['Affinity'])
+        # self.shuffle_combo.current(b_scorer.enumerate_b.scoring_vars['Shuffle'])
+
+        # not used ATM
+        # self.default_button = ttk.Button(self, text="Return to Default",
+        #                                  command=self.return_default_weightings)
         self.save_button = ttk.Button(self, text="Save Weightings",
                                       command=self.save_weightings)
 
+        self.profile_combo.bind("<<ComboboxSelected>>",
+                                lambda event: self.switch_profile())
+
+        self.profile_label.grid(column=0, row=0)
+        self.profile_combo.grid(column=1, row=0)
         self.bal_label.grid(column=0, row=1)
         self.bal_entry.grid(column=1, row=1)
         self.seg_label.grid(column=0, row=2)
@@ -1001,8 +1129,18 @@ class GameStats(tk.Toplevel):
         self.aff_entry.grid(column=1, row=4)
         self.shuffle_label.grid(column=0, row=5)
         self.shuffle_combo.grid(column=1, row=5)
-        self.default_button.grid(column=0, row=6)
+        # self.default_button.grid(column=0, row=6)
         self.save_button.grid(column=1, row=6)
+
+        # Set profile based on day
+        today = datetime.datetime.today().weekday()
+        if today == 1:
+            self.profile_combo.current(1)
+        elif today == 3:
+            self.profile_combo.current(2)
+        else:
+            self.profile_combo.current(0)
+        self.switch_profile()
 
     def save_weightings(self):
         # Check to see if you want to update
@@ -1014,16 +1152,17 @@ class GameStats(tk.Toplevel):
             # Ensure all entries are floats, then update the new weightings
             # Double imported naming seems wonky
             try:
-                b_scorer.enumerate_b.scoring_vars['Balance'] = float(
+                day = self.profile_combo.get()
+                b_scorer.enumerate_b.scoring_vars['Balance', day] = float(
                     self.bal_entry.get())
-                b_scorer.enumerate_b.scoring_vars['Ability_Seg'] = float(
+                b_scorer.enumerate_b.scoring_vars['Ability_Seg', day] = float(
                     self.seg_entry.get())
-                b_scorer.enumerate_b.scoring_vars['Mixing'] = float(
+                b_scorer.enumerate_b.scoring_vars['Mixing', day] = float(
                     self.mix_entry.get())
-                b_scorer.enumerate_b.scoring_vars['Affinity'] = float(
+                b_scorer.enumerate_b.scoring_vars['Affinity', day] = float(
                     self.aff_entry.get())
                 b_scorer.enumerate_b.scoring_vars[
-                    'Shuffle'] = self.shuffle_combo.current()
+                    'Shuffle', day] = self.shuffle_combo.current()
 
                 # MMmmmm score pie
                 score_pi = open('score_pi.obj', 'wb')
@@ -1037,33 +1176,62 @@ class GameStats(tk.Toplevel):
                                                 "Please ensure all values are"
                                                 " numbers only.")
 
-    def return_default_weightings(self):
-        """Replace the user-defined weightings with default ones"""
+    # OUT OF DATE ATM
+    # def return_default_weightings(self):
+    #     """Replace the user-defined weightings with default ones"""
+    #
+    #
+    #     are_you_sure = tk.messagebox.askyesno("Are you sure?",
+    #                                           "Are you sure you want to return "
+    #                                           "to the default weightings?")
+    #
+    #     if are_you_sure is True:
+    #         b_scorer.enumerate_b.scoring_vars['Balance'] = 5.0
+    #         b_scorer.enumerate_b.scoring_vars['Ability_Seg'] = 2.0
+    #         b_scorer.enumerate_b.scoring_vars['Mixing'] = 1.5
+    #         b_scorer.enumerate_b.scoring_vars['Affinity'] = 4.0
+    #
+    #         # should be able to loop?
+    #         self.bal_entry.delete(0, "end")
+    #         self.seg_entry.delete(0, "end")
+    #         self.mix_entry.delete(0, "end")
+    #         self.aff_entry.delete(0, "end")
+    #
+    #         self.bal_entry.insert(0,
+    #                               b_scorer.enumerate_b.scoring_vars['Balance'])
+    #         self.seg_entry.insert(0, b_scorer.enumerate_b.scoring_vars[
+    #             'Ability_Seg'])
+    #         self.mix_entry.insert(0,
+    #                               b_scorer.enumerate_b.scoring_vars['Mixing'])
+    #         self.aff_entry.insert(0,
+    #                               b_scorer.enumerate_b.scoring_vars['Affinity'])
 
-        are_you_sure = tk.messagebox.askyesno("Are you sure?",
-                                              "Are you sure you want to return "
-                                              "to the default weightings?")
+    def switch_profile(self):
+        """When profile_combo selects a new profile, switch to those"""
+        # Delete balance entries, and insert the new profile's numbers.
+        # print("Selected!")
+        profile = self.profile_combo.get() # could pass in?
 
-        if are_you_sure is True:
-            b_scorer.enumerate_b.scoring_vars['Balance'] = 5.0
-            b_scorer.enumerate_b.scoring_vars['Ability_Seg'] = 2.0
-            b_scorer.enumerate_b.scoring_vars['Mixing'] = 1.5
-            b_scorer.enumerate_b.scoring_vars['Affinity'] = 6.0
+        self.bal_entry.delete(0, "end")
+        self.seg_entry.delete(0, "end")
+        self.mix_entry.delete(0, "end")
+        self.aff_entry.delete(0, "end")
 
-            # should be able to loop?
-            self.bal_entry.delete(0, "end")
-            self.seg_entry.delete(0, "end")
-            self.mix_entry.delete(0, "end")
-            self.aff_entry.delete(0, "end")
+        self.bal_entry.insert(0,
+                              b_scorer.enumerate_b.scoring_vars[('Balance',
+                                                                profile)])
+        self.seg_entry.insert(0, b_scorer.enumerate_b.scoring_vars[
+            ('Ability_Seg', profile)])
+        self.mix_entry.insert(0,
+                              b_scorer.enumerate_b.scoring_vars[('Mixing',
+                                                                 profile) ])
+        self.aff_entry.insert(0,
+                              b_scorer.enumerate_b.scoring_vars[('Affinity',
+                                                                 profile)])
+        self.shuffle_combo.current(b_scorer.enumerate_b.scoring_vars[(
+            'Shuffle', profile)])
 
-            self.bal_entry.insert(0,
-                                  b_scorer.enumerate_b.scoring_vars['Balance'])
-            self.seg_entry.insert(0, b_scorer.enumerate_b.scoring_vars[
-                'Ability_Seg'])
-            self.mix_entry.insert(0,
-                                  b_scorer.enumerate_b.scoring_vars['Mixing'])
-            self.aff_entry.insert(0,
-                                  b_scorer.enumerate_b.scoring_vars['Affinity'])
+
 
 class HelpMenu(tk.Toplevel):
     def __init__(self, controller):

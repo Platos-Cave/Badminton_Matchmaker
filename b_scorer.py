@@ -7,11 +7,9 @@ import enumerate_b
 import b_sessions
 import datetime
 
-# PYBRANCH
-
 class Player:
-    def __init__(self, name, sex, ability,
-                 partner_affinities=[], opponent_affinities=[]):
+    def __init__(self, name, sex, ability, partner_affinities=[],
+                 opponent_affinities=[], membership = "Casual"):
         self.name = name
         self.sex = sex
         self.ability = ability  # An integer from 1-9 (1 being weakest)
@@ -19,6 +17,10 @@ class Player:
         # Other players this player likes to be partnered with/oppose
         self.partner_affinities = partner_affinities
         self.opponent_affinities = opponent_affinities
+        # membership status: Member or Casual. Had trouble making
+        # backwards-compatible with pickle
+        self.membership = membership
+        self.money_owed = 0
 
         self.total_games = 0
         # if a player arrives late, add extra games for game priority purposes
@@ -27,6 +29,8 @@ class Player:
         self.adjusted_games = 0
         # No. of rounds since the player last had a game. 0 = was on last round
         self.time_since_last = 0
+        # "old" time_since_last purely for undoing purposes
+        self.old_tsl = 0
         # who this player's partners have been this night
         self.played_with = []
         # who this player's opponents have been this night
@@ -38,10 +42,74 @@ class Player:
         # If True, player will not be selected in automatic game
         self.keep_off = False
 
+        self.paid_tonight = True
+
+
     def update_game_count(self):
         self.total_games += 1
         self.adjusted_games += 1
+        self.old_tsl = self.time_since_last # for undoing
         self.time_since_last = 0
+
+    def undo_game(self):
+        self.total_games -= 1
+        self.adjusted_games -= 1
+        self.time_since_last = self.old_tsl
+        del self.played_with[-1]
+        del self.played_against[-1]
+
+    def accumulate_fee(self):
+
+        # put this somewhere else!
+        # keys are a tuple of membership and day of the week)
+
+
+        # first: check membership status
+        # then check what the fee is for tonight for a given status
+        # thus, need to have a means of saving fee levels for certain nights
+        # basic version first: just assume it's $5 for everyone
+        try:
+            #today = datetime.datetime.today().weekday()
+            today = 3
+            fee_key = (self.membership, today)
+
+            # if this player has a membership that requires them to have money
+
+            try:
+                if fee_structure[fee_key] > 0:
+                    self.paid_tonight = False
+
+                self.money_owed += fee_structure[fee_key]
+            except KeyError: # in case it's the wrong day/stuffed up
+                print("Key Error on fees!")
+
+            # print("{}, a {}, owes another {}".format(self.name,
+            #                                      self.membership,
+            #                        fee_structure[fee_key]))
+            #today -= 2
+            # if today == 3: # Thursday
+            #     if self.membership == "Casual"
+            #     self.money_owed += 10 # Thursday
+            #     print("Thursday: Added $10")
+            # else: # Tuesday
+            #     self.money_owed += 5
+            #     print("Tuesday: Added $5")
+
+        except TypeError:
+            print(self.money_owed)
+
+    # pay tonight's fee only
+    def pay_fee(self):
+
+        today = 3
+        fee_key = (self.membership, today)
+        self.paid_tonight = True
+
+        try:
+            self.money_owed -= fee_structure[fee_key]
+        except KeyError:  # in case it's the wrong day/stuffed up
+            pass
+
 
 
 class Court:
@@ -288,10 +356,15 @@ def view_bench():
 def generate_new_game():
     """Find the best game possible, then add those players to the courts"""
 
-    if enumerate_b.scoring_vars['Shuffle'] == 1:
-        best_game = (enumerate_b.find_best_game(select_players("Segregated")))
-    else:
+    # Quick and dirty rule to always start with random shuffle, then use
+    # segregated if you've saved that
+    if (total_rounds == 0) or (enumerate_b.scoring_vars['Shuffle',
+                             enumerate_b.profile] == 0):
         best_game = (enumerate_b.find_best_game(select_players("Random")))
+    else:
+        best_game = (enumerate_b.find_best_game(select_players("Segregated")))
+
+
 
     empty_courts()
 
@@ -338,6 +411,24 @@ def confirm_game():
 
     # New: trialing saving data
     today_session.games.append([courts[i].spaces for i in range(3)])
+
+def undo_confirm():
+
+    for court in courts:
+        for player in court.spaces:
+            if player is not None:
+                player.undo_game()
+
+    for player in bench:
+        player.time_since_last -= 1
+
+    # not ideal to use globals, what but else should I do?
+    global total_rounds
+    total_rounds -= 1
+
+    del today_session.games[-1]
+
+
 
 def test_mixing():
     '''View all the players and their (sorted) game history.
@@ -393,6 +484,7 @@ def add_player(player):
 
     player.penalty_games = average_games
     player.adjusted_games += average_games
+    player.accumulate_fee()
     all_current_players.append(player)
     today_session.player_arrivals[player] = datetime.datetime.now().time()
 
@@ -500,6 +592,23 @@ try:
     pickle_in = open("every_player_pi_2.obj","rb")
     every_player = pickle.load(pickle_in)
     pickle_in.close()
+
+    # temporary backwards compatibility code
+    for player in every_player:
+        if not hasattr(player, 'membership'):
+            player.membership = "Member (incl. feathers)"
+            #print("Added membership!")
+        else:
+            pass
+            #print("Membership is", player.membership)
+        if not hasattr(player, 'money_owed'):
+            player.money_owed = 0
+            #print("Added money owed!")
+        if not hasattr(player, "paid_tonight"):
+            player.paid_tonight = True
+            print("Added Played Tonight!")
+
+
 except FileNotFoundError:
     every_player = [Aaron, Andrew, Amanda, Anna, Barry, Beth, Bill, Bob, Caleb,
                 Calvin, Cindy, Charles, David, Derek, Denise, Doris, Edward,
@@ -523,4 +632,10 @@ absent_players = [player for player in every_player if player.name not in
 # Bench starts full
 bench = all_current_players[:]
 
-random.shuffle(bench)
+# fee structure
+fee_structure = {("Casual", 1): 5, ("Casual", 3): 10,
+                 ("Member (incl. feathers)", 1): 0,
+                 ("Member (incl. feathers)", 3): 0,
+                 ("Member (no feathers)", 1): 0,
+                 ("Member (no feathers)", 3): 3}
+
