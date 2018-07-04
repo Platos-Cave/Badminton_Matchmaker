@@ -41,6 +41,8 @@ class Player:
 
         # If True, player will not be selected in automatic game
         self.keep_off = False
+        # If True, player will always be selected in automatic games
+        self.keep_on = False
 
         self.paid_tonight = True
 
@@ -189,10 +191,16 @@ def select_players(shuffle_version):
     # The players who have been selected by this function to go on the board.
     trial_players = []
 
+    # Add kept on players
+    for player in all_current_players:
+        if player.keep_on:
+            trial_players.append(player)
+
     players_to_pick = [player for player in all_current_players if
-                       player.keep_off is False]
+                       not player.keep_off and not player.keep_on]
 
     total_court_space = 12
+
 
     # While the queue of players to go on is not full
     while len(trial_players) < total_court_space:
@@ -293,7 +301,7 @@ def colour_sorter(players):
     for being due. Used in the GUI for colouring the bench labels.
     Seems out of place/should be integrated into the select_players()
     function?"""
-    players_left = players
+    players_left = players[:]
     colour_dict = {}
 
     # If there are 12 or fewer players, then they're all "due"
@@ -335,6 +343,14 @@ def colour_sorter(players):
         colour_dict[player] = "orange"
     for player in red_players:
         colour_dict[player] = "red"
+
+    # Overrule colours with Keep On/Keep off:
+    for player in players:
+        if player.keep_off:
+            colour_dict[player] = "gray"
+        elif player.keep_on:
+            colour_dict[player] = "white"
+
 
     return colour_dict
 
@@ -404,6 +420,7 @@ def confirm_game():
 
     for player in all_current_players:
         player.keep_off = False
+        player.keep_on = False
 
     # not ideal to use globals, what but else should I do?    
     global total_rounds
@@ -506,6 +523,7 @@ def save_and_quit():
         player.played_with = []
         player.played_against = []
         player.keep_off = False
+        player.keep_on = False
 
     # Save departure times
     for player in all_current_players:
@@ -589,7 +607,7 @@ Isaac = Player("Isaac", "Male", 9, opponent_affinities=["Ian"])
 players"""
 
 try:
-    pickle_in = open("every_player_pi_2.obj","rb")
+    pickle_in = open("every_player_pi_3.obj","rb")
     every_player = pickle.load(pickle_in)
     pickle_in.close()
 
@@ -607,6 +625,8 @@ try:
         if not hasattr(player, "paid_tonight"):
             player.paid_tonight = True
             print("Added Played Tonight!")
+        if not hasattr(player, 'keep_on'):
+            player.keep_on = False
 
 
 except FileNotFoundError:
@@ -615,6 +635,10 @@ except FileNotFoundError:
                 Elliot, Emma, Erin, Fiona, Felicity, Flynn, Fred, Gary,
                 George, Georgina, Gordon, Hannah, Harry, Heather, Hunter,
                 Ian, Igor, Indiana, Isaac]
+
+    for player in every_player:
+        player.membership = "Member (incl. feathers)"
+
 
 """Ditto but for session data"""
 try:

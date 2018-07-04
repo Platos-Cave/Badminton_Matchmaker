@@ -187,7 +187,7 @@ def score_court(court, trial_players):
                 if o_player in game:
                     base_score = + scoring_vars[('Mixing', profile)] * (
                                 1 / (1 + discount_rate) ** (
-                                    player.total_games - i - 1))
+                                     player.total_games - i - 1))
                     count += 0.1
             # "Count" is a means of pseudo-exponentiation - i.e. we want it
             # to be proportionally worse to play someone three times row

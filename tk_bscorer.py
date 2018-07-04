@@ -129,7 +129,7 @@ class Application(tk.Tk):
 
         if self.test_mode is True:
             random.shuffle(b_scorer.every_player)
-            for player in b_scorer.every_player[0:18]:
+            for player in b_scorer.every_player[0:17]:
                 b_scorer.add_player(player)
                 self.add_bench_menus(player)
             self.colour_dict = b_scorer.colour_sorter(
@@ -258,6 +258,10 @@ class Application(tk.Tk):
                                                    label="Remove From Night")
         self.bench_popup_menus[player].add_command(command=lambda: self.keep_player_off(None, None, player),
                                                    label="Keep Player Off Next Round")
+        self.bench_popup_menus[player].add_command(
+            command=lambda: self.keep_player_on(None, None, player),
+            label="Keep Player On Next Round")
+
         if not player.paid_tonight:
             self.bench_popup_menus[player].add_command(
             command = lambda: self.quick_pay(player),
@@ -336,6 +340,12 @@ class Application(tk.Tk):
                 new_row += 1
             label.grid(column=count, row=new_row,
                        padx=custom_pad, pady=custom_pad, sticky='nsew')
+
+    def colour_change(self):
+        """Rejig the colours off the bench"""
+        self.colour_dict = b_scorer.colour_sorter(
+            b_scorer.all_current_players)
+        self.bench_grid()
 
     def bench_to_court(self, player, court, space):
         """Manually add a player from the bench to the court"""
@@ -454,17 +464,10 @@ class Application(tk.Tk):
         way of creating singles matches, I'm just going to leave it up to the
         person to do it manually"""
 
-        players_on = [player for player in b_scorer.all_current_players
-                      if player.keep_off is False]
-
         if len(b_scorer.all_current_players) < 12:
             tk.messagebox.showerror(
                 "Error", "There are fewer players available than spaces"
                          " on courts! This program can't handle that.")
-        elif len(players_on) < 12:
-            tk.messagebox.showerror(
-                "Error", "You've kept so many players off that you can't "
-                         "fill the courts! Put some back on!")
         else:
 
             b_scorer.generate_new_game()
@@ -543,6 +546,15 @@ class Application(tk.Tk):
                                                           label="Undo Keep "
                                                                 "Player Off")
 
+        if player.keep_on is False:
+            self.bench_popup_menus[player].entryconfigure(3,label="Keep "
+                                                                  "Player On "
+                                                                  "Next Round")
+        else:
+            self.bench_popup_menus[player].entryconfigure(3,
+                                                          label="Undo Keep "
+                                                                "Player On")
+
         self.bench_popup_menus[player].post(event.x_root, event.y_root)
 
     def show_court_options(self, event, court_number, index):
@@ -556,11 +568,23 @@ class Application(tk.Tk):
             # If the player is already "kept off", configure the label to "undo keep off"
             # Can't manage to get it to >80 characters
             if player.keep_off is False:
-                self.court_frames[court_number].popup_menus[index].entryconfigure(3,
-                                                                                  label="Keep Player Off Next Round")
+                self.court_frames[court_number].popup_menus[
+                    index].entryconfigure(3,
+                                          label="Keep Player Off Next Round")
             else:
-                self.court_frames[court_number].popup_menus[index].entryconfigure(3,
-                                                                                  label="Undo Keep Player Off")
+                self.court_frames[court_number].popup_menus[
+                    index].entryconfigure(3,
+                                          label="Undo Keep Player Off")
+            if player.keep_on is False:
+                self.court_frames[court_number].popup_menus[
+                    index].entryconfigure(4,
+                                          label="Keep Player On Next Round")
+            else:
+                self.court_frames[court_number].popup_menus[
+                    index].entryconfigure(4,
+                                          label="Undo Keep Player On")
+
+
 
             self.court_frames[court_number].popup_menus[index].post(event.x_root, event.y_root)
 
@@ -574,6 +598,16 @@ class Application(tk.Tk):
     def keep_player_off(self, court_number, index, player=None):
         """Ensure player isn't put onto the next game. Should probably be in """
 
+        # Ensure there aren't too many players off
+        players_available = [player for player in b_scorer.all_current_players
+                             if not player.keep_off]
+        if len(players_available) <=12:
+            tk.messagebox.showerror("Error", "Keeping this player off would "
+                                             "leave you with too few "
+                                             "players!", parent= self)
+            return
+
+
         # Differentiating between players on the court and the bench
         if court_number is None:
             player = player # due to reconfiguring the way menus work
@@ -585,7 +619,35 @@ class Application(tk.Tk):
             player.keep_off = False
         else:
             player.keep_off = True
+            player.keep_on = False
 
+        self.colour_change()
+
+    def keep_player_on(self, court_number, index, player=None):
+
+        # Ensure there aren't too many players on
+        players_kept_on = [player for player in b_scorer.all_current_players
+                             if player.keep_on]
+        if len(players_kept_on) >=12:
+            tk.messagebox.showerror("Error", "You can't keep on more players "
+                                             "than there are spaces on the "
+                                             "court!", parent= self)
+            return
+
+        # Differentiating between players on the court and the bench
+        if court_number is None:
+            player = player # due to reconfiguring the way menus work
+        else:
+            player = b_scorer.courts[court_number].spaces[index]
+
+        # toggle on/off
+        if player.keep_on is True:
+            player.keep_on = False
+        else:
+            player.keep_on = True
+            player.keep_off = False
+
+        self.colour_change()
 
     def view_player_stats(self, court_number, index, player=None):
         """Create a top-level popup menu which displays editable statistics
@@ -648,6 +710,9 @@ class CourtFrame(tk.Frame):
                                             label="Remove From Night")
             self.popup_menus[i].add_command(command=lambda
                 index=i: controller.keep_player_off(self.court_number, index))
+            self.popup_menus[i].add_command(command=lambda
+                index=i: controller.keep_player_on(self.court_number, index))
+
 
         # padding creates a de facto border
         self.labels[0].grid(row=0, column=0, sticky="nsew", padx=1, pady=1)

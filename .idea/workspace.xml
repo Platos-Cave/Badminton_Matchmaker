@@ -5,12 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="12b4690e-7fa1-496f-b4cf-baaf01e9f6e0" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/Badminton Matchmaker.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/Badminton_Matchmaker.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/b_scorer.py" beforeDir="false" afterPath="$PROJECT_DIR$/b_scorer.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/badminton_session_data.obj" beforeDir="false" afterPath="$PROJECT_DIR$/badminton_session_data.obj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/board_data.obj" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/board_data.obj" beforeDir="false" afterPath="$PROJECT_DIR$/board_data.obj" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/enumerate_b.py" beforeDir="false" afterPath="$PROJECT_DIR$/enumerate_b.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/every_player_pi_2.obj" beforeDir="false" afterPath="$PROJECT_DIR$/every_player_pi_2.obj" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tk_bscorer.py" beforeDir="false" afterPath="$PROJECT_DIR$/tk_bscorer.py" afterDir="false" />
@@ -24,20 +22,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="enumerate_b.py" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/enumerate_b.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="124">
-              <caret line="77" column="23" lean-forward="true" selection-start-line="77" selection-start-column="23" selection-end-line="77" selection-end-column="23" />
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file leaf-file-name="b_scorer.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/b_scorer.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="17">
-              <caret line="24" column="28" selection-start-line="24" selection-start-column="28" selection-end-line="24" selection-end-column="28" />
+              <caret line="182" column="25" selection-start-line="182" selection-start-column="25" selection-end-line="182" selection-end-column="25" />
               <folding>
                 <element signature="e#120#133#0" expanded="true" />
               </folding>
@@ -45,14 +34,53 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="tk_bscorer.py" pinned="false" current-in-tab="false">
+      <file leaf-file-name="enumerate_b.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/enumerate_b.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="3213">
+              <caret line="189" column="22" selection-start-line="189" selection-start-column="22" selection-end-line="189" selection-end-column="22" />
+              <folding>
+                <element signature="e#1557#1573#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="user_guide.txt" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/user_guide.txt">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="204">
+              <caret line="15" selection-start-line="15" selection-end-line="15" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="README.txt" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/README.txt">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="85">
+              <caret line="5" column="14" selection-start-line="5" selection-start-column="14" selection-end-line="5" selection-end-column="14" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="tk_bscorer.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/tk_bscorer.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="102">
-              <caret line="1135" column="23" lean-forward="true" selection-start-line="1135" selection-start-column="23" selection-end-line="1135" selection-end-column="23" />
+            <state relative-caret-position="183">
+              <caret line="606" column="54" selection-start-line="606" selection-start-column="54" selection-end-line="606" selection-end-column="54" />
               <folding>
                 <element signature="e#108#128#0" expanded="true" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="b_sessions.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/b_sessions.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="68">
+              <caret line="4" column="12" selection-start-line="4" selection-start-column="12" selection-end-line="4" selection-end-column="12" />
             </state>
           </provider>
         </entry>
@@ -68,23 +96,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>print(</find>
-      <find>pay_off</find>
-      <find>players</find>
-      <find>players =</find>
-      <find>existing</find>
-      <find>already</find>
-      <find>name</find>
-      <find>are you sure</find>
-      <find>are you sure you want to sa</find>
-      <find>event</find>
-      <find>selected</find>
-      <find>profile_comb</find>
-      <find>(self, ev</find>
-      <find>profile_c</find>
-      <find>switch_p</find>
-      <find>lambda event</find>
-      <find>day</find>
       <find>menu</find>
       <find>Balance</find>
       <find>profile_combo</find>
@@ -98,6 +109,23 @@
       <find>shuffle'</find>
       <find>.weekday</find>
       <find>current(0)</find>
+      <find>bench_menu</find>
+      <find>keep_player_off</find>
+      <find>Keep Pl</find>
+      <find>keep_player_on</find>
+      <find>keep_on</find>
+      <find>colour</find>
+      <find>colour_sorte</find>
+      <find>bench_grid</find>
+      <find>colour_dict</find>
+      <find>add_bench_menus</find>
+      <find>isaac</find>
+      <find>print</find>
+      <find>gray</find>
+      <find>keep</find>
+      <find>keep_off(</find>
+      <find>start(</find>
+      <find>keep_off</find>
     </findStrings>
     <replaceStrings>
       <replace>0</replace>
@@ -107,7 +135,7 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="confirm_undo_branch" />
+        <entry key="$PROJECT_DIR$" value="master" />
       </map>
     </option>
   </component>
@@ -123,9 +151,9 @@
         <option value="$PROJECT_DIR$/b_sessions.py" />
         <option value="$PROJECT_DIR$/user_guide.txt" />
         <option value="$PROJECT_DIR$/README.txt" />
+        <option value="$PROJECT_DIR$/enumerate_b.py" />
         <option value="$PROJECT_DIR$/b_scorer.py" />
         <option value="$PROJECT_DIR$/tk_bscorer.py" />
-        <option value="$PROJECT_DIR$/enumerate_b.py" />
       </list>
     </option>
   </component>
@@ -145,7 +173,7 @@
         <subPane>
           <expand>
             <path>
-              <item name="Badminton_Matchmaker" type="b2602c69:ProjectViewProjectNode" />
+              <item name="Badminton Matchmaker" type="b2602c69:ProjectViewProjectNode" />
               <item name="Badminton Matchmaker" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
@@ -227,7 +255,7 @@
       <option name="MODULE_MODE" value="false" />
     </configuration>
     <configuration name="tk_bscorer_0.04" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <module name="Badminton_Matchmaker" />
+      <module name="Badminton Matchmaker" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs>
@@ -253,8 +281,8 @@
     <recent_temporary>
       <list>
         <item itemvalue="Python.tk_bscorer" />
-        <item itemvalue="Python.b_scorer" />
         <item itemvalue="Python.tk_bscorer_0.04" />
+        <item itemvalue="Python.b_scorer" />
         <item itemvalue="Python.tk_bscorer_0.04" />
         <item itemvalue="Python.tk_bscorer_0.04" />
       </list>
@@ -278,7 +306,21 @@
       <option name="project" value="LOCAL" />
       <updated>1528777847845</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="commit pybranch">
+      <created>1530509264167</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1530509264197</updated>
+    </task>
+    <task id="LOCAL-00003" summary="commit money &amp; day updates">
+      <created>1530509371881</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1530509371882</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -288,13 +330,13 @@
       <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.24304539" />
       <window_info anchor="bottom" id="TODO" order="6" />
       <window_info anchor="bottom" id="Event Log" order="11" side_tool="true" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.32913387" />
-      <window_info anchor="bottom" id="Version Control" order="7" />
+      <window_info anchor="bottom" id="Version Control" order="7" weight="0.32913387" />
       <window_info anchor="bottom" id="Python Console" order="8" />
+      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.32913387" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info anchor="bottom" id="Terminal" order="9" />
-      <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info id="Favorites" order="2" side_tool="true" />
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
       <window_info anchor="right" id="Commander" order="0" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
@@ -337,18 +379,12 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="commit pybranch" />
-    <option name="LAST_COMMIT_MESSAGE" value="commit pybranch" />
+    <MESSAGE value="commit money &amp; day updates" />
+    <option name="LAST_COMMIT_MESSAGE" value="commit money &amp; day updates" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/b_scorer.py</url>
-          <line>603</line>
-          <option name="timeStamp" value="1" />
-        </line-breakpoint>
-      </breakpoints>
-      <option name="time" value="2" />
+      <option name="time" value="1" />
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
@@ -661,13 +697,6 @@
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/test_players.py" />
-    <entry file="file://$PROJECT_DIR$/user_guide.txt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="68">
-          <caret line="4" column="41" selection-start-line="4" selection-start-column="41" selection-end-line="4" selection-end-column="41" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/README.txt">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="85">
@@ -685,27 +714,37 @@
     <entry file="file://$PROJECT_DIR$/b_scorer.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="17">
-          <caret line="24" column="28" selection-start-line="24" selection-start-column="28" selection-end-line="24" selection-end-column="28" />
+          <caret line="182" column="25" selection-start-line="182" selection-start-column="25" selection-end-line="182" selection-end-column="25" />
           <folding>
             <element signature="e#120#133#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/tk_bscorer.py">
+    <entry file="file://$PROJECT_DIR$/enumerate_b.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="102">
-          <caret line="1135" column="23" lean-forward="true" selection-start-line="1135" selection-start-column="23" selection-end-line="1135" selection-end-column="23" />
+        <state relative-caret-position="3213">
+          <caret line="189" column="22" selection-start-line="189" selection-start-column="22" selection-end-line="189" selection-end-column="22" />
           <folding>
-            <element signature="e#108#128#0" expanded="true" />
+            <element signature="e#1557#1573#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/enumerate_b.py">
+    <entry file="file://$PROJECT_DIR$/user_guide.txt">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="124">
-          <caret line="77" column="23" lean-forward="true" selection-start-line="77" selection-start-column="23" selection-end-line="77" selection-end-column="23" />
+        <state relative-caret-position="204">
+          <caret line="15" selection-start-line="15" selection-end-line="15" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/tk_bscorer.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="183">
+          <caret line="606" column="54" selection-start-line="606" selection-start-column="54" selection-end-line="606" selection-end-column="54" />
+          <folding>
+            <element signature="e#108#128#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
