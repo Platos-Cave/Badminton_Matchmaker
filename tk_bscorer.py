@@ -5,9 +5,11 @@ import tkinter as tk
 from tkinter import Tk, ttk, Frame, Menu, messagebox, Scrollbar
 from tkinter.messagebox import showinfo, askyesno, showerror
 import b_scorer
+import b_sessions
 import pickle
 import random
 import datetime
+from datetime import datetime # huh?
 
 class Application(tk.Tk):
     """The main application"""
@@ -68,6 +70,10 @@ class Application(tk.Tk):
                                                command=self.create_player)
         self.delete_player_button = ttk.Button(self, text="Delete Player",
                                                command=self.delete_player)
+        self.game_history_button = ttk.Button(self, text="View Game "
+                                                         "History", command=
+                                              self.view_history)
+
         self.rounds_label = ttk.Label(text="Rounds: {}".format(
             b_scorer.total_rounds),
                                       background=bg_colour,
@@ -108,6 +114,8 @@ class Application(tk.Tk):
         self.create_player_button.grid(column=1, row=17,
                                        sticky='nsew', padx=1, pady=1)
         self.delete_player_button.grid(column=1, row=18,
+                                       sticky='nsew', padx=1, pady=1)
+        self.game_history_button.grid(column=2, row=18,
                                        sticky='nsew', padx=1, pady=1)
 
         self.bench_label.grid(column=7, row=15, columnspan=2,
@@ -674,6 +682,9 @@ class Application(tk.Tk):
         self.abs_plyr_cbox.config(values=self.all_player_names)
         self.abs_plyr_cbox.current(0)
 
+    def view_history(self):
+        self.history = HistoryPopup(self)
+
 
 class CourtFrame(tk.Frame):
     """A frame for each of the courts to be placed in"""
@@ -914,7 +925,6 @@ class PlayerStats(tk.Toplevel):
         self.owed_entry.insert(0, 0)
 
 
-
     def new_partner_affinity(self):
         """Simply clears the combobox"""
         self.partner_aff_box.delete(0, "end")
@@ -934,9 +944,15 @@ class PlayerStats(tk.Toplevel):
 
             other_player = self.partner_aff_box.get()
 
-            self.partner_affs.remove(other_player)
+            try:
+                self.partner_affs.remove(other_player)
+            except ValueError:
+                tk.messagebox.showerror("Error", "Error: Name not found")
+                return
+
             if self.new is False:
                 self.player.partner_affinities.remove(other_player)
+
 
             self.partner_aff_box.config(values=self.partner_affs)
             self.partner_aff_box.delete(0, "end")
@@ -959,10 +975,15 @@ class PlayerStats(tk.Toplevel):
 
             other_player = self.opp_aff_box.get()
 
-            self.opp_affs.remove(other_player)
+            try:
+                self.opp_affs.remove(other_player)
+            except ValueError:
+                tk.messagebox.showerror("Error", "Error: Name not found")
+                return
 
             if self.new is False:
                 self.player.opponent_affinities.remove(other_player)
+
 
             self.opp_aff_box.config(values=self.opp_affs)
             self.opp_aff_box.delete(0, "end")
@@ -1154,6 +1175,8 @@ class GameStats(tk.Toplevel):
         self.seg_label = ttk.Label(self, text="Ability Segregation Weighting")
         self.mix_label = ttk.Label(self, text="Player Mixing Weighting")
         self.aff_label = ttk.Label(self, text="Player Affinity Weighting")
+        self.female_aff_label = ttk.Label(self, text="Female Affinity "
+                                                     "Weighting")
         self.shuffle_label = ttk.Label(self, text="Shuffle Algorithm")
 
         self.profile_combo = ttk.Combobox(self, width = 10, state = 'readonly',
@@ -1163,6 +1186,7 @@ class GameStats(tk.Toplevel):
         self.seg_entry = ttk.Entry(self, width=4)
         self.mix_entry = ttk.Entry(self, width=4)
         self.aff_entry = ttk.Entry(self, width=4)
+        self.female_aff_entry = ttk.Entry(self, width=4)
         self.shuffle_combo = ttk.Combobox(self, width=10, state = 'readonly',
                                           values=["Random", "Segregated"])
 
@@ -1192,13 +1216,15 @@ class GameStats(tk.Toplevel):
         self.mix_entry.grid(column=1, row=3)
         self.aff_label.grid(column=0, row=4)
         self.aff_entry.grid(column=1, row=4)
-        self.shuffle_label.grid(column=0, row=5)
-        self.shuffle_combo.grid(column=1, row=5)
+        self.female_aff_label.grid(column=0, row=5)
+        self.female_aff_entry.grid(column=1, row=5)
+        self.shuffle_label.grid(column=0, row=6)
+        self.shuffle_combo.grid(column=1, row=6)
         # self.default_button.grid(column=0, row=6)
-        self.save_button.grid(column=1, row=6)
+        self.save_button.grid(column=1, row=7)
 
         # Set profile based on day
-        today = datetime.datetime.today().weekday()
+        today = datetime.today().weekday()
         if today == 1:
             self.profile_combo.current(1)
         elif today == 3:
@@ -1226,6 +1252,9 @@ class GameStats(tk.Toplevel):
                     self.mix_entry.get())
                 b_scorer.enumerate_b.scoring_vars['Affinity', day] = float(
                     self.aff_entry.get())
+                b_scorer.enumerate_b.scoring_vars['Female Affinity', day] = \
+                    float(
+                    self.female_aff_entry.get())
                 b_scorer.enumerate_b.scoring_vars[
                     'Shuffle', day] = self.shuffle_combo.current()
 
@@ -1281,6 +1310,7 @@ class GameStats(tk.Toplevel):
         self.seg_entry.delete(0, "end")
         self.mix_entry.delete(0, "end")
         self.aff_entry.delete(0, "end")
+        self.female_aff_entry.delete(0, "end")
 
         self.bal_entry.insert(0,
                               b_scorer.enumerate_b.scoring_vars[('Balance',
@@ -1293,8 +1323,277 @@ class GameStats(tk.Toplevel):
         self.aff_entry.insert(0,
                               b_scorer.enumerate_b.scoring_vars[('Affinity',
                                                                  profile)])
+        self.female_aff_entry.insert(0,
+                              b_scorer.enumerate_b.scoring_vars[(
+                                  'Female Affinity',
+                                                                 profile)])
         self.shuffle_combo.current(b_scorer.enumerate_b.scoring_vars[(
             'Shuffle', profile)])
+
+class HistoryPopup(tk.Toplevel):
+    def __init__(self, controller):
+
+        tk.Toplevel.__init__(self, controller)
+
+        self.controller = controller
+
+        self.sessions = []
+        #self.combined_sessions = b_scorer.all_sessions
+            #Get only sessions that have at least 2 games. Maybe in method?
+        for i, session in enumerate(b_scorer.all_sessions):
+            if len(session.games) > 0:
+                self.sessions.append(session)
+
+        self.title("Game History")
+
+        self.current_history = ttk.Button(self, text="Print Current Session"
+                                                     " History", command=
+                                          self.print_current)
+
+        self.print_history_button = ttk.Button(self, text = "Print All "
+                                                            "Sessions",
+                                               command = self.print_sessions)
+        self.session_combo = ttk.Combobox(self, width=20, values = [])
+        self.get_sessions()
+        self.session_combo.current(0)
+
+        self.print_sess_button = ttk.Button(self, text = "Print Games From "
+                                                         "Selected Date",
+                                            command = self.print_selected)
+
+        self.print_times_button = ttk.Button(self, text = "Print Times",
+                                            command = self.print_times)
+
+        self.print_summary_button = ttk.Button(self, text = "Print Overall "
+                                                            "Summary",
+                                            command = self.print_overall)
+
+        self.export_game_CSV = ttk.Button(self, text = "Export Game History to CSV",
+                                          command=lambda: self.export_to_csv(
+                                              "games"))
+
+        self.export_player_CSV = ttk.Button(self, text = "Export Player History to CSV",
+                                            command=lambda: self.export_to_csv(
+                                                "players"))
+
+        
+        self.every_player_combo = ttk.Combobox(self, width = 20, values =
+            sorted([p.name for p in b_scorer.every_player]), state =
+        'readonly')
+
+        self.every_player_combo.current(0)
+
+        self.player_stats_button = ttk.Button(self, text="View Player "
+                                                         "History", command
+                                              =self.view_player_history)
+
+
+        self.current_history.grid(column=0, row=0)
+        self.print_summary_button.grid(column=0, row=1)
+        self.print_history_button.grid(column=0, row=2)
+        
+        self.session_combo.grid(column=0, row=4)
+        self.print_sess_button.grid(column=0, row=5)
+        # self.print_times_button.grid(column=0, row=4)
+
+        self.every_player_combo.grid(column=0, row=6)
+        self.player_stats_button.grid(column=0, row=7)
+        self.export_game_CSV.grid(column = 0, row = 8)
+        self.export_player_CSV.grid(column = 0, row = 9 )
+
+    def export_to_csv(self, type):
+
+        # first, entry popup to name the .csv. Require input validation.
+        # then (ideally in b_sessions module), call export function
+        # then tk messagebox "Success" if created
+        self.export_popup = CSVPopup(self, type)
+
+    def print_sessions(self):
+        for i, session in enumerate(b_scorer.all_sessions):
+            if len(session.games) > 2:
+                print("\nSession", i+1)
+                print("Date:", session.date)
+                print("Start:", session.start_time)
+                print("End Time:", session.end_time)
+                print("")
+
+                for i, game in enumerate(session.games):                
+                    print("***Game {}*** \n".format(i+1))
+                    for i, court in enumerate(game):
+                        print("*Court {}* \n".format(i+1))
+                        print("{} and {} [VERSUS]".format(court[0].name,
+                                                         court[1].name))
+                        print("{} and {}".format(court[2].name,
+                                                         court[3].name))
+                        print("")
+                    print("--------------------")
+
+    def print_current(self):
+
+        session = b_scorer.today_session
+
+
+        print("Date:", session.date)
+        print("Start:", session.start_time)
+
+        for i, game in enumerate(session.games):
+            print("***Game {}*** \n".format(i+1))
+            for i, court in enumerate(game):
+                print("*Court {}* \n".format(i+1))
+                print("{} and {} [VERSUS]".format(court[0].name,
+                                                 court[1].name))
+                print("{} and {}".format(court[2].name,
+                                                 court[3].name))
+                print("")
+            print("--------------------")
+
+
+
+    def get_sessions(self):
+        """Gets session names for the name combobox"""
+        self.names = []
+        count = 0 # for extra days
+
+        self.session_dict = {} # keying combo to sessions
+
+        for i, session in enumerate(b_scorer.all_sessions):
+            if len(session.games) > 1: # so non-sessions are ignored
+
+                day = datetime.strftime(session.date, '%a, %b %d, %Y')
+                if day in self.names: # multiple sessions in one day
+                    count += 1
+                    day = (('{} ({})'.format(day, count + 1)))
+                else:
+                    count = 0
+
+                self.session_dict[day] = session
+                self.names.insert(0, day) # so list is in descending order
+
+
+        self.session_combo.config(values = self.names)
+
+    def print_selected(self):
+        session_title = self.session_combo.get()
+        session = self.session_dict[session_title]
+        print("\n Games for {} \n".format(session_title))
+
+        for i, game in enumerate(session.games):
+            print("***Game {}*** \n".format(i + 1))
+            for i, court in enumerate(game):
+                print("*Court {}* \n".format(i + 1))
+                print("{} and {} [VERSUS]".format(court[0].name,
+                                                  court[1].name))
+                print("{} and {}".format(court[2].name,
+                                         court[3].name))
+                print("")
+            print("--------------------")
+
+    def print_times(self):
+        session_title = self.session_combo.get()
+        session = self.session_dict[session_title]
+        print("***Arrivals and Departures for {}*** \n".format(session_title))
+
+        arrivals = sorted(session.player_arrivals, key =
+                            session.player_arrivals.get)
+        departures = sorted(session.player_departures, key =
+                            session.player_departures.get)
+        print("*Arrivals*: \n")
+        for player in arrivals:
+            print(player.name, session.player_arrivals[player])#"{}: {
+            # }".format(player.key,
+            # player.value))
+        print("*Departures*: \n")
+        for player in departures:
+            print(player.name, session.player_departures[player])
+
+    def print_overall(self):
+        "print summary of results"
+        sessions = []
+
+        for i, session in enumerate(b_scorer.all_sessions):
+            if len(session.games) > 1:
+                sessions.append(session)
+
+        print("***Summary of Sessions*** \n")
+        print("Total Sessions: {}".format(len(sessions)))
+        print("First Recorded Session: {}".format(self.names[-1]))
+        print("Last Recorded Session: {}".format(self.names[0]))
+
+        arrivals = []
+        for session in sessions:
+            arrivals.append(len(session.player_arrivals))
+
+        print("Maximum Recorded Players: {}".format(max(arrivals)))
+        print("Minimum Recorded Players: {}".format(min(arrivals)))
+        mean = (sum(arrivals) / len(arrivals))
+        print("Mean Recorded Players: {}".format(round(mean,2)))
+
+    def view_player_history(self):
+
+        p_name = self.every_player_combo.get()
+
+        # should be less nested way?
+        for player in b_scorer.every_player:
+            if player.name == p_name:
+                print("")
+                print(player.name)
+                print("Ability: {}".format(player.ability))
+                print("Membership: {}".format(player.membership))
+                print("Partner Affinities:")
+                for p in player.partner_affinities:
+                    print("", p)
+                print("Opponent Affinities:")
+                for p in player.opponent_affinities:
+                    print("", p)
+
+                count = 0
+                for session in self.sessions:
+
+                    peeps = [p for p in session.player_arrivals]
+                    players_in_session = [p.name for p in
+                                          session.player_arrivals]
+                    if player.name in players_in_session:
+                        count += 1
+                print("Turned up {} out of {} nights".format(count,
+                                                            len(self.sessions)))
+                
+                # Let's find all the games they've played in
+                #print(self.sessions[0].games)
+                played_with = []
+                for session in self.sessions:
+                    for round in session.games:
+                        for court in round:
+                            if player.name in [p.name for p in court if p is
+                                                             not None]:
+                                for p in court:
+                                    played_with.append(p.name)
+                #print(played_with)
+                #sorted(played_with, key = )
+
+class CSVPopup(tk.Toplevel):
+    def __init__(self, controller, type):
+        tk.Toplevel.__init__(self, controller)
+
+        self.controller = controller
+        self.type = type
+        self.title("Save CSV")
+
+        self.entry = ttk.Entry(self, width = 20)
+        self.csv_label = ttk.Label(self, text = ".csv")
+        self.save_button = ttk.Button(self, text = "Save to File", command =
+                                      self.save_file)
+
+        self.entry.grid(column = 0, row = 0)
+        self.csv_label.grid(column = 1, row = 0)
+        self.save_button.grid(column = 0, row = 1,  sticky = 'nsew')
+
+    def save_file(self):
+        if self.type == 'games':
+            b_sessions.export_game_data(self.entry.get())
+        elif self.type == 'players':
+            b_sessions.export_player_data(self.entry.get())
+        tk.messagebox.showinfo("Success", "Successfully exported!")
+        self.destroy()
 
 
 
@@ -1321,6 +1620,8 @@ class HelpMenu(tk.Toplevel):
         self.columnconfigure(0, weight=1)
         self.text_widget.grid(column = 0, row = 0, sticky = "NSEW")
         self.scrollbar.grid(column=1, row=0, sticky="NSW")
+
+
 
 
 if __name__ == '__main__':

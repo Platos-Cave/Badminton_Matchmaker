@@ -6,6 +6,7 @@ import pickle
 import enumerate_b
 import b_sessions
 import datetime
+from datetime import datetime
 
 class Player:
     def __init__(self, name, sex, ability, partner_affinities=[],
@@ -71,8 +72,8 @@ class Player:
         # thus, need to have a means of saving fee levels for certain nights
         # basic version first: just assume it's $5 for everyone
         try:
-            #today = datetime.datetime.today().weekday()
-            today = 3
+            today = datetime.today().weekday()
+            #today = 3
             fee_key = (self.membership, today)
 
             # if this player has a membership that requires them to have money
@@ -85,25 +86,13 @@ class Player:
             except KeyError: # in case it's the wrong day/stuffed up
                 print("Key Error on fees!")
 
-            # print("{}, a {}, owes another {}".format(self.name,
-            #                                      self.membership,
-            #                        fee_structure[fee_key]))
-            #today -= 2
-            # if today == 3: # Thursday
-            #     if self.membership == "Casual"
-            #     self.money_owed += 10 # Thursday
-            #     print("Thursday: Added $10")
-            # else: # Tuesday
-            #     self.money_owed += 5
-            #     print("Tuesday: Added $5")
-
         except TypeError:
             print(self.money_owed)
 
     # pay tonight's fee only
     def pay_fee(self):
 
-        today = 3
+        today = datetime.today().weekday()
         fee_key = (self.membership, today)
         self.paid_tonight = True
 
@@ -380,10 +369,9 @@ def generate_new_game():
     else:
         best_game = (enumerate_b.find_best_game(select_players("Segregated")))
 
-
-
     empty_courts()
 
+    scores = 0
     for i, court in enumerate(best_game):
         for j, side in enumerate(court):
             for k, player in enumerate(side):
@@ -391,6 +379,11 @@ def generate_new_game():
                     courts[i].spaces[(2 * j) + k] = player
                     if player in bench:
                         bench.remove(player)
+
+        scores += enumerate_b.score_court(((0,1),(2,3)),courts[i].spaces,
+                                       explain = True)
+    print("Total Court Score: {} \n".format(scores))
+
 
 def confirm_game():
     '''Update game counts, game history, save data'''
@@ -480,7 +473,7 @@ def remove_player(court_number, index, player):
     player.time_since_last = 0
 
     # Update leaving times
-    today_session.player_departures[player] = datetime.datetime.now().time()
+    today_session.player_departures[player] = datetime.now().time()
 
 def add_player(player):
     '''Add an already saved player to the game'''
@@ -503,7 +496,7 @@ def add_player(player):
     player.adjusted_games += average_games
     player.accumulate_fee()
     all_current_players.append(player)
-    today_session.player_arrivals[player] = datetime.datetime.now().time()
+    today_session.player_arrivals[player] = datetime.now().time()
 
 
 def empty_courts():
@@ -527,9 +520,9 @@ def save_and_quit():
 
     # Save departure times
     for player in all_current_players:
-        today_session.player_arrivals[player] = datetime.datetime.now().time()
+        today_session.player_departures[player] = datetime.now().time()
 
-    today_session.end_time = datetime.datetime.now().time()
+    today_session.end_time = datetime.now().time()
 
     all_sessions.append(today_session)
 
@@ -546,8 +539,8 @@ def save_and_quit():
 
 '''Creates an object for storing data about today's session.
  Could just have the time be one argument?'''
-date = datetime.datetime.now().date()
-start_time = datetime.datetime.now().time()
+date = datetime.now().date()
+start_time = datetime.now().time()
 today_session = b_sessions.Session(date, start_time)
 
 total_rounds = 0
@@ -607,7 +600,7 @@ Isaac = Player("Isaac", "Male", 9, opponent_affinities=["Ian"])
 players"""
 
 try:
-    pickle_in = open("every_player_pi_3.obj","rb")
+    pickle_in = open("every_player_pi_2.obj","rb")
     every_player = pickle.load(pickle_in)
     pickle_in.close()
 
@@ -624,9 +617,10 @@ try:
             #print("Added money owed!")
         if not hasattr(player, "paid_tonight"):
             player.paid_tonight = True
-            print("Added Played Tonight!")
+            #print("Added Played Tonight!")
         if not hasattr(player, 'keep_on'):
             player.keep_on = False
+            #print("Added Played Tonight!")
 
 
 except FileNotFoundError:

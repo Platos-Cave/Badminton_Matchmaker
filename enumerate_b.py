@@ -40,23 +40,16 @@ try:
     score_in = open("score_pi.obj", "rb")
     scoring_vars = pickle.load(score_in)
     # replace old version
-    if len(scoring_vars) <10:
-        scoring_vars = {('Balance', "Default"): 5.0, ('Ability_Seg', "Default"): 2.0,
-                        ('Mixing', "Default"): 1.5,
-                        ('Affinity', "Default"): 4.0, ('Shuffle', "Default"): 0,
-                        ('Balance', 'Tuesday'): 5.0, ('Ability_Seg',
-                                                      'Tuesday'): 2.0,
-                        ('Mixing', 'Tuesday'): 2.0, ('Affinity',
-                                                     'Tuesday'): 4.0,
-                        ('Shuffle', 'Tuesday'): 0, ('Balance', 'Thursday'):
-                            6.0,
-                        ('Ability_Seg', 'Thursday'): 3.0,
-                        ('Mixing', 'Thursday'): 1.5,
-                        ('Affinity', 'Thursday'): 5.0,
-                        ('Shuffle', 'Thursday'): 1}
+    if ('Female Affinity', 'Default') not in scoring_vars:
+        scoring_vars[('Female Affinity', 'Default')] = 1.0
+        scoring_vars[('Female Affinity', 'Tuesday')] = 1.0
+        scoring_vars[('Female Affinity', 'Thursday')] = 1.0
+
+        print(scoring_vars)
 
     score_in.close()
 except FileNotFoundError:
+    # seems ugly, should be mapped differently
     scoring_vars = {('Balance', "Default"): 5.0,
                     ('Ability_Seg', "Default"): 2.0,
                     ('Mixing', "Default"): 1.5,
@@ -70,7 +63,10 @@ except FileNotFoundError:
                     ('Ability_Seg', 'Thursday'): 3.0,
                     ('Mixing', 'Thursday'): 1.5,
                     ('Affinity', 'Thursday'): 5.0,
-                    ('Shuffle', 'Thursday'): 1}
+                    ('Shuffle', 'Thursday'): 1,
+                    ('Female Affinity', 'Default'): 1.0,
+                    ('Female Affinity', 'Tuesday'): 1.0,
+                    ('Female Affinity', 'Thursday'): 1.0}
 
 # what score profile to use
 day_of_week = datetime.datetime.today().weekday()
@@ -89,7 +85,7 @@ all_combos = []
 tested_combos = []
 tested_combos_2 = []
 
-# all possible ways of selecting 4 integers from 12
+# all possible ways of selecting 4 integers from 12. Bad name
 court_1s = list(itertools.combinations(players, 4))
 
 '''Appends to all_combos all ~5500 possible unordered courts
@@ -111,6 +107,8 @@ for court_1 in court_1s:
                 if court_3 not in tested_combos:
                     all_combos.append([court_1, court_2, court_3])
 
+
+
 ''' For a given combo (e.g. [0,1,6,7], score all three distinct combos
 (i.e. ((0,1),(6,7)), ((0,6),(1,7)) and ((0,7),(1,6))).
 Suppose the second combo had the lowest score, and that score was 8. 
@@ -129,7 +127,7 @@ best_combos = {}
 # e.g. 8)
 scores_dict = {}
 
-def score_court(court, trial_players):
+def score_court(court, trial_players, explain = False):
     ''' Returns the "score" of a game, where "trial_players" is a list of
      player objects and "court" is a pair of tuples, representing indices
      of those players'''
@@ -141,8 +139,8 @@ def score_court(court, trial_players):
 
     abilities = [player.ability for player in new_court]
     # The imbalance between team abilities. High imbalance = highly penalised
-    score += ((scoring_vars[('Balance', profile)] * (
-                sum(abilities[0:2]) - sum(abilities[2:4]))) ** 2)
+    score += scoring_vars[('Balance', profile)] * 5 * ((
+                sum(abilities[0:2]) - sum(abilities[2:4])) ** 2)
     # It is generally better to not have strong and weak players in the same
     #  game even if balanced, so this formula penalises that.
     score += scoring_vars[('Ability_Seg', profile)] * (
@@ -161,7 +159,7 @@ def score_court(court, trial_players):
     # and then against them)
     # Also: if player has affinity for another player, subtract the affinity
     # score from the total score.
-    # This seems all very nested and duplicative
+    # (This seems all very nested and duplicative)
     for player in new_court:
         if player is not None:
             if player in new_court[0:2]:
@@ -185,19 +183,19 @@ def score_court(court, trial_players):
                     count += 0.2
             for i, game in enumerate(player.played_with):
                 if o_player in game:
-                    base_score = + scoring_vars[('Mixing', profile)] * (
+                    base_score += scoring_vars[('Mixing', profile)] * (
                                 1 / (1 + discount_rate) ** (
                                      player.total_games - i - 1))
                     count += 0.1
             # "Count" is a means of pseudo-exponentiation - i.e. we want it
-            # to be proportionally worse to play someone three times row
-            # than twice
+            # to be proportionally worse to play someone three times in a row
+            # than twice in a row
             score += base_score * (count)
             # Subtract affinity variable from score
             if o_player.name in player.opponent_affinities:
                 score -= scoring_vars[('Affinity', profile)]
 
-        for o_player in partner:
+        for o_player in partner: # there's only 1 partner, so loop seems silly?
             count = 1
             base_score = 0
             for i, game in enumerate(player.played_against):
@@ -214,6 +212,18 @@ def score_court(court, trial_players):
             score += base_score * (count)
             if o_player.name in player.partner_affinities:
                 score -= scoring_vars[('Affinity', profile)]
+
+    # Female mini-affinity:
+    no_women = len([p for p in new_court if p.sex == "Female" if p is not
+                       None])
+    women_score = scoring_vars[('Female Affinity', profile)] * (no_women*(
+            no_women - 1))
+    score -= women_score
+
+    if explain:
+        print("There are {} women in this game, subtracting {} from the game "
+              "score".format(no_women, women_score))
+        print(score)
 
     return score
 
@@ -245,7 +255,7 @@ def best_score(combo, trial_players):
     scores = []
     three_combos = find_combos_of_four(combo)
 
-    for com in three_combos:
+    for com in three_combos: # EXCEPT RULED-OUT PINNED
         scores.append(score_court(com, trial_players))
 
     index, scores_dict[combo] = min(enumerate(scores),
@@ -277,6 +287,7 @@ def find_best_game(trial_players):
     # Possible drawback: no tie-breaking mechanism might cause a small bias?
 
     best_game = [best_combos[best_unsorted[i]] for i in range(3)]
+    #print(best_game)
 
     # Index the players to the numbers representing them.
     # Ugly, should be able to make more succinct and readable
