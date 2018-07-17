@@ -13,6 +13,8 @@ class Session:
         self.games = []  # gets appended to
         self.player_arrivals = {} # Keys: Player names. Values: times
         self.player_departures = {} # Ditto
+        self.payments = {} # Keys: Player names. Values: (Membership
+         # Status, Payments)
 
 
 # DATA | ROUND NO | COURT NO| SPACE NO| PLAYER NAME | PLAYER ABILITY |
@@ -28,9 +30,8 @@ def export_game_data(filename):
     with game_file:
         writer = csv.writer(game_file)
 
-        writer.writerow(['DATE', "ROUND #", "COURT #", "SPACE #", "PLAYER "
-                                                                  "NAME",
-                         "ABILITY" ])
+        writer.writerow(['DATE', "ROUND #", "COURT #", "SPACE #", "NAME",
+                         "ABILITY"])
 
         for i, session in enumerate(loaded_sessions):
             if len(session.games) > 0:

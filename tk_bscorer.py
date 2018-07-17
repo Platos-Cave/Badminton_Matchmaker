@@ -1091,7 +1091,21 @@ class PlayerStats(tk.Toplevel):
             self.player.ability = ability
             self.player.player_notes = notes
             self.player.membership = membership
+
+            # Not ideal place for this
+            if owed != self.player.money_owed:
+
+                if self.player.name not in b_scorer.today_session.payments:
+                    b_scorer.today_session.payments[self.player.name] = (
+                        self.player.membership, self.player.money_owed - owed)
+                else: # if already paid. ugly
+                    b_scorer.today_session.payments[self.player.name] = \
+                        (self.player.membership,
+                         b_scorer.today_session.payments[self.player.name][1] +
+                         (self.player.money_owed - owed))
+
             self.player.money_owed = owed
+
 
             self.player.penalty_games = late_penalty
             self.player.adjusted_games = self.player.total_games + late_penalty
@@ -1376,7 +1390,6 @@ class HistoryPopup(tk.Toplevel):
                                             command=lambda: self.export_to_csv(
                                                 "players"))
 
-        
         self.every_player_combo = ttk.Combobox(self, width = 20, values =
             sorted([p.name for p in b_scorer.every_player]), state =
         'readonly')
@@ -1387,6 +1400,10 @@ class HistoryPopup(tk.Toplevel):
                                                          "History", command
                                               =self.view_player_history)
 
+        # self.print_payments_button = ttk.Button(self, text = "Print "
+        #                                                      "Payments",
+        #                                         command = self.print_payments)
+
 
         self.current_history.grid(column=0, row=0)
         self.print_summary_button.grid(column=0, row=1)
@@ -1394,7 +1411,7 @@ class HistoryPopup(tk.Toplevel):
         
         self.session_combo.grid(column=0, row=4)
         self.print_sess_button.grid(column=0, row=5)
-        # self.print_times_button.grid(column=0, row=4)
+        self.print_times_button.grid(column=0, row=10)
 
         self.every_player_combo.grid(column=0, row=6)
         self.player_stats_button.grid(column=0, row=7)
@@ -1500,11 +1517,19 @@ class HistoryPopup(tk.Toplevel):
         print("*Arrivals*: \n")
         for player in arrivals:
             print(player.name, session.player_arrivals[player])#"{}: {
+
+            try:
+                pay_value = session.payments[player.name]
+                print("Paid {} as a {}".format(pay_value[1], pay_value[0]))
+            except (AttributeError, KeyError):
+                pass
+
             # }".format(player.key,
             # player.value))
         print("*Departures*: \n")
         for player in departures:
             print(player.name, session.player_departures[player])
+
 
     def print_overall(self):
         "print summary of results"
@@ -1569,6 +1594,8 @@ class HistoryPopup(tk.Toplevel):
                                     played_with.append(p.name)
                 #print(played_with)
                 #sorted(played_with, key = )
+    #def print_payments(self):
+
 
 class CSVPopup(tk.Toplevel):
     def __init__(self, controller, type):

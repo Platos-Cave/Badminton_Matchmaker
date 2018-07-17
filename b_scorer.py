@@ -97,6 +97,19 @@ class Player:
         self.paid_tonight = True
 
         try:
+            if self.name not in today_session.payments: # if already a payment
+                today_session.payments[self.name] = (self.membership,
+                                                 fee_structure[fee_key])
+            else:
+                today_session.payments[self.player.name] = \
+                    (self.player.membership,
+                     today_session.payments[self.player.name][1] +
+                     (self.player.money_owed - owed))
+
+        except KeyError:
+            pass
+
+        try:
             self.money_owed -= fee_structure[fee_key]
         except KeyError:  # in case it's the wrong day/stuffed up
             pass
@@ -381,8 +394,8 @@ def generate_new_game():
                         bench.remove(player)
 
         scores += enumerate_b.score_court(((0,1),(2,3)),courts[i].spaces,
-                                       explain = True)
-    print("Total Court Score: {} \n".format(scores))
+                                       explain = False)
+   # print("Total Court Score: {} \n".format(scores))
 
 
 def confirm_game():
