@@ -15,6 +15,9 @@ class Session:
         self.player_departures = {} # Ditto
 
 
+# DATA | ROUND NO | COURT NO| SPACE NO| PLAYER NAME | PLAYER ABILITY |
+
+
 def export_game_data(filename):
     session_data = open('badminton_session_data.obj', 'rb')
     loaded_sessions = pickle.load(session_data)
@@ -25,48 +28,65 @@ def export_game_data(filename):
     with game_file:
         writer = csv.writer(game_file)
 
+        writer.writerow(['DATE', "ROUND #", "COURT #", "SPACE #", "PLAYER "
+                                                                  "NAME",
+                         "ABILITY" ])
+
         for i, session in enumerate(loaded_sessions):
             if len(session.games) > 0:
-                writer.writerow(['DATE'])
-                writer.writerow([session.date])
-                writer.writerow([''])
-                for i, game in enumerate(session.games):
-                    writer.writerow(['GAME {} \n'.format(i + 1), '', 'COURT 1',
-                                     '', '', 'COURT 2', '', '', 'COURT 3'])
-
-                    # Dealing with "NoneType" issues
-                    side_1s = ['', 'SIDE 1']
-                    side_2s = ['', 'SIDE 2']
-
-                    for i in range(3):
-                        for j in range(2):
+                for j, game in enumerate(session.games):
+                    for k in range(3):
+                        for l in range(4):
                             try:
-                                side_1s.append(game[i][j].name)
+                                writer.writerow([session.date, j+1, k+1, l+1,
+                                             game[k][l].name, game[k][
+                                    l].ability])
                             except AttributeError:
-                                side_1s.append("NONE")
-                        side_1s.append('')
+                                writer.writerow([session.date, j + 1, k, l + 1,
+                                                 "NONE", 0])
 
-                    for i in range(3):
-                        for j in range(2):
-                            try:
-                                side_2s.append(game[i][j+2].name)
-                            except AttributeError:
-                                side_2s.append("NONE")
-                        side_2s.append('')
+            #
+            # if len(session.games) > 0:
+            #     writer.writerow(['DATE'])
+            #     writer.writerow([session.date])
+            #     writer.writerow([''])
+            #     for i, game in enumerate(session.games):
+            #         writer.writerow(['GAME {} \n'.format(i + 1), '', 'COURT 1',
+            #                          '', '', 'COURT 2', '', '', 'COURT 3'])
 
-                    writer.writerow(side_1s)
-                    writer.writerow(side_2s)
-
-                    # writer.writerow(
-                    #     ['', 'SIDE 1', game[0][0].name, game[0][1].name,
-                    #      '', game[1][0].name, game[1][1].name,
-                    #      '', game[2][0].name, game[2][1].name])
-                    # writer.writerow(
-                    #     ['', 'SIDE 2', game[0][2].name, game[0][3].name,
-                    #      '', game[1][2].name, game[1][3].name,
-                    #      '', game[2][2].name, game[2][3].name])
-
-                    writer.writerow([''])
+                    # # Dealing with "NoneType" issues
+                    # side_1s = ['', 'SIDE 1']
+                    # side_2s = ['', 'SIDE 2']
+                    #
+                    # for i in range(3):
+                    #     for j in range(2):
+                    #         try:
+                    #             side_1s.append(game[i][j].name)
+                    #         except AttributeError:
+                    #             side_1s.append("NONE")
+                    #     side_1s.append('')
+                    #
+                    # for i in range(3):
+                    #     for j in range(2):
+                    #         try:
+                    #             side_2s.append(game[i][j+2].name)
+                    #         except AttributeError:
+                    #             side_2s.append("NONE")
+                    #     side_2s.append('')
+                    #
+                    # writer.writerow(side_1s)
+                    # writer.writerow(side_2s)
+                    #
+                    # # writer.writerow(
+                    # #     ['', 'SIDE 1', game[0][0].name, game[0][1].name,
+                    # #      '', game[1][0].name, game[1][1].name,
+                    # #      '', game[2][0].name, game[2][1].name])
+                    # # writer.writerow(
+                    # #     ['', 'SIDE 2', game[0][2].name, game[0][3].name,
+                    # #      '', game[1][2].name, game[1][3].name,
+                    # #      '', game[2][2].name, game[2][3].name])
+                    #
+                    # writer.writerow([''])
 
 
 def export_player_data(filename):
