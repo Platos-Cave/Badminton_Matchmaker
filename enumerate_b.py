@@ -77,6 +77,9 @@ elif day_of_week == 3:
 else:
     profile = "Default"
 
+# Defines the multipliers for each level of affinity
+level_dict = {'Low': 0.5, 'Medium': 1, 'High': 2, 'Maximum': 1000000}
+
 # Integers standing in for players
 players = [i for i in range(12)]
 # Will be appended until it has all possible three-court combos
@@ -192,8 +195,12 @@ def score_court(court, trial_players, explain = False):
             # than twice in a row
             score += base_score * (count)
             # Subtract affinity variable from score
-            if o_player.name in player.opponent_affinities:
-                score -= scoring_vars[('Affinity', profile)]
+            for aff in player.opponent_affinities:
+                if aff[0] == o_player.name:
+                    aff_multiplier = level_dict[aff[1]]
+                    score -= aff_multiplier*(scoring_vars[('Affinity',
+                                                           profile)])
+                    break
 
         for o_player in partner: # there's only 1 partner, so loop seems silly?
             count = 1
@@ -210,8 +217,13 @@ def score_court(court, trial_players, explain = False):
                     (1 / (1 + discount_rate) ** (player.total_games - i - 1)))
                     count += 0.2
             score += base_score * (count)
-            if o_player.name in player.partner_affinities:
-                score -= scoring_vars[('Affinity', profile)]
+
+            for aff in player.partner_affinities:
+                if aff[0] == o_player.name:
+                    aff_multiplier = level_dict[aff[1]]
+                    score -= aff_multiplier*(scoring_vars[('Affinity',
+                                                           profile)])
+                    break
 
     # Female mini-affinity:
     no_women = len([p for p in new_court if p.sex == "Female" if p is not

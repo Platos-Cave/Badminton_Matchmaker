@@ -17,7 +17,7 @@ class Application(tk.Tk):
         tk.Tk.__init__(self)
 
         # A (probably unPythonic) way of randomly loading the bench
-        self.test_mode = True
+        self.test_mode = False
 
         self.title("Badminton Matchmaker")
 
@@ -769,14 +769,19 @@ class PlayerStats(tk.Toplevel):
         self.partner_aff_label = ttk.Label(self, text="Partner Affinities")
         self.opp_aff_label = ttk.Label(self, text="Opponent Affinities")
         self.partner_aff_box = ttk.Combobox(self, width=8)
+        self.partner_aff_level_box = ttk.Combobox(self, width=8, values=[
+            "Low", "Medium", "High", "Maximum"], state='readonly')
         self.opp_aff_box = ttk.Combobox(self, width=8)
+        self.opp_aff_level_box = ttk.Combobox(self, width=8,
+                                              values=["Low", "Medium",
+                                                      "High", "Maximum"],
+                                              state='readonly')
 
         self.new_partner_aff = ttk.Button(self, text="New", width=4,
                                           command=self.new_partner_affinity)
         self.new_opp_aff = ttk.Button(self, text="New", width=4,
                                       command=self.new_opp_affinity)
 
-        # 100 characters long - hard to break up?
         self.save_par_aff_butn = ttk.Button(self, text="Save", width=5,
                                             command=lambda: self.save_affinity(
                                                       "partner"))
@@ -785,9 +790,11 @@ class PlayerStats(tk.Toplevel):
                                                        "opponent"))
 
         self.del_partner_aff = ttk.Button(self, text="Delete", width=6,
-                                          command=self.del_partner_affinity)
+                                          command=lambda:
+                                          self.del_affinity("partner"))
         self.del_opp_aff = ttk.Button(self, text="Delete", width=6,
-                                      command=self.del_opp_affinity)
+                                      command=lambda:
+                                      self.del_affinity("opponent"))
 
         self.name_entry = ttk.Entry(self, width=11)
         self.sex_combobox = ttk.Combobox(self, width=8,
@@ -824,7 +831,9 @@ class PlayerStats(tk.Toplevel):
         self.ability_combobox.current(4)
         self.membership_cbox.current(0)
         self.owed_entry.insert(0, 0)
-                
+        self.partner_aff_level_box.current(1)
+        self.opp_aff_level_box.current(1)
+
         # So new players can get affs saved when their objects don't exist yet
         # Should move
         self.partner_affs = []
@@ -859,15 +868,28 @@ class PlayerStats(tk.Toplevel):
 
 
             self.partner_affs = self.player.partner_affinities
-            self.partner_aff_box.config(values=self.partner_affs)
+            self.partner_aff_box.config(values=[p[0] for p in
+                                                self.partner_affs])
 
             self.opp_affs = self.player.opponent_affinities
-            self.opp_aff_box.config(values=self.opp_affs)
+            self.opp_aff_box.config(values=[p[0] for p in
+                                                self.opp_affs])
 
             if len(self.partner_affs) > 0:
                 self.partner_aff_box.current(0)
+                self.switch_aff("partner")
+
+                # self.partner_aff_level_box.current(
             if len(self.opp_affs) > 0:
                 self.opp_aff_box.current(0)
+                self.switch_aff("opponent")
+                # self.opp_aff_level_box.current()
+
+            self.partner_aff_box.bind("<<ComboboxSelected>>",
+                                    lambda event: self.switch_aff("partner"))
+
+            self.opp_aff_box.bind("<<ComboboxSelected>>",
+                                      lambda event: self.switch_aff("opponent"))
 
             self.save_player_button.config(text="Save Player Stats")
 
@@ -892,19 +914,20 @@ class PlayerStats(tk.Toplevel):
         self.owed_entry.grid(column = 1, row = 5)
         self.pay_owed_button.grid(column = 2, row = 5)
         self.partner_aff_label.grid(column=0, row=7)
-        self.partner_aff_box.grid(column=1, row=7, columnspan=3, sticky='ew')
+        self.partner_aff_box.grid(column=1, row=7, columnspan=2, sticky='ew')
+        self.partner_aff_level_box.grid(column=3, row=7, sticky='ew')
         self.new_partner_aff.grid(column=1, row=8, sticky='ew')
         self.save_par_aff_butn.grid(column=2, row=8, sticky='ew')
         self.del_partner_aff.grid(column=3, row=8, sticky='ew')
-
         self.opp_aff_label.grid(column=0, row=9)
-        self.opp_aff_box.grid(column=1, row=9, columnspan=3, sticky='ew')
+        self.opp_aff_box.grid(column=1, row=9, columnspan=2, sticky='ew')
+        self.opp_aff_level_box.grid(column=3, row=9, sticky='ew')
         self.new_opp_aff.grid(column=1, row=10, sticky='ew')
         self.save_opp_aff_butn.grid(column=2, row=10, sticky='ew')
         self.del_opp_aff.grid(column=3, row=10,  sticky='ew')
 
         # Games played. Irrelevant for new players
-        if self.new is False:
+        if not self.new:
             self.games_played_label.grid(column=0, row=11)
             self.games_played_number.grid(column=2, row=11)
             self.late_penalty_label.grid(column=0, row=12)
@@ -918,6 +941,21 @@ class PlayerStats(tk.Toplevel):
 
         self.save_player_button.grid(column=1, row=16, columnspan=3)
 
+    def switch_aff(self, side):
+        '''Bind the aff level combo to the aff name combo'''
+        aff_dict = {'Low': 0, 'Medium': 1, 'High': 2, 'Maximum': 3}
+        if side == "partner":
+            for plyr in self.player.partner_affinities:
+                # if name, set the level to the corresponding level
+                if plyr[0] == self.partner_aff_box.get():
+                    self.partner_aff_level_box.current(aff_dict[plyr[1]])
+                    break # saving a search of the whole list, pointless?
+
+        elif side == "opponent":
+            for plyr in self.player.opponent_affinities:
+                if plyr[0] == self.opp_aff_box.get():
+                    self.opp_aff_level_box.current(aff_dict[plyr[1]])
+                    break
 
     def pay_off(self):
         """only clears entry widget"""
@@ -925,6 +963,7 @@ class PlayerStats(tk.Toplevel):
         self.owed_entry.insert(0, 0)
 
 
+    # Could combine the two into one method, but it doesn't save space?
     def new_partner_affinity(self):
         """Simply clears the combobox"""
         self.partner_aff_box.delete(0, "end")
@@ -933,68 +972,124 @@ class PlayerStats(tk.Toplevel):
         """Simply clears the combobox"""
         self.opp_aff_box.delete(0, "end")
 
-    # Should be able to combine the next two methods
-    def del_partner_affinity(self):
-        are_you_sure = tk.messagebox.askyesno("Are you sure?",
-                                              "Are you sure you want to "
-                                              "delete this affinity?",
-                                              parent = self)
+    def save_affinity(self, side):
 
-        if are_you_sure is True:
+        # Need to organise this better?
 
+        all_names = [player.name for player in b_scorer.every_player]
+        if side == "partner":
             other_player = self.partner_aff_box.get()
-
-            try:
-                self.partner_affs.remove(other_player)
-            except ValueError:
-                tk.messagebox.showerror("Error", "Error: Name not found")
-                return
-
-            if self.new is False:
-                self.player.partner_affinities.remove(other_player)
-
-
-            self.partner_aff_box.config(values=self.partner_affs)
-            self.partner_aff_box.delete(0, "end")
-
-            for other in b_scorer.every_player:
-                if other.name == other_player:
-                    try:
-                        other.partner_affinities.remove(self.player.name)
-                    # In case it's new, or not there for some reason
-                    except (ValueError, AttributeError) as error:
-                        pass
-
-    def del_opp_affinity(self):
-        are_you_sure = tk.messagebox.askyesno("Are you sure?",
-                                              "Are you sure you want to "
-                                              "delete this affinity?",
-                                              parent = self)
-
-        if are_you_sure is True:
-
+        elif side == "opponent":
             other_player = self.opp_aff_box.get()
 
-            try:
-                self.opp_affs.remove(other_player)
-            except ValueError:
-                tk.messagebox.showerror("Error", "Error: Name not found")
-                return
+        # Can't save your own name as affinity. Seems inconcise
+        if self.new:
+            if other_player == self.name_entry.get():
+                not_found = tk.messagebox.showerror("Error", "A player can't have"
+                                                             " an affinity with "
+                                                             "him/herself!",
+                                                    parent=self)
+                return False
 
-            if self.new is False:
-                self.player.opponent_affinities.remove(other_player)
+        else:
+            if other_player == self.player.name:
+                not_found = tk.messagebox.showerror("Error", "A player can't have"
+                                                             " an affinity with "
+                                                             "him/herself!",
+                                                    parent=self)
+                return False
+
+        # Can't save non-existing player
+        if other_player not in all_names:
+            not_found = tk.messagebox.showerror("Error", "Player name not "
+                                                         "found", parent = self)
+            return False
 
 
-            self.opp_aff_box.config(values=self.opp_affs)
-            self.opp_aff_box.delete(0, "end")
+        # Add affinity to the current player
+        if side == "partner":
 
-            for other in b_scorer.every_player:
-                if other.name == other_player:
-                    try:
-                        other.opponent_affinities.remove(self.player.name)
+            level = self.partner_aff_level_box.get()
+
+            self.partner_affs.append((other_player, level))
+            self.partner_aff_box.config(values=[p[0] for p in
+                                                self.partner_affs])
+            # If not new, add affinities right now
+            if not self.new:
+                for player in b_scorer.every_player:
+                    if player.name == other_player:
+                        player.add_affinity("partner", self.player.name, level)
+                self.player.add_affinity("partner", other_player, level)
+
+        elif side == "opponent":
+
+            level = self.opp_aff_level_box.get()
+
+            self.opp_affs.append((other_player, level))
+            self.opp_aff_box.config(values=[p[0] for p in
+                                                self.opp_affs])
+
+            if not self.new:
+                for player in b_scorer.every_player:
+                    if player.name == other_player:
+                        player.add_affinity("opponent", self.player.name, level)
+                self.player.add_affinity("opponent", other_player, level)
+
+        player_saved = tk.messagebox.showinfo("Success",
+                                              "Player's affinity added!",
+                                              parent = self)
+
+    # Currently - doesn't work for new players, doesn't raise NameErrors for
+    # missing players. But those seem unlikely to be of much relevance atm
+    def del_affinity(self, side):
+
+        are_you_sure = tk.messagebox.askyesno("Are you sure?",
+                                              "Are you sure you want to "
+                                              "delete this affinity?",
+                                              parent = self)
+        if are_you_sure:
+
+            if side == "partner":
+                other_player = self.partner_aff_box.get()
+
+            elif side == "opponent":
+                other_player = self.opp_aff_box.get()
+
+            # try:
+            #     self.partner_affs.remove(other_player)
+            # except ValueError:
+            #     tk.messagebox.showerror("Error", "Error: Name not found")
+            #     return
+
+            if not self.new:
+                try:
+                    self.player.remove_affinity(other_player, side)
+                except NameError:
+                    tk.messagebox.showerror("Error", "Error: Name not found")
+                    return
+
+                if side == "partner":
+                    self.partner_affs = self.player.partner_affinities
+                    self.partner_aff_box.config(values=[p[0] for p in
+                                                        self.partner_affs])
+                    self.partner_aff_box.delete(0, "end")
+                elif side == "opponent":
+                    self.opp_affs = self.player.opponent_affinities
+                    self.opp_aff_box.config(values=[p[0] for p in
+                                                    self.opp_affs])
+                    self.opp_aff_box.delete(0, "end")
+
+                for other in b_scorer.every_player:
+                    if other.name == other_player:
+                        try:
+                            other.remove_affinity(self.player.name, side)
                         # In case it's new, or not there for some reason
-                    except (ValueError, AttributeError) as error:
-                        pass
+                        except NameError:
+                            print("Name problem removing affinity!")
+            else:
+                #  How many times do you need to delete an affinity from a
+                # new player?
+                print("I can't be bothered working this out")
 
     def save_player(self):
         """If the player is existing, then update their stats. If new,
@@ -1052,11 +1147,15 @@ class PlayerStats(tk.Toplevel):
             self.controller.bench_grid()
 
             # Add affinities to other players
+
             for player in b_scorer.every_player:
-                if player.name in self.partner_affs:
-                    player.partner_affinities.append(name)
-                if player.name in self.opp_affs:
-                    player.opponent_affinities.append(name)
+                for aff in self.partner_affs:
+                    if aff[0] == player.name:
+                        player.add_affinity("partner", name, aff[1])
+                for aff in self.opp_affs:
+                    if aff[0] == player.name:
+                        player.add_affinity("opponent", name, aff[1])
+
                     # print(player.opponent_affinities)
         else:
             # if player is existing, update their stats
@@ -1119,60 +1218,6 @@ class PlayerStats(tk.Toplevel):
 
         self.destroy()
 
-    def save_affinity(self, side):
-
-        # Need to organise this better?
-
-        all_names = [player.name for player in b_scorer.every_player]
-        if side == "partner":
-            other_player = self.partner_aff_box.get()
-        elif side == "opponent":
-            other_player = self.opp_aff_box.get()
-
-        if other_player not in all_names:
-            not_found = tk.messagebox.showerror("Error", "Player name not "
-                                                         "found", parent = self)
-            return
-
-        if side == "partner":
-            if other_player in self.partner_affs:
-                already_aff = tk.messagebox.showerror("Error",
-                                                      "Player already has "
-                                                      "this affinity.",
-                                                      parent = self)
-                return
-        elif side == "opponent":
-            if other_player in self.opp_affs:
-                already_aff = tk.messagebox.showerror("Error",
-                                                      "Player already has "
-                                                      "this affinity.",
-                                                      parent = self)
-                return
-
-        # Not very elegant
-
-        # Add affinity to the current player
-        if side == "partner":
-            self.partner_affs.append(other_player)
-            self.partner_aff_box.config(values=self.partner_affs)
-            # If not new
-            if self.new is False:
-                for player in b_scorer.every_player:
-                    if player.name == other_player:
-                        player.partner_affinities.append(self.player.name)
-                self.player.partner_affinities = self.partner_affs
-        elif side == "opponent":
-            self.opp_affs.append(other_player)
-            self.opp_aff_box.config(values=self.opp_affs)
-            if self.new is False:
-                for player in b_scorer.every_player:
-                    if player.name == other_player:
-                        player.opponent_affinities.append(self.player.name)
-                self.player.opponent_affinities = self.opp_affs
-
-        player_saved = tk.messagebox.showinfo("Success",
-                                              "Player's affinity added!",
-                                              parent = self)
 
 class GameStats(tk.Toplevel):
     """A Toplevel popup which allows the user to modify the weightings given to

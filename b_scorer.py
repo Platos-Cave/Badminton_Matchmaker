@@ -16,6 +16,8 @@ class Player:
         self.ability = ability  # An integer from 1-9 (1 being weakest)
 
         # Other players this player likes to be partnered with/oppose
+        # Newly updated to be (Player.name, Level) pairs, where Level is
+        # (currently) Low/Medium/High
         self.partner_affinities = partner_affinities
         self.opponent_affinities = opponent_affinities
         # membership status: Member or Casual. Had trouble making
@@ -46,6 +48,55 @@ class Player:
         self.keep_on = False
 
         self.paid_tonight = True
+
+    def add_affinity(self, side, name, level):
+        '''Given a side (partner/opponent), a name, and a level
+        (Low/Medium/High), add/update that to the respective affinity list.'''
+        if side == "partner":
+            affs = self.partner_affinities
+        elif side == "opponent":
+            affs = self.opponent_affinities
+        else:
+            return NameError # is that right?
+
+        # Uses list comprehension rather than loop - however, loses references
+        affs = [(name,level) if player[0] == name else player for player in
+                affs]
+
+        # Add new affinity otherwise. Seems like I should be able to
+        # integrate this with the flow of the above loop?
+        if name not in [p[0] for p in affs]:
+            affs.append((name,level))
+
+        # Reassigning to the correct list. Seems inelegant
+        if side == "partner":
+            self.partner_affinities = affs
+        elif side == "opponent":
+            self.opponent_affinities = affs
+        else:
+            return NameError # is that right?
+
+
+    def remove_affinity(self, name, side):
+        '''Remove an affinity, so long as it exists'''
+        if side == "partner":
+            affs = self.partner_affinities
+        elif side == "opponent":
+            affs = self.opponent_affinities
+        else:
+            return NameError  # is that right?
+
+        if name not in [p[0] for p in affs]: # error
+            return NameError # is that right?
+        else:
+            affs = [p for p in affs if p[0] != name]
+            # Again need to get reference back, seems annoying
+            if side == "partner":
+                self.partner_affinities = affs
+            elif side == "opponent":
+                self.opponent_affinities = affs
+            else:
+                return NameError
 
 
     def update_game_count(self):
@@ -634,6 +685,27 @@ try:
         if not hasattr(player, 'keep_on'):
             player.keep_on = False
             #print("Added Played Tonight!")
+
+        # Grandfather in new affinities
+        temp_partners = []
+        for name in player.partner_affinities:
+            if isinstance(name, tuple): # i.e. already updated
+                temp_partners.append(name)
+            elif isinstance(name, str): # if string, add "Medium" level
+                temp_partners.append((name, "Medium"))
+            else:
+                print("Affinity Error!")
+        player.partner_affinities = temp_partners
+
+        temp_opps = []
+        for name in player.opponent_affinities:
+            if isinstance(name, tuple): # i.e. already updated
+                temp_opps.append(name)
+            elif isinstance(name, str): # if string, add "Medium" level
+                temp_opps.append((name, "Medium"))
+            else:
+                print("Affinity Error!")
+        player.opponent_affinities = temp_opps
 
 
 except FileNotFoundError:

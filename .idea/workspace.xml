@@ -7,9 +7,10 @@
     <list default="true" id="12b4690e-7fa1-496f-b4cf-baaf01e9f6e0" name="Default" comment="commit money &amp; day updates">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/b_scorer.py" beforeDir="false" afterPath="$PROJECT_DIR$/b_scorer.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/b_sessions.py" beforeDir="false" afterPath="$PROJECT_DIR$/b_sessions.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/badminton_session_data.obj" beforeDir="false" afterPath="$PROJECT_DIR$/badminton_session_data.obj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/enumerate_b.py" beforeDir="false" afterPath="$PROJECT_DIR$/enumerate_b.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/every_player_pi_2.obj" beforeDir="false" afterPath="$PROJECT_DIR$/every_player_pi_2.obj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/score_pi.obj" beforeDir="false" afterPath="$PROJECT_DIR$/score_pi.obj" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tk_bscorer.py" beforeDir="false" afterPath="$PROJECT_DIR$/tk_bscorer.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -24,17 +25,17 @@
       <file leaf-file-name="b_scorer.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/b_scorer.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="17">
-              <caret line="370" column="11" lean-forward="true" selection-start-line="370" selection-start-column="11" selection-end-line="370" selection-end-column="11" />
+            <state relative-caret-position="342">
+              <caret line="92" column="8" selection-start-line="92" selection-start-column="8" selection-end-line="92" selection-end-column="8" />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="tk_bscorer.py" pinned="false" current-in-tab="false">
+      <file leaf-file-name="tk_bscorer.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/tk_bscorer.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="219">
-              <caret line="1101" selection-start-line="1101" selection-end-line="1105" />
+            <state relative-caret-position="221">
+              <caret line="13" column="25" lean-forward="true" selection-start-line="13" selection-start-column="25" selection-end-line="13" selection-end-column="25" />
               <folding>
                 <element signature="e#108#128#0" expanded="true" />
               </folding>
@@ -42,11 +43,32 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="b_sessions.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="debug_test.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/debug_test.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="425">
+              <caret line="25" selection-start-line="25" selection-end-line="25" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="_pydev_execfile.py" pinned="false" current-in-tab="false">
+        <entry file="file://$APPLICATION_HOME_DIR$/helpers/pydev/_pydev_imps/_pydev_execfile.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="289">
+              <caret line="17" selection-start-line="17" selection-end-line="17" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="b_sessions.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/b_sessions.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="349">
-              <caret line="47" lean-forward="true" selection-start-line="47" selection-end-line="47" />
+            <state relative-caret-position="204">
+              <caret line="14" column="37" selection-start-line="14" selection-start-column="37" selection-end-line="14" selection-end-column="37" />
+              <folding>
+                <element signature="e#107#117#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -54,8 +76,8 @@
       <file leaf-file-name="enumerate_b.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/enumerate_b.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="145">
-              <caret line="162" column="28" selection-start-line="162" selection-start-column="28" selection-end-line="162" selection-end-column="28" />
+            <state relative-caret-position="1343">
+              <caret line="83" column="32" selection-start-line="83" selection-start-column="32" selection-end-line="83" selection-end-column="32" />
             </state>
           </provider>
         </entry>
@@ -71,28 +93,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>now</find>
-      <find>print(t</find>
-      <find>weekday</find>
-      <find>key e</find>
-      <find>b_sessions</find>
-      <find>lambda</find>
-      <find>export-</find>
-      <find>len(b</find>
-      <find>len(</find>
-      <find>session</find>
-      <find>session_combo</find>
-      <find>b_scorer.all_sessions</find>
-      <find>combined_ses</find>
-      <find>del_p</find>
-      <find>_affinity</find>
-      <find>popup</find>
-      <find>gamestats</find>
-      <find>pay</find>
-      <find>pay_off</find>
-      <find>save_player</find>
-      <find>today_sess</find>
-      <find>print g</find>
       <find>print_times</find>
       <find>money_o</find>
       <find>nope</find>
@@ -101,6 +101,28 @@
       <find>owed</find>
       <find>money_owed</find>
       <find>explain</find>
+      <find>aff</find>
+      <find>affinit</find>
+      <find>readon</find>
+      <find>low</find>
+      <find>opp_aff_bo</find>
+      <find>opp_aff_box</find>
+      <find>opp_aff_</find>
+      <find>opp_aff</find>
+      <find>switch_</find>
+      <find>switch_profile(s</find>
+      <find>save_affinity</find>
+      <find>partner_Affs</find>
+      <find>level_dict</find>
+      <find>affinity</find>
+      <find>for aff in</find>
+      <find>&quot;Low&quot;</find>
+      <find>Low</find>
+      <find>opponent_aff_b</find>
+      <find>save_aff</find>
+      <find>self.partner_affs =</find>
+      <find>del_aff</find>
+      <find>bothered</find>
     </findStrings>
     <replaceStrings>
       <replace>0</replace>
@@ -127,16 +149,17 @@
         <option value="$PROJECT_DIR$/README.txt" />
         <option value="$PROJECT_DIR$/csv_test.py" />
         <option value="$PROJECT_DIR$/game_csv.py" />
-        <option value="$PROJECT_DIR$/enumerate_b.py" />
-        <option value="$PROJECT_DIR$/tk_bscorer.py" />
-        <option value="$PROJECT_DIR$/b_scorer.py" />
         <option value="$PROJECT_DIR$/b_sessions.py" />
+        <option value="$PROJECT_DIR$/debug_test.py" />
+        <option value="$PROJECT_DIR$/enumerate_b.py" />
+        <option value="$PROJECT_DIR$/b_scorer.py" />
+        <option value="$PROJECT_DIR$/tk_bscorer.py" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="226" />
-    <option name="y" value="140" />
+    <option name="x" value="-8" />
+    <option name="y" value="-8" />
     <option name="width" value="763" />
     <option name="height" value="735" />
   </component>
@@ -232,6 +255,24 @@
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
     </configuration>
+    <configuration name="debug_test" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="Badminton_Matchmaker" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/debug_test.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+    </configuration>
     <configuration name="enumerate_b" type="PythonConfigurationType" factoryName="Python">
       <module name="Badminton_Matchmaker" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -268,39 +309,21 @@
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
     </configuration>
-    <configuration name="tk_bscorer_0.04" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <module name="Badminton Matchmaker" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="C:\Users\Henry\Desktop\Badminton Matchmaker\tk_bscorer.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-    </configuration>
     <list>
       <item itemvalue="Python.enumerate_b" />
-      <item itemvalue="Python.tk_bscorer_0.04" />
       <item itemvalue="Python.b_scorer" />
       <item itemvalue="Python.tk_bscorer" />
       <item itemvalue="Python.csv_test" />
       <item itemvalue="Python.b_sessions" />
+      <item itemvalue="Python.debug_test" />
     </list>
     <recent_temporary>
       <list>
         <item itemvalue="Python.tk_bscorer" />
+        <item itemvalue="Python.debug_test" />
         <item itemvalue="Python.b_sessions" />
         <item itemvalue="Python.csv_test" />
         <item itemvalue="Python.b_scorer" />
-        <item itemvalue="Python.tk_bscorer_0.04" />
       </list>
     </recent_temporary>
   </component>
@@ -350,57 +373,26 @@
     <frame x="-8" y="-8" width="1382" height="744" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.13909224" />
+      <window_info content_ui="combo" id="Project" order="0" weight="0.13909224" />
       <window_info anchor="bottom" id="TODO" order="6" />
       <window_info anchor="bottom" id="Event Log" order="11" side_tool="true" />
       <window_info anchor="bottom" id="Version Control" order="7" weight="0.32913387" />
       <window_info anchor="bottom" id="Python Console" order="8" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.31653544" />
-      <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
-      <window_info anchor="bottom" id="Terminal" order="9" />
-      <window_info id="Favorites" order="2" side_tool="true" />
-      <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
-      <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
-      <window_info anchor="bottom" id="Version Control" order="7" weight="0.32913387" />
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.13909224" />
-      <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
-      <window_info anchor="right" id="Commander" order="0" weight="0.4" />
-      <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
-      <window_info anchor="bottom" id="TODO" order="6" />
       <window_info anchor="bottom" id="Run" order="2" weight="0.32755905" />
-      <window_info anchor="bottom" id="Inspection Results" order="10" weight="0.24094488" />
-      <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
-      <window_info anchor="bottom" id="Messages" order="12" />
-      <window_info anchor="bottom" id="Message" order="0" />
-      <window_info anchor="bottom" id="Event Log" order="11" side_tool="true" />
-      <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
-      <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
-      <window_info id="Favorites" order="2" side_tool="true" />
-      <window_info anchor="bottom" id="Find" order="1" weight="0.32913387" />
-      <window_info anchor="bottom" id="Terminal" order="9" />
-      <window_info anchor="bottom" id="Python Console" order="8" />
-    </layout>
-    <layout-to-restore>
-      <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
-      <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
-      <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.24304539" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
+      <window_info anchor="bottom" id="Terminal" order="9" />
+      <window_info id="Favorites" order="2" side_tool="true" />
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
+      <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
       <window_info anchor="right" id="Commander" order="0" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
-      <window_info anchor="bottom" id="TODO" order="6" />
-      <window_info anchor="bottom" id="Run" order="2" visible="true" weight="0.28976378" />
       <window_info anchor="bottom" id="Inspection Results" order="10" weight="0.24094488" />
-      <window_info anchor="bottom" id="Python Console" order="8" />
-      <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
-      <window_info anchor="bottom" id="Terminal" order="9" />
-      <window_info anchor="bottom" id="Event Log" order="11" side_tool="true" />
-      <window_info anchor="bottom" id="Find" order="1" weight="0.32913387" />
-      <window_info anchor="bottom" id="Version Control" order="7" weight="0.32913387" />
-      <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Messages" order="12" />
-      <window_info id="Favorites" order="2" side_tool="true" />
-    </layout-to-restore>
+      <window_info anchor="bottom" id="Message" order="0" />
+      <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
+      <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
+      <window_info anchor="bottom" id="Find" order="1" weight="0.32913387" />
+    </layout>
   </component>
   <component name="Vcs.Log.Tabs.Properties">
     <option name="TAB_STATES">
@@ -439,24 +431,22 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <option name="time" value="1" />
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url />
+          <line>25</line>
+          <option name="timeStamp" value="6" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url />
+          <line>8</line>
+          <option name="timeStamp" value="7" />
+        </line-breakpoint>
+      </breakpoints>
+      <option name="time" value="8" />
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/enumerate_b.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="3366">
-          <caret line="203" column="34" selection-start-line="203" selection-start-column="34" selection-end-line="203" selection-end-column="34" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/b_scorer.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="85">
-          <caret line="9" lean-forward="true" selection-start-line="9" selection-end-line="9" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/tk_bscorer.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1346">
@@ -754,34 +744,51 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/enumerate_b.py">
+    <entry file="file://$PROJECT_DIR$/b_sessions.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="145">
-          <caret line="162" column="28" selection-start-line="162" selection-start-column="28" selection-end-line="162" selection-end-column="28" />
+        <state relative-caret-position="204">
+          <caret line="14" column="37" selection-start-line="14" selection-start-column="37" selection-end-line="14" selection-end-column="37" />
+          <folding>
+            <element signature="e#107#117#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/tk_bscorer.py">
+    <entry file="file://$APPLICATION_HOME_DIR$/helpers/pydev/_pydev_imps/_pydev_execfile.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="219">
-          <caret line="1101" selection-start-line="1101" selection-end-line="1105" />
-          <folding>
-            <element signature="e#108#128#0" expanded="true" />
-          </folding>
+        <state relative-caret-position="289">
+          <caret line="17" selection-start-line="17" selection-end-line="17" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/debug_test.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="425">
+          <caret line="25" selection-start-line="25" selection-end-line="25" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/enumerate_b.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1343">
+          <caret line="83" column="32" selection-start-line="83" selection-start-column="32" selection-end-line="83" selection-end-column="32" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/b_scorer.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="17">
-          <caret line="370" column="11" lean-forward="true" selection-start-line="370" selection-start-column="11" selection-end-line="370" selection-end-column="11" />
+        <state relative-caret-position="342">
+          <caret line="92" column="8" selection-start-line="92" selection-start-column="8" selection-end-line="92" selection-end-column="8" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/b_sessions.py">
+    <entry file="file://$PROJECT_DIR$/tk_bscorer.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="349">
-          <caret line="47" lean-forward="true" selection-start-line="47" selection-end-line="47" />
+        <state relative-caret-position="221">
+          <caret line="13" column="25" lean-forward="true" selection-start-line="13" selection-start-column="25" selection-end-line="13" selection-end-column="25" />
+          <folding>
+            <element signature="e#108#128#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
