@@ -2,12 +2,15 @@
 readable by the players themselves.'''
 
 import tkinter as tk
-from tkinter import Tk, ttk, Frame, Menu, messagebox, Scrollbar
+from tkinter import Tk, ttk, Frame, Menu, messagebox, Scrollbar, StringVar
 from tkinter.messagebox import showinfo, askyesno, showerror
 import b_scorer
 import b_sessions
 import pickle
 import random
+import winsound
+from threading import Thread, Event
+import time
 import datetime
 from datetime import datetime # huh?
 
@@ -17,11 +20,14 @@ class Application(tk.Tk):
         tk.Tk.__init__(self)
 
         # A (probably unPythonic) way of randomly loading the bench
-        self.test_mode = False
+        self.test_mode = True
 
         self.title("Badminton Matchmaker")
 
         self.protocol("WM_DELETE_WINDOW", lambda: self.confirm_quit())
+
+        # For the sake of configuring buttons
+        self.unchanged_board = False
 
         self.bench_popup_menus = {}
         self.court_menus = {}
@@ -49,6 +55,7 @@ class Application(tk.Tk):
         self.bench_labels = [tk.Label(self.bench,
                                       text=player.name, width=8,
                                       height=2) for player in b_scorer.bench]
+        self.timer = Timer(self)
 
         # These attempts to format my lines to >80 characters seem unnatural
 
@@ -79,8 +86,8 @@ class Application(tk.Tk):
                                       background=bg_colour,
                                       font=('Helvetica', 16, 'bold'))
         self.start_button = ttk.Button(self, text="Generate New Board",
-                                       command=self.start)
-        self.confirm_button = ttk.Button(self, text="Confirm Board",
+                                       command=self.generate)
+        self.confirm_button = ttk.Button(self, text="Confirm and Start",
                                          command=self.confirm)
         self.undo_confirm_button = ttk.Button(self, text="Undo Confirm",
                                          command=self.undo_confirm)
@@ -89,9 +96,8 @@ class Application(tk.Tk):
                                                 text="Change Automatic Rules",
                                                 command=self.edit_game_weightings)
         self.empty_courts_button = ttk.Button(self, text="Empty Courts",
-                                              command=self.empty_courts)
 
-        self.undo_confirm_button.configure(state="disabled")
+                                              command=self.empty_courts)
 
         for i, court in enumerate(self.court_labels):
             court.grid(column=(5 * i) + 2, row=2, sticky='nsew',
@@ -123,7 +129,9 @@ class Application(tk.Tk):
         self.bench.grid(column=4, row=16, columnspan=7, rowspan=5,
                         sticky='nsew', padx=1, pady=1)
 
-        self.rounds_label.grid(column=12, row=15, columnspan=2)
+        self.rounds_label.grid(column=12, row=15)
+        self.timer.grid(column=13, row=15, sticky='nsew',
+                        padx=1, pady=1)
         self.start_button.grid(column=12, row=16, sticky='nsew',
                                padx=1, pady=1)
         self.confirm_button.grid(column=13, row=16, sticky='nsew',
@@ -135,9 +143,10 @@ class Application(tk.Tk):
         self.game_weighting_button.grid(column=12, row=17, sticky='nsew',
                                         padx=1, pady=1)
 
-        if self.test_mode is True:
+
+        if self.test_mode:
             random.shuffle(b_scorer.every_player)
-            for player in b_scorer.every_player[0:17]:
+            for player in b_scorer.every_player[0:15]:
                 b_scorer.add_player(player)
                 self.add_bench_menus(player)
             self.colour_dict = b_scorer.colour_sorter(
@@ -169,7 +178,10 @@ class Application(tk.Tk):
             pickle_in.close()
             # If it hasn't been saved before, or was blanked when it quit
         except KeyError:  # board_data was blanked on exit
-             pickle_in.close()
+            try:
+                pickle_in.close()
+            except UnboundLocalError:
+                pass
 
         self.update_board()
 
@@ -208,16 +220,22 @@ class Application(tk.Tk):
         every_pi.close()
 
     def confirm_quit(self):
-        answer = tk.messagebox.askokcancel("Confirm Quit",
-                                           "Are you sure you want to quit?")
-        if answer is True:
-            b_scorer.save_and_quit()
 
-            every_pi = open('every_player_pi_2.obj', 'wb')
-            pickle.dump(b_scorer.every_player, every_pi)
-            every_pi.close()
+        if not self.test_mode:
+            answer = tk.messagebox.askokcancel("Confirm Quit",
+                                               "Are you sure you want to quit?")
+            if not answer:
+                return
 
-            self.destroy()
+        b_scorer.save_and_quit()
+
+        # Means of clearing tonight's data for next time. Though, should
+        # probably be more elegant way to do it?
+        every_pi = open('every_player_pi_2.obj', 'wb')
+        pickle.dump(b_scorer.every_player, every_pi)
+        every_pi.close()
+
+        self.destroy()
 
     def player_cbox_clear(self):
 
@@ -235,11 +253,10 @@ class Application(tk.Tk):
         are_you_sure = tk.messagebox.askyesno("Are you sure?",
                                               "Are you sure you want to "
                                               "empty the courts?")
-        if are_you_sure is True:
+        if are_you_sure:
             b_scorer.empty_courts()
-            self.confirm_button.configure(state="normal")
-            self.undo_confirm_button.configure(state="disabled")
             self.update_board()
+
 
     def quick_pay(self, player):
         player.pay_fee()
@@ -363,6 +380,7 @@ class Application(tk.Tk):
         else:
             b_scorer.courts[court].spaces[space] = player
             b_scorer.bench.remove(player)
+            self.unchanged_board = False
             self.update_board()
 
     def add_player(self):
@@ -465,7 +483,7 @@ class Application(tk.Tk):
             self.autosave()
 
 
-    def start(self):
+    def generate(self):
         """Calls b_scorer.generate_new_game.
 
         Can't make game with <12 players. Rather than figure out a
@@ -479,27 +497,30 @@ class Application(tk.Tk):
         else:
 
             b_scorer.generate_new_game()
+            self.unchanged_board = False
             self.update_board()
-            self.confirm_button.configure(state="normal")
-            self.undo_confirm_button.configure(state="disabled")
+
 
     def confirm(self):
         """Call b_scorer's confirm_game() function, update and autosave"""
 
         are_you_sure = tk.messagebox.askyesno("Are you sure?",
                                               "Are you sure you want to "
-                                              "confirm this game for the "
+                                              "confirm this game and start "
+                                              "the timer for the "
                                               "next round?")
 
-        if are_you_sure is True:
+        if are_you_sure:
             b_scorer.confirm_game()
             self.colour_dict = b_scorer.colour_sorter(
                 b_scorer.all_current_players)
+            # Disabling buttons
+            self.unchanged_board = True
+            # self.confirm_button.configure(state="disabled")
+            #self.undo_confirm_button.configure(state="normal")
+            # Start timer
+            self.timer.timer_go()
             self.update_board()
-            # Disabled to stop you accidentally pressing it multiple times
-            self.confirm_button.configure(state="disabled")
-            self.undo_confirm_button.configure(state="normal")
-
             self.autosave()
 
     def undo_confirm(self):
@@ -508,15 +529,14 @@ class Application(tk.Tk):
                                               "Are you sure you want to undo "
                                               "the confirmation?")
 
-        if are_you_sure is True:
+        if are_you_sure:
             b_scorer.undo_confirm()
             self.colour_dict = b_scorer.colour_sorter(
                 b_scorer.all_current_players)
+            self.unchanged_board = False
             self.update_board()
-            self.undo_confirm_button.configure(state="disabled")
-            self.confirm_button.configure(state="normal")
+            self.timer.reset_timer()
             self.autosave()
-
 
 
     def update_board(self):
@@ -528,8 +548,13 @@ class Application(tk.Tk):
         for i, court in enumerate(self.court_frames):
             for j, label in enumerate(court.labels):
                 try:
+                    if self.unchanged_board:
+                        name_colour = "white"
+                    else:
+                        name_colour = "yellow"
                     name = b_scorer.courts[i].spaces[j].name
-                    label.config(text=name, font=("Helvetica", 32, 'bold'))
+                    label.config(text=name, font=("Helvetica", 32, 'bold'),
+                                 fg = name_colour)
 
                 except AttributeError:  # if there is no-one in that space
                     label.config(text="-")
@@ -538,8 +563,38 @@ class Application(tk.Tk):
         self.rounds_label.config(text="Rounds: {}".format(
             b_scorer.total_rounds))
 
+        # Ensure buttons are correctly configured
+        self.config_buttons()
+
         # Redisplay the bench
         self.bench_grid()
+
+    def config_buttons(self):
+        '''A method for ensuring that all the buttons are configured
+        appropriately with the new round and timer'''
+
+        # if timer on: confirm -> disabled
+        # if courts empty: confirm -> disabled
+        # if gsmes are the same: confirm -> disabled
+        # else: normal
+        # if self.timer.timer_on:
+        #     print("Timer on!")
+        # else:
+        #     print("Timer off!")
+
+
+        if self.timer.timer_on or self.unchanged_board:
+            self.confirm_button.configure(state = "disabled")
+        else:
+            self.confirm_button.configure(state="normal")
+
+        if self.unchanged_board:
+            self.undo_confirm_button.configure(state="normal")
+        else:
+            self.undo_confirm_button.configure(state="disabled")
+
+
+
 
 
     def show_bench_options(self, event, player):
@@ -695,7 +750,7 @@ class CourtFrame(tk.Frame):
         self.court_number = court_number
 
         self.labels = [tk.Label(self, text="-",
-                                font=("Helvetica", 33, 'bold'),
+                                font=("Helvetica", 32, 'bold'),
                                 fg="white", background="black",
                                 width=8, height=4) for i in range(4)]
 
@@ -1219,6 +1274,9 @@ class PlayerStats(tk.Toplevel):
         self.destroy()
 
 
+
+
+
 class GameStats(tk.Toplevel):
     """A Toplevel popup which allows the user to modify the weightings given to
     the various factors of the sorting algorithm"""
@@ -1248,13 +1306,6 @@ class GameStats(tk.Toplevel):
         self.female_aff_entry = ttk.Entry(self, width=4)
         self.shuffle_combo = ttk.Combobox(self, width=10, state = 'readonly',
                                           values=["Random", "Segregated"])
-
-
-        # self.bal_entry.insert(0, b_scorer.enumerate_b.scoring_vars['Balance'])
-        # self.seg_entry.insert(0, b_scorer.enumerate_b.scoring_vars['Ability_Seg'])
-        # self.mix_entry.insert(0, b_scorer.enumerate_b.scoring_vars['Mixing'])
-        # self.aff_entry.insert(0, b_scorer.enumerate_b.scoring_vars['Affinity'])
-        # self.shuffle_combo.current(b_scorer.enumerate_b.scoring_vars['Shuffle'])
 
         # not used ATM
         # self.default_button = ttk.Button(self, text="Return to Default",
@@ -1666,6 +1717,158 @@ class CSVPopup(tk.Toplevel):
             b_sessions.export_player_data(self.entry.get())
         tk.messagebox.showinfo("Success", "Successfully exported!")
         self.destroy()
+
+# Probably won't be a toplevel in the end
+class Timer(tk.Frame):
+    """A frame for each of the courts to be placed in"""
+
+    def __init__(self, controller):
+        tk.Frame.__init__(self, controller, background=bg_colour)
+
+        self.controller = controller
+
+
+        self.timer_on = False
+        self.timer_paused = False
+        self.timer_count = 0
+        self.duration = 60*12 # 12 minutes default
+        self.seconds_left = self.duration
+        self.time_str = StringVar()
+        self.time_str.set("{:02d}:{:02d}".format(*divmod(self.seconds_left,
+                                                         60)))
+
+
+
+        self.timer_label = ttk.Label(self, textvariable=self.time_str,
+                                     font=('helvetica', 30), relief='raised')
+        self.plus_one_button = ttk.Button(self, text="+1 min", command=
+                                                         self.plus_one)
+        self.minus_one_button = ttk.Button(self, text="-1 min", command=
+                                                         self.minus_one)
+        self.reset_button = ttk.Button(self, text="Reset", command= lambda:
+                                                          self.reset_timer(
+                                                              override=False))
+        self.pause_button = ttk.Button(self, text="Pause", command = self.pause)
+
+        self.timer_label.grid(column=0, row=0, sticky='nsew', rowspan = 3)
+        self.plus_one_button.grid(column= 1, row = 0,  sticky='nsew')
+        self.minus_one_button.grid(column= 2, row= 0,  sticky='nsew')
+        self.reset_button.grid(column=1, row=1, sticky='nsew')
+        self.pause_button.grid(column=2, row=1, sticky='nsew')
+
+
+    def timer_go(self):
+
+        self.timer_on = True
+        self.pause_button.config(text="Pause")
+
+        if self.timer_count <= self.duration:  # - self.write_timer_count
+
+            self.seconds_left = self.duration - self.timer_count  # -
+            # self.write_timer_count
+
+            self.countdown = "{:02d}:{:02d}".format(
+                *divmod(self.seconds_left, 60))
+        else:
+            self.timer_on = False
+            self.pause_button.config(state = 'disabled')
+            # Make beeps
+            self.alarm = Alarm()
+            self.alarm.start()
+            # Enable button
+            self.controller.config_buttons()
+
+
+        self.time_str.set(self.countdown)
+        self.update()
+
+        if self.timer_on:
+            self.timer_count += 1
+            self.go = self.after(1000, lambda: self.timer_go())
+
+
+    def update_timer(self):
+        self.seconds_left = self.duration - self.timer_count
+        self.countdown = "{:02d}:{:02d}".format(
+            *divmod(self.seconds_left, 60))
+        self.time_str.set(self.countdown)
+        self.update()
+
+    def pause(self):
+        if self.timer_paused:
+            self.timer_paused = False
+            self.pause_button.config(text="Pause")
+            # Stop the timer
+            try:
+                self.after_cancel(self.go)
+            except AttributeError:
+                pass
+        elif not self.timer_paused:
+            self.timer_paused = True
+            self.pause_button.config(text="Resume")
+            self.go = self.after(1000, lambda: self.timer_go())
+
+    # Add or reduce by 1 min
+    def plus_one(self):
+        self.duration += 60
+        self.update_timer()
+
+    def minus_one(self):
+        if self.seconds_left >= 60:
+            self.duration -= 60
+            self.update_timer()
+
+    def reset_timer(self, override = True):
+        '''If timer on, verify first if called by button. If timer off,
+        stop beeping. In either
+        case, reset and update the timer'''
+        if self.timer_on and not override:
+            sure = tk.messagebox.askokcancel('Are you sure?', 'Are you sure '
+                                                              'you '
+                                                             'want to reset '
+                                                              'the timer?')
+            if sure:
+                self.timer_on = False
+                #if not self.controller.unchanged_board:
+                #    self.controller.confirm_button.configure(state="normal")
+            else:
+                return
+        elif not self.timer_on:
+            # Stop the alarm if it's on
+            try:
+                self.alarm.stop()
+            except AttributeError:
+                pass
+
+        try:
+            self.after_cancel(self.go)
+        except AttributeError:
+            pass
+
+        self.pause_button.config(text = "Resume")
+        self.timer_count = 0
+        self.update_timer()
+
+
+
+class Alarm(Thread):
+    '''Multithread so the alarm doesn't freeze the GUI'''
+
+    def __init__(self):
+        Thread.__init__(self)
+        self._stop = Event()
+
+    def run(self):
+        self._stop.clear()
+        for i in range(10):
+            if not self._stop.is_set():
+                for j in range(4):
+                    winsound.Beep(3000, 20)
+            time.sleep(1)
+
+    def stop(self):
+        self._stop.set()
+
 
 
 
