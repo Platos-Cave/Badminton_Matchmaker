@@ -1748,7 +1748,8 @@ class Timer(tk.Frame):
         self.reset_button = ttk.Button(self, text="Reset", command= lambda:
                                                           self.reset_timer(
                                                               override=False))
-        self.pause_button = ttk.Button(self, text="Pause", command = self.pause)
+        self.pause_button = ttk.Button(self, text="Pause", state="disabled",
+                                       command= self.pause)
 
         self.timer_label.grid(column=0, row=0, sticky='nsew', rowspan = 3)
         self.plus_one_button.grid(column= 1, row = 0,  sticky='nsew')
@@ -1761,6 +1762,7 @@ class Timer(tk.Frame):
 
         self.timer_on = True
         self.pause_button.config(text="Pause")
+        self.pause_button.config(state='normal')
 
         if self.timer_count <= self.duration:  # - self.write_timer_count
 
@@ -1795,18 +1797,21 @@ class Timer(tk.Frame):
         self.update()
 
     def pause(self):
+        # if paused, unpause
         if self.timer_paused:
             self.timer_paused = False
+            self.timer_on = True
             self.pause_button.config(text="Pause")
+            self.go = self.after(1000, lambda: self.timer_go())
+        # if unpaused, pause
+        elif not self.timer_paused:
+            self.timer_paused = True
+            self.pause_button.config(text="Resume")
             # Stop the timer
             try:
                 self.after_cancel(self.go)
             except AttributeError:
                 pass
-        elif not self.timer_paused:
-            self.timer_paused = True
-            self.pause_button.config(text="Resume")
-            self.go = self.after(1000, lambda: self.timer_go())
 
     # Add or reduce by 1 min
     def plus_one(self):
@@ -1829,8 +1834,6 @@ class Timer(tk.Frame):
                                                               'the timer?')
             if sure:
                 self.timer_on = False
-                #if not self.controller.unchanged_board:
-                #    self.controller.confirm_button.configure(state="normal")
             else:
                 return
         elif not self.timer_on:
@@ -1839,13 +1842,13 @@ class Timer(tk.Frame):
                 self.alarm.stop()
             except AttributeError:
                 pass
-
-        try:
+        try: # stop the timer's recursive call
             self.after_cancel(self.go)
         except AttributeError:
             pass
 
-        self.pause_button.config(text = "Resume")
+        self.pause_button.config(text = "Resume", state = "normal")
+        self.timer_paused = True
         self.timer_count = 0
         self.update_timer()
 
