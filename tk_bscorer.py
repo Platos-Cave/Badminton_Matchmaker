@@ -2,7 +2,7 @@
 readable by the players themselves.'''
 
 import tkinter as tk
-from tkinter import Tk, ttk, Frame, Menu, messagebox, Scrollbar, StringVar
+from tkinter import Tk, ttk, Frame, Menu, messagebox, Scrollbar, StringVar, font
 from tkinter.messagebox import showinfo, askyesno, showerror
 import b_scorer
 import b_sessions
@@ -107,10 +107,6 @@ class Application(tk.Tk):
             court.grid(column=5 * i, row=5, rowspan=5, columnspan=5,
                        padx=10, pady=10, sticky='nsew')
 
-        for i in range(50):
-            self.columnconfigure(i, weight=1)
-            self.rowconfigure(i, weight=1)
-
         self.absent_label.grid(column=1, row=15, columnspan=2)
         self.abs_plyr_cbox.grid(column=1, row=16, columnspan=2,
                                 padx=2, pady=2)
@@ -142,6 +138,14 @@ class Application(tk.Tk):
                                       padx=1, pady=1)
         self.game_weighting_button.grid(column=12, row=17, sticky='nsew',
                                         padx=1, pady=1)
+
+        for i in range(5,11):
+            self.rowconfigure(i, weight=10)
+        for i in range(11,20):
+            self.rowconfigure(i, weight=1)
+
+        for i in range(15):
+            self.columnconfigure(i, weight=10)
 
 
         if self.test_mode:
@@ -553,8 +557,9 @@ class Application(tk.Tk):
                     else:
                         name_colour = "yellow"
                     name = b_scorer.courts[i].spaces[j].name
-                    label.config(text=name, font=("Helvetica", 32, 'bold'),
-                                 fg = name_colour)
+                    font_size = 50 - 2*len(name)
+                    new_font = "Helvetica", font_size, 'bold'
+                    label.config(text=name, fg = name_colour, font = new_font)
 
                 except AttributeError:  # if there is no-one in that space
                     label.config(text="-")
@@ -749,10 +754,12 @@ class CourtFrame(tk.Frame):
         # gets updated when created, to distinguish it. Not ideal?
         self.court_number = court_number
 
+        self.base_font = "Helvetica", 40, 'bold'
+        #self.base_font = font.Font()
         self.labels = [tk.Label(self, text="-",
-                                font=("Helvetica", 32, 'bold'),
-                                fg="white", background="black",
-                                width=8, height=4) for i in range(4)]
+                                font=self.base_font,
+                                fg="white", background="black", width=8,
+                                height=3) for i in range(4)]
 
         # Create the popup menus for each player
         self.popup_menus = []
@@ -762,6 +769,7 @@ class CourtFrame(tk.Frame):
                        court_no=self.court_number,
                        index=i: controller.show_court_options(event,
                                                               court_no, index))
+
 
             self.popup_menus.append(Menu(self, tearoff=0))
             self.popup_menus[i].add_command(command=lambda
@@ -792,12 +800,29 @@ class CourtFrame(tk.Frame):
         for row in range(2):
             self.grid_rowconfigure(row, weight=1)
 
+    # def _on_configure(self, event):
+    #
+    #     # first, grow the font until the text is too big,
+    #     size = self.base_font.actual("size")
+    #     # while size < event.width:
+    #     #     size += 1
+    #     #     self.base_font.configure(size=size)
+    #     # ... then shrink it until it fits
+    #     while size > 1 and self.base_font.measure("text") > event.width:
+    #         size -= 1
+    #         self.base_font.configure(size=size)
+
 
 class BenchFrame(tk.Frame):
     """A frame for placing the labels of the players who are on the bench.
     Seems bad that it's basically blank, though it does work"""
     def __init__(self, parent):
         tk.Frame.__init__(self, parent, background=bg_colour)
+
+        for i in range(50):
+            self.columnconfigure(i, weight=1)
+            self.rowconfigure(i, weight=1)
+
 
 class PlayerStats(tk.Toplevel):
     """Using the same class for new and existing player popups.
