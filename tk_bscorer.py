@@ -9,6 +9,7 @@ import b_sessions
 import pickle
 import random
 import winsound
+import os
 from threading import Thread, Event
 import time
 import datetime
@@ -99,9 +100,18 @@ class Application(tk.Tk):
 
                                               command=self.empty_courts)
 
+        # This wouldn't align well, so did it manually:
         for i, court in enumerate(self.court_labels):
-            court.grid(column=(5 * i) + 2, row=2, sticky='nsew',
+            court.grid(column=(5 * i) + 2, row=2, columnspan=1, sticky='e',
                        padx=10, pady=10)
+
+        # self.court_labels[0].grid(column=2, row=2, sticky='nsew',
+        #                padx=10, pady=10, columnspan =1)
+        # self.court_labels[1].grid(column=7, row=2, sticky='nsew',
+        #                           padx=10, pady=10, columnspan =1)
+        # self.court_labels[2].grid(column=13, row=2, sticky='nsew',
+        #                           padx=10, pady=10, columnspan =1)
+
 
         for i, court in enumerate(self.court_frames):
             court.grid(column=5 * i, row=5, rowspan=5, columnspan=5,
@@ -125,9 +135,9 @@ class Application(tk.Tk):
         self.bench.grid(column=4, row=16, columnspan=7, rowspan=5,
                         sticky='nsew', padx=1, pady=1)
 
-        self.rounds_label.grid(column=12, row=15)
-        self.timer.grid(column=13, row=15, sticky='nsew',
-                        padx=1, pady=1)
+        #self.rounds_label.grid(column=11, row=15)
+        self.timer.grid(column=12, row=15, columnspan =2, sticky='nsew',
+                        padx=5, pady=5)
         self.start_button.grid(column=12, row=16, sticky='nsew',
                                padx=1, pady=1)
         self.confirm_button.grid(column=13, row=16, sticky='nsew',
@@ -139,18 +149,21 @@ class Application(tk.Tk):
         self.game_weighting_button.grid(column=12, row=17, sticky='nsew',
                                         padx=1, pady=1)
 
-        for i in range(5,11):
+        for i in range(5,10):
             self.rowconfigure(i, weight=10)
-        for i in range(11,20):
+        for i in range(10,20):
             self.rowconfigure(i, weight=1)
 
+        # for i in range(20):
+        #     self.rowconfigure(i, weight=1)
+
         for i in range(15):
-            self.columnconfigure(i, weight=10)
+            self.columnconfigure(i, weight=1)
 
 
         if self.test_mode:
             random.shuffle(b_scorer.every_player)
-            for player in b_scorer.every_player[0:15]:
+            for player in b_scorer.every_player[0:34]:
                 b_scorer.add_player(player)
                 self.add_bench_menus(player)
             self.colour_dict = b_scorer.colour_sorter(
@@ -518,11 +531,8 @@ class Application(tk.Tk):
             b_scorer.confirm_game()
             self.colour_dict = b_scorer.colour_sorter(
                 b_scorer.all_current_players)
-            # Disabling buttons
             self.unchanged_board = True
-            # self.confirm_button.configure(state="disabled")
-            #self.undo_confirm_button.configure(state="normal")
-            # Start timer
+             # Start timer
             self.timer.timer_go()
             self.update_board()
             self.autosave()
@@ -538,8 +548,8 @@ class Application(tk.Tk):
             self.colour_dict = b_scorer.colour_sorter(
                 b_scorer.all_current_players)
             self.unchanged_board = False
-            self.update_board()
             self.timer.reset_timer()
+            self.update_board()
             self.autosave()
 
 
@@ -557,12 +567,14 @@ class Application(tk.Tk):
                     else:
                         name_colour = "yellow"
                     name = b_scorer.courts[i].spaces[j].name
-                    font_size = 50 - 2*len(name)
+                    font_size = 50 - 2*len(name) # buggy with names >=25 chars
                     new_font = "Helvetica", font_size, 'bold'
                     label.config(text=name, fg = name_colour, font = new_font)
 
                 except AttributeError:  # if there is no-one in that space
-                    label.config(text="-")
+                    label.config(text="-", font = ("Helvetica", 40, 'bold'))
+
+
 
         # Update the rounds label
         self.rounds_label.config(text="Rounds: {}".format(
@@ -588,7 +600,9 @@ class Application(tk.Tk):
         #     print("Timer off!")
 
 
-        if self.timer.timer_on or self.unchanged_board:
+        if self.timer.timer_on or self.timer.reset_button['text'] == \
+                "Restart" or \
+                self.unchanged_board:
             self.confirm_button.configure(state = "disabled")
         else:
             self.confirm_button.configure(state="normal")
@@ -1752,16 +1766,14 @@ class Timer(tk.Frame):
 
         self.controller = controller
 
-
         self.timer_on = False
         self.timer_paused = False
         self.timer_count = 0
-        self.duration = 60*12 # 12 minutes default
+        self.duration = 60*13 #12 minutes default
         self.seconds_left = self.duration
         self.time_str = StringVar()
         self.time_str.set("{:02d}:{:02d}".format(*divmod(self.seconds_left,
                                                          60)))
-
 
 
         self.timer_label = ttk.Label(self, textvariable=self.time_str,
@@ -1770,9 +1782,9 @@ class Timer(tk.Frame):
                                                          self.plus_one)
         self.minus_one_button = ttk.Button(self, text="-1 min", command=
                                                          self.minus_one)
-        self.reset_button = ttk.Button(self, text="Reset", command= lambda:
-                                                          self.reset_timer(
-                                                              override=False))
+        self.reset_button = ttk.Button(self, text="Reset", command=lambda:
+                                                    self.reset_timer(
+                                                        override=False))
         self.pause_button = ttk.Button(self, text="Pause", state="disabled",
                                        command= self.pause)
 
@@ -1786,8 +1798,7 @@ class Timer(tk.Frame):
     def timer_go(self):
 
         self.timer_on = True
-        self.pause_button.config(text="Pause")
-        self.pause_button.config(state='normal')
+        self.pause_button.config(text="Pause", state='normal')
 
         if self.timer_count <= self.duration:  # - self.write_timer_count
 
@@ -1830,6 +1841,11 @@ class Timer(tk.Frame):
             self.go = self.after(1000, lambda: self.timer_go())
         # if unpaused, pause
         elif not self.timer_paused:
+            # when reset, allows this to restart it. Feels dirty
+            # if not self.timer_on:
+            #     self.timer_paused = True
+            #     self.pause()
+            # else:
             self.timer_paused = True
             self.pause_button.config(text="Resume")
             # Stop the timer
@@ -1844,6 +1860,7 @@ class Timer(tk.Frame):
         self.update_timer()
 
     def minus_one(self):
+        # can't make timer negative
         if self.seconds_left >= 60:
             self.duration -= 60
             self.update_timer()
@@ -1852,28 +1869,45 @@ class Timer(tk.Frame):
         '''If timer on, verify first if called by button. If timer off,
         stop beeping. In either
         case, reset and update the timer'''
+
+        # if undo confirm
+        if self.reset_button['text'] == "Restart" and override:
+            self.reset_button.config(text="Reset", state='disabled')
+            return
+
+        # if called from button
+        if self.reset_button['text'] == "Restart" and not override:
+            self.timer_on = True
+            self.reset_button.config(text="Reset")
+            self.pause_button.config(text="Pause", state='normal')
+            self.go = self.after(1000, lambda: self.timer_go())
+            return
+
         if self.timer_on and not override:
             sure = tk.messagebox.askokcancel('Are you sure?', 'Are you sure '
                                                               'you '
                                                              'want to reset '
                                                               'the timer?')
             if sure:
-                self.timer_on = False
+                self.reset_button.config(text="Restart")
             else:
                 return
+
         elif not self.timer_on:
             # Stop the alarm if it's on
             try:
                 self.alarm.stop()
             except AttributeError:
                 pass
+
         try: # stop the timer's recursive call
             self.after_cancel(self.go)
         except AttributeError:
             pass
 
-        self.pause_button.config(text = "Resume", state = "normal")
-        self.timer_paused = True
+        self.timer_on = False
+        self.timer_paused = False
+        self.pause_button.config(text = "Pause", state = "disabled")
         self.timer_count = 0
         self.update_timer()
 
@@ -1886,18 +1920,28 @@ class Alarm(Thread):
         Thread.__init__(self)
         self._stop = Event()
 
+    # Unnecessary as of now: for packaging
+    # def resource_path(self,relative_path):
+    #     """ Get absolute path to resource, works for dev and for PyInstaller """
+    #     try:
+    #         # PyInstaller creates a temp folder and stores path in _MEIPASS
+    #         base_path = sys._MEIPASS
+    #     except Exception:
+    #         base_path = os.path.abspath(".")
+    #
+    #     return os.path.join(base_path, relative_path)
+
     def run(self):
         self._stop.clear()
-        for i in range(10):
+        for i in range(20):
             if not self._stop.is_set():
-                for j in range(4):
-                    winsound.Beep(3000, 20)
-            time.sleep(1)
+                winsound.PlaySound('woop_alarm.wav', winsound.SND_FILENAME)
+                # winsound.PlaySound(self.resource_path('woop_alarm.wav'),
+                #                    winsound.SND_FILENAME)
+            #time.sleep(1)
 
     def stop(self):
         self._stop.set()
-
-
 
 
 class HelpMenu(tk.Toplevel):
