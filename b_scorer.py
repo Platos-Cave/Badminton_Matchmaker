@@ -39,6 +39,9 @@ class Player:
         # who this player's opponents have been this night
         self.played_against = []
 
+        self.hunger = 0
+        self.mean_game_abs = self.ability
+
         # user modifiable notes
         self.player_notes = ''
 
@@ -105,12 +108,26 @@ class Player:
         self.old_tsl = self.time_since_last # for undoing
         self.time_since_last = 0
 
+    def recalculate_hunger(self, last_game_ab):
+
+        self.old_hunger = self.hunger
+        self.old_mean_game_abs = self.mean_game_abs
+        self.mean_game_abs = (self.mean_game_abs + last_game_ab)/2
+        self.hunger = self.ability - self.mean_game_abs
+        # print("{}'s hunger goes from {} to {}".format(self.name,
+        #                                               self.old_hunger,
+        #                                               self.hunger))
+       
+
     def undo_game(self):
         self.total_games -= 1
         self.adjusted_games -= 1
         self.time_since_last = self.old_tsl
         del self.played_with[-1]
         del self.played_against[-1]
+        self.hunger = self.old_hunger
+        self.mean_game_abs = self.old_mean_game_abs
+
 
     def accumulate_fee(self):
 
@@ -452,13 +469,16 @@ def generate_new_game():
 def confirm_game():
     '''Update game counts, game history, save data'''
     for i, court in enumerate(courts):
+        mean_ability = sum([p.ability for p in court.spaces]) / 4
         for j, player in enumerate(court.spaces):
-            if player is not None:
+            if player:
                 player.update_game_count()
+                player.recalculate_hunger(mean_ability)
+
 
         # Add played with/against to lists. Seems kind of suboptimal
         for player in court.spaces:
-            if player is not None:
+            if player:
                 if player in court.spaces[
                              0:2]:  # if player on side 1. Time to split list?
                     player.played_with.append(
@@ -483,8 +503,10 @@ def confirm_game():
     global total_rounds
     total_rounds += 1
 
-    # New: trialing saving data
+    # saving session
     today_session.games.append([courts[i].spaces for i in range(3)])
+
+    print("------------------")
 
 def undo_confirm():
 
@@ -573,7 +595,7 @@ def save_and_quit():
 
     # Reset all the players
     for player in every_player:
-        player.total_games = 0
+        player.total_games =  0
         player.penalty_games = 0
         player.adjusted_games = 0
         player.time_since_last = 0
@@ -581,6 +603,8 @@ def save_and_quit():
         player.played_against = []
         player.keep_off = False
         player.keep_on = False
+        player.mean_game_abs = player.ability
+        player.hunger = 0
 
     # Save departure times
     for player in all_current_players:
@@ -667,6 +691,12 @@ try:
     pickle_in = open("every_player_pi_2.obj","rb")
     every_player = pickle.load(pickle_in)
     pickle_in.close()
+
+    for player in every_player:
+        if not hasattr(player, 'hunger'):
+            player.hunger = player.ability
+        if not hasattr(player, 'mean_game_abs'):
+            player.mean_game_abs = player.ability
 
     # temporary backwards compatibility code
     for player in every_player:

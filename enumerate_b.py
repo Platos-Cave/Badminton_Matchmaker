@@ -40,12 +40,14 @@ try:
     score_in = open("score_pi.obj", "rb")
     scoring_vars = pickle.load(score_in)
     # replace old version
-    if ('Female Affinity', 'Default') not in scoring_vars:
-        scoring_vars[('Female Affinity', 'Default')] = 1.0
-        scoring_vars[('Female Affinity', 'Tuesday')] = 1.0
-        scoring_vars[('Female Affinity', 'Thursday')] = 1.0
+    if ('Ability Alternation', 'Default') not in scoring_vars:
+        scoring_vars[('Ability Alternation', 'Default')] = 1.0
+        scoring_vars[('Ability Alternation', 'Tuesday')] = 1.0
+        scoring_vars[('Ability Alternation', 'Thursday')] = 1.0
 
         print(scoring_vars)
+
+
 
     score_in.close()
 except FileNotFoundError:
@@ -146,8 +148,17 @@ def score_court(court, trial_players, explain = False):
                 sum(abilities[0:2]) - sum(abilities[2:4])) ** 2)
     # It is generally better to not have strong and weak players in the same
     #  game even if balanced, so this formula penalises that.
+    # Removing for now
     score += scoring_vars[('Ability_Seg', profile)] * (
                 (max(abilities) - min(abilities)) ** 1.5)
+
+    #NEW: "Hungry" weighting
+    average_ability = sum(abilities)/4
+    for player in new_court:
+        score += scoring_vars[('Ability Alternation', profile)] * \
+                 player.hunger * (player.ability - average_ability)
+
+
 
     # We then want to penalise playing the same people over and over.
 
@@ -202,7 +213,7 @@ def score_court(court, trial_players, explain = False):
                                                            profile)])
                     break
 
-        for o_player in partner: # there's only 1 partner, so loop seems silly?
+        for o_player in partner:  # there's only 1 partner, so loop seems silly?
             count = 1
             base_score = 0
             for i, game in enumerate(player.played_against):
@@ -213,7 +224,7 @@ def score_court(court, trial_players, explain = False):
                     count += 0.1
             for i, game in enumerate(player.played_with):
                 if o_player in game:
-                    base_score += scoring_vars[('Mixing', profile)] * 2 * (
+                    base_score += scoring_vars[('Mixing', profile)] * 3 * (
                     (1 / (1 + discount_rate) ** (player.total_games - i - 1)))
                     count += 0.2
             score += base_score * (count)

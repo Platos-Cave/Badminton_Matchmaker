@@ -4,11 +4,10 @@
     <option name="SPLITTER_PROPORTION" value="0.5007622" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="12b4690e-7fa1-496f-b4cf-baaf01e9f6e0" name="Default" comment="commit money &amp; day updates">
-      <change afterPath="$PROJECT_DIR$/bell_test.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/Badminton_Matchmaker.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/Badminton_Matchmaker.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+    <list default="true" id="12b4690e-7fa1-496f-b4cf-baaf01e9f6e0" name="Default" comment="commit format updates">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/b_scorer.py" beforeDir="false" afterPath="$PROJECT_DIR$/b_scorer.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/enumerate_b.py" beforeDir="false" afterPath="$PROJECT_DIR$/enumerate_b.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tk_bscorer.py" beforeDir="false" afterPath="$PROJECT_DIR$/tk_bscorer.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -21,18 +20,20 @@
     <session id="-151827430">
       <usages-collector id="statistics.lifecycle.project">
         <counts>
-          <entry key="project.closed" value="17" />
+          <entry key="project.closed" value="19" />
           <entry key="project.open.time.1" value="1" />
           <entry key="project.open.time.3" value="1" />
           <entry key="project.open.time.4" value="8" />
-          <entry key="project.open.time.5" value="6" />
+          <entry key="project.open.time.5" value="7" />
+          <entry key="project.open.time.6" value="1" />
           <entry key="project.open.time.7" value="2" />
-          <entry key="project.opened" value="18" />
+          <entry key="project.opened" value="20" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
-          <entry key="py" value="8333" />
+          <entry key="Python Console" value="40" />
+          <entry key="py" value="11019" />
           <entry key="spec" value="204" />
           <entry key="txt" value="20" />
         </counts>
@@ -40,25 +41,25 @@
       <usages-collector id="statistics.file.types.edit">
         <counts>
           <entry key="PLAIN_TEXT" value="224" />
-          <entry key="Python" value="8333" />
+          <entry key="Python" value="11059" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
         <counts>
-          <entry key="py" value="17" />
+          <entry key="py" value="19" />
           <entry key="spec" value="2" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.open">
         <counts>
           <entry key="PLAIN_TEXT" value="2" />
-          <entry key="Python" value="17" />
+          <entry key="Python" value="19" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.vcs.git.usages">
         <counts>
           <entry key="git.branch.checkout.local" value="2" />
-          <entry key="git.branch.create.new" value="2" />
+          <entry key="git.branch.create.new" value="3" />
         </counts>
       </usages-collector>
     </session>
@@ -68,58 +69,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/b_scorer.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-435">
-              <caret line="295" column="47" selection-start-line="295" selection-start-column="41" selection-end-line="295" selection-end-column="47" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/tk_bscorer.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="51">
-              <caret line="165" column="52" selection-start-line="165" selection-start-column="52" selection-end-line="165" selection-end-column="52" />
-              <folding>
-                <element signature="e#108#128#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/tk_bscorer.spec">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="493">
-              <caret line="29" column="30" selection-start-line="29" selection-start-column="30" selection-end-line="29" selection-end-column="30" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$USER_HOME$/tk_bscorer.spec">
-          <provider selected="true" editor-type-id="text-editor" />
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/test_font_changer.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="153">
-              <caret line="9" column="8" selection-start-line="9" selection-start-column="8" selection-end-line="9" selection-end-column="8" />
-              <folding>
-                <element signature="e#0#20#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/b_sessions.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="204">
-              <caret line="14" column="37" selection-start-line="14" selection-start-column="37" selection-end-line="14" selection-end-column="37" />
-              <folding>
-                <element signature="e#107#117#0" expanded="true" />
-              </folding>
+            <state relative-caret-position="88">
+              <caret line="113" column="51" lean-forward="true" selection-start-line="113" selection-start-column="51" selection-end-line="113" selection-end-column="51" />
             </state>
           </provider>
         </entry>
@@ -127,8 +78,29 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/enumerate_b.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="969">
-              <caret line="61" column="28" selection-start-line="61" selection-start-column="28" selection-end-line="61" selection-end-column="28" />
+            <state relative-caret-position="323">
+              <caret line="158" column="50" selection-start-line="158" selection-start-column="50" selection-end-line="158" selection-end-column="50" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/tk_bscorer.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="282">
+              <caret line="1290" column="35" selection-start-line="1290" selection-start-column="35" selection-end-line="1290" selection-end-column="35" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/b_sessions.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="17">
+              <caret line="14" column="37" selection-start-line="14" selection-start-column="37" selection-end-line="14" selection-end-column="37" />
+              <folding>
+                <element signature="e#107#117#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -144,23 +116,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>config_</find>
-      <find>undo_conf</find>
-      <find>court</find>
-      <find>benchframe</find>
-      <find>font =</find>
-      <find>courtframe</find>
-      <find>court_frame</find>
-      <find>self.font =</find>
-      <find>court_fram</find>
-      <find>label</find>
-      <find>new_font</find>
-      <find>width = 8</find>
-      <find>width=</find>
-      <find>Alarm(t</find>
-      <find>reset_time</find>
-      <find>undo_confirm</find>
-      <find>reset_timer</find>
       <find>confirm</find>
       <find>restart</find>
       <find>reset</find>
@@ -174,6 +129,23 @@
       <find>font</find>
       <find>50 -</find>
       <find>segreg</find>
+      <find>if not has</find>
+      <find>ability_s</find>
+      <find>seg_entry</find>
+      <find>alternation</find>
+      <find>mean_game_abs</find>
+      <find>entry.</find>
+      <find>seg_en</find>
+      <find>alternation_entry</find>
+      <find>alternation_entry_</find>
+      <find>self.hunger</find>
+      <find>Timer</find>
+      <find>Timer.du</find>
+      <find>Timer.</find>
+      <find>.hunger</find>
+      <find>confirm_</find>
+      <find>new_player</find>
+      <find>hunger</find>
     </findStrings>
     <replaceStrings>
       <replace>0</replace>
@@ -202,22 +174,22 @@
         <option value="$PROJECT_DIR$/game_csv.py" />
         <option value="$PROJECT_DIR$/b_sessions.py" />
         <option value="$PROJECT_DIR$/debug_test.py" />
-        <option value="$PROJECT_DIR$/enumerate_b.py" />
-        <option value="$PROJECT_DIR$/b_scorer.py" />
         <option value="$USER_HOME$/Downloads/CornerNew2.py" />
         <option value="$USER_HOME$/Downloads/GoalTimerController.py" />
         <option value="$PROJECT_DIR$/bell_test.py" />
         <option value="$PROJECT_DIR$/test_font_changer.py" />
         <option value="$PROJECT_DIR$/tk_bscorer.spec" />
         <option value="$PROJECT_DIR$/file_splitter.py" />
+        <option value="$PROJECT_DIR$/enumerate_b.py" />
         <option value="$PROJECT_DIR$/tk_bscorer.py" />
+        <option value="$PROJECT_DIR$/b_scorer.py" />
       </list>
     </option>
   </component>
-  <component name="ProjectFrameBounds">
-    <option name="x" value="18" />
-    <option name="y" value="3" />
-    <option name="width" value="1893" />
+  <component name="ProjectFrameBounds" extendedState="6">
+    <option name="x" value="-27" />
+    <option name="y" value="11" />
+    <option name="width" value="1922" />
     <option name="height" value="1045" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
@@ -258,7 +230,7 @@
     </option>
   </component>
   <component name="RunManager" selected="Python.tk_bscorer">
-    <configuration name="GoalTimer3" type="PythonConfigurationType" factoryName="Python" temporary="true">
+    <configuration name="b_scorer" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="Badminton_Matchmaker" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -266,11 +238,11 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$USER_HOME$/Downloads" />
-      <option name="IS_MODULE_SDK" value="false" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$USER_HOME$/Downloads/GoalTimer3.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/b_scorer.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -387,18 +359,18 @@
     <list>
       <item itemvalue="Python.enumerate_b" />
       <item itemvalue="Python.tk_bscorer" />
-      <item itemvalue="Python.GoalTimer3" />
       <item itemvalue="Python.bell_test" />
       <item itemvalue="Python.test_font_changer" />
       <item itemvalue="Python.file_splitter" />
+      <item itemvalue="Python.b_scorer" />
     </list>
     <recent_temporary>
       <list>
         <item itemvalue="Python.tk_bscorer" />
+        <item itemvalue="Python.b_scorer" />
         <item itemvalue="Python.file_splitter" />
         <item itemvalue="Python.test_font_changer" />
         <item itemvalue="Python.bell_test" />
-        <item itemvalue="Python.GoalTimer3" />
       </list>
     </recent_temporary>
   </component>
@@ -461,21 +433,21 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="18" y="3" width="1893" height="1045" extended-state="0" />
+    <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.14555256" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.14330874" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.3286334" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" sideWeight="0.4872074" visible="true" weight="0.32821077" />
+      <window_info active="true" anchor="bottom" id="Run" order="2" sideWeight="0.4872074" visible="true" weight="0.3275488" />
       <window_info anchor="bottom" id="Debug" order="3" sideWeight="0.49891892" weight="0.39846322" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
-      <window_info anchor="bottom" id="TODO" order="6" weight="0.329718" />
-      <window_info anchor="bottom" id="Version Control" order="7" weight="0.32858709" />
-      <window_info anchor="bottom" id="Python Console" order="8" />
+      <window_info anchor="bottom" id="TODO" order="6" weight="0.3286334" />
+      <window_info anchor="bottom" id="Version Control" order="7" weight="0.32821077" />
+      <window_info anchor="bottom" id="Python Console" order="8" weight="0.19305857" />
       <window_info anchor="bottom" id="Terminal" order="9" />
       <window_info anchor="bottom" id="Inspection Results" order="10" weight="0.24094488" />
       <window_info anchor="bottom" id="Event Log" order="11" sideWeight="0.5127926" side_tool="true" weight="0.32821077" />
@@ -557,7 +529,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/tk_bscorer.py</url>
-          <line>1932</line>
+          <line>1965</line>
           <option name="timeStamp" value="8" />
         </line-breakpoint>
       </breakpoints>
@@ -624,23 +596,6 @@
     <entry file="file://$USER_HOME$/tk_bscorer.spec">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
-    <entry file="file://$PROJECT_DIR$/b_sessions.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="204">
-          <caret line="14" column="37" selection-start-line="14" selection-start-column="37" selection-end-line="14" selection-end-column="37" />
-          <folding>
-            <element signature="e#107#117#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/enumerate_b.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="969">
-          <caret line="61" column="28" selection-start-line="61" selection-start-column="28" selection-end-line="61" selection-end-column="28" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/file_splitter.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="17">
@@ -652,26 +607,44 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="153">
           <caret line="9" column="8" selection-start-line="9" selection-start-column="8" selection-end-line="9" selection-end-column="8" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/AppData/Local/Programs/Python/Python36/Lib/tkinter/__init__.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="4940">
+          <caret line="2370" column="32" selection-start-line="2370" selection-start-column="32" selection-end-line="2370" selection-end-column="32" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/b_sessions.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="17">
+          <caret line="14" column="37" selection-start-line="14" selection-start-column="37" selection-end-line="14" selection-end-column="37" />
           <folding>
-            <element signature="e#0#20#0" expanded="true" />
+            <element signature="e#107#117#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/enumerate_b.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="323">
+          <caret line="158" column="50" selection-start-line="158" selection-start-column="50" selection-end-line="158" selection-end-column="50" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/tk_bscorer.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="51">
-          <caret line="165" column="52" selection-start-line="165" selection-start-column="52" selection-end-line="165" selection-end-column="52" />
-          <folding>
-            <element signature="e#108#128#0" expanded="true" />
-          </folding>
+        <state relative-caret-position="282">
+          <caret line="1290" column="35" selection-start-line="1290" selection-start-column="35" selection-end-line="1290" selection-end-column="35" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/b_scorer.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-435">
-          <caret line="295" column="47" selection-start-line="295" selection-start-column="41" selection-end-line="295" selection-end-column="47" />
+        <state relative-caret-position="88">
+          <caret line="113" column="51" lean-forward="true" selection-start-line="113" selection-start-column="51" selection-end-line="113" selection-end-column="51" />
         </state>
       </provider>
     </entry>

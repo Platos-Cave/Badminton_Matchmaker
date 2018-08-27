@@ -56,6 +56,7 @@ class Application(tk.Tk):
         self.bench_labels = [tk.Label(self.bench,
                                       text=player.name, width=8,
                                       height=2) for player in b_scorer.bench]
+
         self.timer = Timer(self)
 
         # These attempts to format my lines to >80 characters seem unnatural
@@ -163,11 +164,19 @@ class Application(tk.Tk):
 
         if self.test_mode:
             random.shuffle(b_scorer.every_player)
-            for player in b_scorer.every_player[0:34]:
+            for player in b_scorer.every_player[0:22]:
                 b_scorer.add_player(player)
                 self.add_bench_menus(player)
-            self.colour_dict = b_scorer.colour_sorter(
-                b_scorer.all_current_players)
+                self.colour_dict = b_scorer.colour_sorter(
+                                     b_scorer.all_current_players)
+            # for player in b_scorer.every_player:
+            #     if player.name.startswith(("A","B","I")):
+            #         b_scorer.add_player(player)
+            #         self.add_bench_menus(player)
+            #         self.colour_dict = b_scorer.colour_sorter(
+            #                     b_scorer.all_current_players)
+            # avoid having to reset timer. Should cancel timer entirely
+            self.timer.duration = 0
 
         # If program crashed or exited otherwise normally, reload all data
         try:
@@ -598,6 +607,7 @@ class Application(tk.Tk):
         #     print("Timer on!")
         # else:
         #     print("Timer off!")
+
 
 
         if self.timer.timer_on or self.timer.reset_button['text'] == \
@@ -1278,12 +1288,22 @@ class PlayerStats(tk.Toplevel):
                             pass
                         player.opponent_affinities.append(name)
 
-            self.player.name = name
+            # Recalculating hunger:
+            old_ability = self.player.ability
+            new_ability = ability
+            self.player.hunger= new_ability - old_ability
+            self.player.old_hunger = self.player.hunger
 
+
+
+
+            self.player.name = name
             self.player.sex = sex
             self.player.ability = ability
             self.player.player_notes = notes
             self.player.membership = membership
+
+
 
             # Not ideal place for this
             if owed != self.player.money_owed:
@@ -1329,6 +1349,9 @@ class GameStats(tk.Toplevel):
         self.profile_label = ttk.Label(self, text="Profile:")
         self.bal_label = ttk.Label(self, text="Game Balance Weighting")
         self.seg_label = ttk.Label(self, text="Ability Segregation Weighting")
+        self.alternation_label = ttk.Label(self, text="Ability "
+                                                            "Alternation "
+                                                            "Weighting")
         self.mix_label = ttk.Label(self, text="Player Mixing Weighting")
         self.aff_label = ttk.Label(self, text="Player Affinity Weighting")
         self.female_aff_label = ttk.Label(self, text="Female Affinity "
@@ -1340,6 +1363,7 @@ class GameStats(tk.Toplevel):
                                              "Thursday"])
         self.bal_entry = ttk.Entry(self, width=4)
         self.seg_entry = ttk.Entry(self, width=4)
+        self.alternation_entry = ttk.Entry(self, width=4)
         self.mix_entry = ttk.Entry(self, width=4)
         self.aff_entry = ttk.Entry(self, width=4)
         self.female_aff_entry = ttk.Entry(self, width=4)
@@ -1361,16 +1385,18 @@ class GameStats(tk.Toplevel):
         self.bal_entry.grid(column=1, row=1)
         self.seg_label.grid(column=0, row=2)
         self.seg_entry.grid(column=1, row=2)
-        self.mix_label.grid(column=0, row=3)
-        self.mix_entry.grid(column=1, row=3)
-        self.aff_label.grid(column=0, row=4)
-        self.aff_entry.grid(column=1, row=4)
-        self.female_aff_label.grid(column=0, row=5)
-        self.female_aff_entry.grid(column=1, row=5)
-        self.shuffle_label.grid(column=0, row=6)
-        self.shuffle_combo.grid(column=1, row=6)
+        self.alternation_label.grid(column=0, row=3)
+        self.alternation_entry.grid(column=1, row=3)
+        self.mix_label.grid(column=0, row=4)
+        self.mix_entry.grid(column=1, row=4)
+        self.aff_label.grid(column=0, row=5)
+        self.aff_entry.grid(column=1, row=5)
+        self.female_aff_label.grid(column=0, row=6)
+        self.female_aff_entry.grid(column=1, row=6)
+        self.shuffle_label.grid(column=0, row=7)
+        self.shuffle_combo.grid(column=1, row=7)
         # self.default_button.grid(column=0, row=6)
-        self.save_button.grid(column=1, row=7)
+        self.save_button.grid(column=1, row=8)
 
         # Set profile based on day
         today = datetime.today().weekday()
@@ -1387,16 +1413,20 @@ class GameStats(tk.Toplevel):
         are_you_sure = tk.messagebox.askyesno("Are you sure?",
                                               "Are you sure you want to update these weightings? "
                                               "They will affect the way every game is generated from now on.")
-        if are_you_sure is True:
+        if are_you_sure:
 
             # Ensure all entries are floats, then update the new weightings
-            # Double imported naming seems wonky
+            # Double imported naming seems wonky. Should import them directly
+            #  rather than reference the module names
             try:
                 day = self.profile_combo.get()
                 b_scorer.enumerate_b.scoring_vars['Balance', day] = float(
                     self.bal_entry.get())
                 b_scorer.enumerate_b.scoring_vars['Ability_Seg', day] = float(
                     self.seg_entry.get())
+                b_scorer.enumerate_b.scoring_vars['Ability Alternation',
+                                                  day] = float(
+                    self.alternation_entry.get())
                 b_scorer.enumerate_b.scoring_vars['Mixing', day] = float(
                     self.mix_entry.get())
                 b_scorer.enumerate_b.scoring_vars['Affinity', day] = float(
@@ -1457,6 +1487,7 @@ class GameStats(tk.Toplevel):
 
         self.bal_entry.delete(0, "end")
         self.seg_entry.delete(0, "end")
+        self.alternation_entry.delete(0, "end")
         self.mix_entry.delete(0, "end")
         self.aff_entry.delete(0, "end")
         self.female_aff_entry.delete(0, "end")
@@ -1466,6 +1497,8 @@ class GameStats(tk.Toplevel):
                                                                 profile)])
         self.seg_entry.insert(0, b_scorer.enumerate_b.scoring_vars[
             ('Ability_Seg', profile)])
+        self.alternation_entry.insert(0, b_scorer.enumerate_b.scoring_vars[
+            ('Ability Alternation', profile)])
         self.mix_entry.insert(0,
                               b_scorer.enumerate_b.scoring_vars[('Mixing',
                                                                  profile) ])
