@@ -117,7 +117,7 @@ class Player:
         # print("{}'s hunger goes from {} to {}".format(self.name,
         #                                               self.old_hunger,
         #                                               self.hunger))
-       
+
 
     def undo_game(self):
         self.total_games -= 1
