@@ -152,7 +152,8 @@ class Player:
 
                 self.money_owed += fee_structure[fee_key]
             except KeyError: # in case it's the wrong day/stuffed up
-                print("Key Error on fees!")
+                pass
+                #print("Key Error on fees!")
 
         except TypeError:
             print(self.money_owed)
@@ -506,7 +507,6 @@ def confirm_game():
     # saving session
     today_session.games.append([courts[i].spaces for i in range(3)])
 
-    print("------------------")
 
 def undo_confirm():
 
@@ -589,7 +589,7 @@ def empty_courts():
     for court in courts:
         court.empty()
 
-def save_and_quit():
+def save_and_quit(pickling=True):
     """Reset everything only when exited properly.
     Otherwise, you can reload your previous state."""
 
@@ -614,15 +614,17 @@ def save_and_quit():
 
     all_sessions.append(today_session)
 
-    session_data = open('badminton_session_data.obj', 'wb')
-    pickle.dump(all_sessions, session_data)
-    session_data.close()
+    if pickling:
 
-    # When quitting, blank the data
-    pickle_in = open('board_data.obj', 'wb')
-    board_data = {}
-    pickle.dump(board_data, pickle_in)
-    pickle_in.close()
+        session_data = open('badminton_session_data.obj', 'wb')
+        pickle.dump(all_sessions, session_data)
+        session_data.close()
+
+        # When quitting, blank the data
+        pickle_in = open('board_data.obj', 'wb')
+        board_data = {}
+        pickle.dump(board_data, pickle_in)
+        pickle_in.close()
 
 
 '''Creates an object for storing data about today's session.

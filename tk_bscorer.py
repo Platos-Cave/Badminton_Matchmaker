@@ -865,6 +865,9 @@ class PlayerStats(tk.Toplevel):
         else:
             self.title("Player Profile")
 
+        # for distinguishing titles and labels
+        self.label_font = ('Helvetica', 10, 'bold')
+
         self.name_label = ttk.Label(self, text="Name")
         self.sex_label = ttk.Label(self, text="Sex")
         self.ability_label = ttk.Label(self, text="Ability (1-9)")
@@ -917,16 +920,16 @@ class PlayerStats(tk.Toplevel):
                                           self.pay_off)
 
         self.games_played_label = ttk.Label(self, text="Actual Games Played")
-        self.games_played_number = ttk.Label(self, text="0")
+        self.games_played_number = ttk.Label(self, text="0", font = self.label_font)
 
         self.late_penalty_label = ttk.Label(self, text="Lateness Penalty")
         self.late_penalty_entry = ttk.Entry(self, width=4)
 
         self.games_total_label = ttk.Label(self, text="Adjusted Games")
-        self.games_total_number = ttk.Label(self, text="0")
+        self.games_total_number = ttk.Label(self, text="0", font = self.label_font)
 
         self.player_notes_label = ttk.Label(self, text="Player Notes")
-        self.player_notes = tk.Text(self, height=5, width=15, wrap=tk.WORD)
+        self.player_notes = tk.Text(self, height=2, width=15, wrap=tk.WORD)
 
         self.save_player_button = ttk.Button(self, text="Save New Player",
                                              command=self.save_player)
@@ -945,7 +948,7 @@ class PlayerStats(tk.Toplevel):
 
         # If current player, upload their existing stats
 
-        if self.new is False:
+        if not self.new:
             self.name_entry.insert(0, player.name)
 
             # Should be able to do this more succinctly
@@ -1000,11 +1003,31 @@ class PlayerStats(tk.Toplevel):
             self.games_played_number.config(
                 text=round(self.player.total_games, 2))
             self.late_penalty_entry.insert(0,
-                                           round(self.player.penalty_games, 2))
+                                           round(self.player.penalty_games,
+                                                 2))
             self.games_total_number.config(
                 text=round(self.player.adjusted_games, 2))
 
-            self.player_notes.insert(1.0, self.player.player_notes)
+            # self.player_notes.insert(1.0, self.player.player_notes)
+
+            #######
+            self.game_history_label = ttk.Label(self, text = "Tonight's Games")
+
+            self.game_number_combo = ttk.Combobox(self, width=15, values= [],
+                                                 state = 'readonly')
+            self.single_game_label = ttk.Label(self, text = 'Players')
+            self.played_with_label = ttk.Label(self, text = "N/A",
+                                               font= self.label_font)
+            self.played_against_label = ttk.Label(self, text = "N/A",
+                                                  font=self.label_font)
+
+            self.game_number_config()
+            self.game_number_combo.bind("<<ComboboxSelected>>",
+                                        lambda
+                                            event: self.update_game_display())
+
+
+            ####
 
         self.name_label.grid(column=0, row=1)
         self.name_entry.grid(column=1, row=1, columnspan=3, sticky='ew')
@@ -1033,17 +1056,49 @@ class PlayerStats(tk.Toplevel):
         # Games played. Irrelevant for new players
         if not self.new:
             self.games_played_label.grid(column=0, row=11)
-            self.games_played_number.grid(column=2, row=11)
+            self.games_played_number.grid(column=1, row=11)
             self.late_penalty_label.grid(column=0, row=12)
-            self.late_penalty_entry.grid(column=2, row=12)
+            self.late_penalty_entry.grid(column=1, row=12)
             self.games_total_label.grid(column=0, row=13)
-            self.games_total_number.grid(column=2, row=13)
+            self.games_total_number.grid(column=1, row=13)
+            self.game_history_label.grid(column=0, row=14)
+            self.game_number_combo.grid(column=1, row=14)
+            self.single_game_label.grid(column=0, row=15)
+            self.played_with_label.grid(column=1, row=15)
+            self.played_against_label.grid(column=1, row=16)
 
-        self.player_notes_label.grid(column=1, row=14, columnspan=2)
-        self.player_notes.grid(column=0, row=15, columnspan=6,
-                               padx=5, pady=5, sticky='nsew')
+        # self.player_notes_label.grid(column=1, row=17, columnspan=6)
+        # self.player_notes.grid(column=0, row=18, columnspan=2,
+        #                        padx=5, pady=5, sticky='nsew')
 
-        self.save_player_button.grid(column=1, row=16, columnspan=3)
+        self.save_player_button.grid(column=1, row=19, columnspan=3)
+
+    def game_number_config(self):
+        if self.player.total_games == 0:
+            vals = ["No games yet"]
+        else:
+            vals = ["Game {}".format(i + 1) for i in reversed(range(
+                    self.player.total_games))]
+        self.game_number_combo.config(values = vals)
+        self.game_number_combo.current(0)
+        self.update_game_display()
+
+    def update_game_display(self):
+        if self.player.total_games == 0: #nothing to display
+            self.played_with_label.config(text = "N/A")
+            self.played_against_label.config(text = "N/A")
+            return
+        index = int(self.game_number_combo.get()[-1]) -1
+        partner = [p.name for p in self.player.played_with[index]]
+        opps = [p.name for p in self.player.played_against[index]]
+        player = self.player.name.upper()
+        self.played_with_label.config(text ="{} and {} [VS]".format(player,
+                                                               partner[0]))
+        self.played_against_label.config(text="{} and {}".format(opps[0],
+                                                                 opps[1]))
+
+        # print("{} and {} vs \n {} amd {}".format(player, partner[0], opps[0],
+        #                                          opps[1]))
 
     def switch_aff(self, side):
         '''Bind the aff level combo to the aff name combo'''
@@ -1293,9 +1348,6 @@ class PlayerStats(tk.Toplevel):
             new_ability = ability
             self.player.hunger= new_ability - old_ability
             self.player.old_hunger = self.player.hunger
-
-
-
 
             self.player.name = name
             self.player.sex = sex
