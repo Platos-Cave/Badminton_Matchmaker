@@ -62,15 +62,17 @@ class Player:
         else:
             return NameError # is that right?
 
+
         # Uses list comprehension rather than loop - however, loses references
         affs = [(name,level) if player[0] == name else player for player in
                 affs]
+
 
         # Add new affinity otherwise. Seems like I should be able to
         # integrate this with the flow of the above loop?
         if name not in [p[0] for p in affs]:
             affs.append((name,level))
-
+      
         # Reassigning to the correct list. Seems inelegant
         if side == "partner":
             self.partner_affinities = affs
@@ -583,6 +585,11 @@ def add_player(player):
     player.accumulate_fee()
     all_current_players.append(player)
     today_session.player_arrivals[player] = datetime.now().time()
+
+    # print("{}'s partner affinities: {}".format(player.name,
+    #                                            player.partner_affinities))
+    # print("{}'s opp affinities: {}".format(player.name,
+    #                                            player.opponent_affinities))
 
 
 def empty_courts():

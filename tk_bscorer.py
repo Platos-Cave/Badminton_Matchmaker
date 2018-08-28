@@ -429,7 +429,7 @@ class Application(tk.Tk):
                                                "No player with that name found!"
                                                " Would you like to create "
                                                "this player?")
-            if new_query is True:
+            if new_query:
                 self.create_player()
                 self.create_toplevel.name_entry.insert(0, selected)
             else:
@@ -453,6 +453,8 @@ class Application(tk.Tk):
         self.bench_grid()
 
         self.autosave()
+
+
 
     def create_player(self):
         """Launch a popup for creating new players"""
@@ -1165,12 +1167,21 @@ class PlayerStats(tk.Toplevel):
             return False
 
 
-        # Add affinity to the current player
+        # Add affinity to the current player. Bit duplicative
         if side == "partner":
 
             level = self.partner_aff_level_box.get()
 
-            self.partner_affs.append((other_player, level))
+            # Bit of duplication from b_scorer's Player class, just so new
+            # players can have affinities added
+            self.partner_affs = [(other_player, level) if player[0] ==
+                                                          other_player else
+                                 player
+                              for player in self.partner_affs]
+            if other_player not in [p[0] for p in self.partner_affs]:
+                self.partner_affs.append((other_player, level))
+
+
             self.partner_aff_box.config(values=[p[0] for p in
                                                 self.partner_affs])
             # If not new, add affinities right now
@@ -1184,7 +1195,12 @@ class PlayerStats(tk.Toplevel):
 
             level = self.opp_aff_level_box.get()
 
-            self.opp_affs.append((other_player, level))
+            self.opp_affs = [
+                (other_player, level) if player[0] == other_player else player
+                for player in self.opp_affs]
+            if other_player not in [p[0] for p in self.opp_affs]:
+                self.opp_affs.append((other_player, level))
+
             self.opp_aff_box.config(values=[p[0] for p in
                                                 self.opp_affs])
 
