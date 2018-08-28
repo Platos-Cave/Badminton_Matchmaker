@@ -21,7 +21,7 @@ class Application(tk.Tk):
         tk.Tk.__init__(self)
 
         # A (probably unPythonic) way of randomly loading the bench
-        self.test_mode = True
+        self.test_mode = False
 
         self.title("Badminton Matchmaker")
 
@@ -164,7 +164,7 @@ class Application(tk.Tk):
 
         if self.test_mode:
             random.shuffle(b_scorer.every_player)
-            for player in b_scorer.every_player[0:22]:
+            for player in b_scorer.every_player[0:18]:
                 b_scorer.add_player(player)
                 self.add_bench_menus(player)
                 self.colour_dict = b_scorer.colour_sorter(
@@ -1023,6 +1023,10 @@ class PlayerStats(tk.Toplevel):
             self.played_against_label = ttk.Label(self, text = "N/A",
                                                   font=self.label_font)
 
+            self.hunger_label = ttk.Label(self, text = "Hunger")
+            self.hunger_value = ttk.Label(self, text = round(
+                                            self.player.hunger,2))
+
             self.game_number_config()
             self.game_number_combo.bind("<<ComboboxSelected>>",
                                         lambda
@@ -1068,6 +1072,9 @@ class PlayerStats(tk.Toplevel):
             self.single_game_label.grid(column=0, row=15)
             self.played_with_label.grid(column=1, row=15)
             self.played_against_label.grid(column=1, row=16)
+            self.hunger_label.grid(column = 0, row = 17)
+            self.hunger_value.grid(column=1, row=17)
+
 
         # self.player_notes_label.grid(column=1, row=17, columnspan=6)
         # self.player_notes.grid(column=0, row=18, columnspan=2,
@@ -1335,12 +1342,15 @@ class PlayerStats(tk.Toplevel):
         else:
             # if player is existing, update their stats
             try:
+                # issue: rounds the lateness penalty when people get stats
+                # updated, which may cause random bias
                 late_penalty = float(self.late_penalty_entry.get())
             except ValueError:
                 tk.messagebox.showerror("Error", "Please enter a valid "
                                                  "lateness penalty",
                                                   parent = self)
                 return
+
 
             # if the player's name is changed, update all the affinities
 

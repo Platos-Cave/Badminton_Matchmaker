@@ -41,9 +41,9 @@ try:
     scoring_vars = pickle.load(score_in)
     # replace old version
     if ('Ability Alternation', 'Default') not in scoring_vars:
-        scoring_vars[('Ability Alternation', 'Default')] = 1.0
-        scoring_vars[('Ability Alternation', 'Tuesday')] = 1.0
-        scoring_vars[('Ability Alternation', 'Thursday')] = 1.0
+        scoring_vars[('Ability Alternation', 'Default')] = 2.0
+        scoring_vars[('Ability Alternation', 'Tuesday')] = 2.0
+        scoring_vars[('Ability Alternation', 'Thursday')] = 2.0
 
         print(scoring_vars)
 
