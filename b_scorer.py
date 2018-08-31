@@ -13,7 +13,7 @@ class Player:
                  opponent_affinities=[], membership = "Casual"):
         self.name = name
         self.sex = sex
-        self.ability = ability  # An integer from 1-9 (1 being weakest)
+        self.ability = ability  # An integer from 1-10 (1 being weakest)
 
         # Other players this player likes to be partnered with/oppose
         # Newly updated to be (Player.name, Level) pairs, where Level is
@@ -472,7 +472,7 @@ def generate_new_game():
 def confirm_game():
     '''Update game counts, game history, save data'''
     for i, court in enumerate(courts):
-        mean_ability = sum([p.ability for p in court.spaces]) / 4
+        mean_ability = sum([p.ability for p in court.spaces if p]) / 4
         for j, player in enumerate(court.spaces):
             if player:
                 player.update_game_count()

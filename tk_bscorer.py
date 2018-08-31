@@ -21,7 +21,8 @@ class Application(tk.Tk):
         tk.Tk.__init__(self)
 
         # A (probably unPythonic) way of randomly loading the bench
-        self.test_mode = False
+        self.test_mode = True
+
 
         self.title("Badminton Matchmaker")
 
@@ -872,7 +873,7 @@ class PlayerStats(tk.Toplevel):
 
         self.name_label = ttk.Label(self, text="Name")
         self.sex_label = ttk.Label(self, text="Sex")
-        self.ability_label = ttk.Label(self, text="Ability (1-9)")
+        self.ability_label = ttk.Label(self, text="Ability (1-10)")
         self.membership_label = ttk.Label(self, text = "Membership Status")
         self.owed_label =  ttk.Label(self, text = "Money Owed ($)")
         self.partner_aff_label = ttk.Label(self, text="Partner Affinities")
@@ -910,7 +911,7 @@ class PlayerStats(tk.Toplevel):
                                          values=["Male", "Female", "Other"],
                                          state='readonly')
         self.ability_combobox = ttk.Combobox(self, width=8,
-                                             values=[i for i in range(1, 10)],
+                                             values=[i for i in range(1, 11)],
                                              state='readonly')
         self.membership_cbox = ttk.Combobox(self, width=8,
                                              values=["Casual", "Member (no "

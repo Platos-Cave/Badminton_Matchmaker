@@ -44,11 +44,7 @@ try:
         scoring_vars[('Ability Alternation', 'Default')] = 2.0
         scoring_vars[('Ability Alternation', 'Tuesday')] = 2.0
         scoring_vars[('Ability Alternation', 'Thursday')] = 2.0
-
-        print(scoring_vars)
-
-
-
+        print("Ability Alternation added!")
     score_in.close()
 except FileNotFoundError:
     # seems ugly, should be mapped differently
@@ -69,6 +65,10 @@ except FileNotFoundError:
                     ('Female Affinity', 'Default'): 1.0,
                     ('Female Affinity', 'Tuesday'): 1.0,
                     ('Female Affinity', 'Thursday'): 1.0}
+    if ('Ability Alternation', 'Default') not in scoring_vars:
+        scoring_vars[('Ability Alternation', 'Default')] = 2.0
+        scoring_vars[('Ability Alternation', 'Tuesday')] = 2.0
+        scoring_vars[('Ability Alternation', 'Thursday')] = 2.0
 
 # what score profile to use
 day_of_week = datetime.datetime.today().weekday()
@@ -237,8 +237,7 @@ def score_court(court, trial_players, explain = False):
                     break
 
     # Female mini-affinity:
-    no_women = len([p for p in new_court if p.sex == "Female" if p is not
-                       None])
+    no_women = len([p for p in new_court if p.sex == "Female" if p])
     women_score = scoring_vars[('Female Affinity', profile)] * (no_women*(
             no_women - 1))
     score -= women_score
