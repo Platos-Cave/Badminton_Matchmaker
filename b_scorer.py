@@ -32,6 +32,8 @@ class Player:
         self.adjusted_games = 0
         # No. of rounds since the player last had a game. 0 = was on last round
         self.time_since_last = 0
+        # numbers of games in a row that have been played
+        self.consecutive_games_on = 0
         # "old" time_since_last purely for undoing purposes
         self.old_tsl = 0
         # who this player's partners have been this night
@@ -107,24 +109,28 @@ class Player:
     def update_game_count(self):
         self.total_games += 1
         self.adjusted_games += 1
+        self.old_consecutive_games_on = self.consecutive_games_on # for undoing
+        self.consecutive_games_on +=1
         self.old_tsl = self.time_since_last # for undoing
         self.time_since_last = 0
 
-    def recalculate_hunger(self, last_game_ab):
+    def update_when_benched(self):
+        self.old_tsl = self.time_since_last  # for undoing
+        self.time_since_last += 1
+        self.old_consecutive_games_on = self.consecutive_games_on # for undoing
+        self.consecutive_games_on = 0
 
+    def recalculate_hunger(self, last_game_ab):
         self.old_hunger = self.hunger
         self.old_mean_game_abs = self.mean_game_abs
         self.mean_game_abs = (self.mean_game_abs + last_game_ab)/2
         self.hunger = self.ability - self.mean_game_abs
-        # print("{}'s hunger goes from {} to {}".format(self.name,
-        #                                               self.old_hunger,
-        #                                               self.hunger))
-
 
     def undo_game(self):
         self.total_games -= 1
         self.adjusted_games -= 1
         self.time_since_last = self.old_tsl
+        self.consecutive_games_on = self.old_consecutive_games_on
         del self.played_with[-1]
         del self.played_against[-1]
         self.hunger = self.old_hunger
@@ -222,8 +228,13 @@ class Court:
 def find_most_off(lst):
     """Of a list of players, find those who have had the max games in a row
     off"""
-    times = [player.time_since_last for player in lst if player is not None]
+    times = [player.time_since_last for player in lst if player]
     return [lst[i] for i, j in enumerate(times) if j == max(times)]
+
+def find_least_consecutive(lst):
+    """Of a list of players, find those who have played the least consecutive games in a row"""
+    times = [player.consecutive_games_on for player in lst if player]
+    return [lst[i] for i, j in enumerate(times) if j == min(times)]
 
 
 def find_least_games(lst):
@@ -236,6 +247,8 @@ def get_ability(player):
     """To give a key for the next function to sort by ability. Unnecessary?
     Could use lambda?"""
     return player.ability
+
+
 
 def select_players(shuffle_version):
     """ Starting with a blank list (trial_players), append players to this list
@@ -259,7 +272,10 @@ def select_players(shuffle_version):
     If they're stronger, then tie-break in order of descending ability from the
     strongest down. If they're weaker, tie-break in order of ascending
     ability from the weakest up.
+
+    (Probably too long and should be split up)
     """
+    #@todo Replace prints with logging
 
     # The players who have been selected by this function to go on the board.
     trial_players = []
@@ -272,7 +288,8 @@ def select_players(shuffle_version):
     players_to_pick = [player for player in all_current_players if
                        not player.keep_off and not player.keep_on]
 
-    total_court_space = 12
+
+    total_court_space = 12 # should be 4*len(courts) for extensibility
 
 
     # While the queue of players to go on is not full
@@ -282,6 +299,12 @@ def select_players(shuffle_version):
 
         # the indices of the players who've been off the longest so far
         players_most_due = find_most_off(players_to_pick)
+
+        # print('Players off the longest:')
+        # print([p.name for p in players_most_due])
+        # print('Current Players')
+        # print([p.name for p in trial_players])
+
 
         # If there are fewer players left who have have N games off than
         # there are slots remaining, add all of them to trial_players
@@ -300,6 +323,11 @@ def select_players(shuffle_version):
 
             players_with_least = find_least_games(players_most_due)
 
+            # print('Players with least:')
+            # print([p.name for p in players_with_least])
+            # print('Current Players')
+            # print([p.name for p in trial_players])
+
             #  If players with the least number of games fill the courts,
             # add them
             if len(players_with_least) <= (total_court_space - taken):
@@ -307,13 +335,37 @@ def select_players(shuffle_version):
                     trial_players.append(player)
             else:
 
-                # To hopefully ensure tiebreaks are fair
-                random.shuffle(players_with_least)
-
                 if shuffle_version == "Random":
-                    for i in range(total_court_space - taken):
-                        trial_players.append(players_with_least[i])
+
+                    # put players with least consecutive games on first
+                    least_consec = find_least_consecutive(players_with_least)
+
+                    # print('Players with least conse:')
+                    # print([p.name for p in least_consec])
+                    # print('Current Players')
+                    # print([p.name for p in trial_players])
+
+                    if len(least_consec) <= (total_court_space - taken):
+                        for player in least_consec:
+                            trial_players.append(player)
+                            # print(f'Least consec added:: {player.name}')
+                    else:
+                    # To hopefully ensure tiebreaks are fair
+                        random.shuffle(least_consec)
+
+                        # print('Current Players')
+                        # print([p.name for p in trial_players])
+
+                        for i in range(total_court_space - taken):
+                            trial_players.append(least_consec[i])
+                        #     print(f'{players_with_least[i].name} added at '
+                        #             'random')
+                        # print('Final')
+                        # print([p.name for p in trial_players])
+
                 elif shuffle_version == "Segregated":
+                    # To hopefully ensure tiebreaks are fair
+                    random.shuffle(players_with_least)
                     # players sorted from worst to best ability-wise
                     ability_sorted_players = sorted(players_with_least,
                                                     key=get_ability)
@@ -459,7 +511,7 @@ def generate_new_game():
     for i, court in enumerate(best_game):
         for j, side in enumerate(court):
             for k, player in enumerate(side):
-                if player is not None:
+                if player:
                     courts[i].spaces[(2 * j) + k] = player
                     if player in bench:
                         bench.remove(player)
@@ -496,7 +548,9 @@ def confirm_game():
                             [i for i in court.spaces[0:2]])
 
     for player in bench:
-        player.time_since_last += 1
+        # should be Player Method?
+        player.update_when_benched()
+
 
     for player in all_current_players:
         player.keep_off = False
@@ -542,13 +596,13 @@ def test_mixing():
 
 
 def remove_player(court_number, index, player):
-    if court_number is not None:
+    if court_number:
         player = courts[court_number].spaces[index]
     # Update lists of players
     absent_players.append(player)
     all_current_players.remove(player)
 
-    if court_number is None:
+    if not court_number:
         # remove player from bench
         bench.remove(player)
     else:
@@ -606,6 +660,7 @@ def save_and_quit(pickling=True):
         player.penalty_games = 0
         player.adjusted_games = 0
         player.time_since_last = 0
+        player.consecutive_games_on = 0
         player.played_with = []
         player.played_against = []
         player.keep_off = False
@@ -700,6 +755,11 @@ try:
     pickle_in = open("every_player_pi_2.obj","rb")
     every_player = pickle.load(pickle_in)
     pickle_in.close()
+
+    for player in every_player:
+        if not hasattr(player, 'consecutive_games_on'):
+            player.consecutive_games_on = 0
+            print("Add consec!")
 
     for player in every_player:
         if not hasattr(player, 'hunger'):

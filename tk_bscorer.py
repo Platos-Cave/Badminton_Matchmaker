@@ -21,7 +21,7 @@ class Application(tk.Tk):
         tk.Tk.__init__(self)
 
         # A (probably unPythonic) way of randomly loading the bench
-        self.test_mode = True
+        self.test_mode = False
 
 
         self.title("Badminton Matchmaker")
@@ -165,7 +165,7 @@ class Application(tk.Tk):
 
         if self.test_mode:
             random.shuffle(b_scorer.every_player)
-            for player in b_scorer.every_player[0:18]:
+            for player in b_scorer.every_player[0:17]:
                 b_scorer.add_player(player)
                 self.add_bench_menus(player)
                 self.colour_dict = b_scorer.colour_sorter(
@@ -863,7 +863,7 @@ class PlayerStats(tk.Toplevel):
         self.player = player
 
         # If new player, Create New. If existing, Player Stats
-        if self.new is True:
+        if self.new:
             self.title("Create New Player")
         else:
             self.title("Player Profile")
@@ -930,6 +930,16 @@ class PlayerStats(tk.Toplevel):
 
         self.games_total_label = ttk.Label(self, text="Adjusted Games")
         self.games_total_number = ttk.Label(self, text="0", font = self.label_font)
+
+        self.games_off_label = ttk.Label(self, text = "Rounds since last "
+                                                      "played")
+        self.games_off_number = ttk.Label(self, text="0",
+                                        font=self.label_font)
+        self.games_on_label = ttk.Label(self, text = "Rounds played in a row")
+        self.games_on_number = ttk.Label(self, text="0",
+                                        font=self.label_font)
+
+
 
         self.player_notes_label = ttk.Label(self, text="Player Notes")
         self.player_notes = tk.Text(self, height=2, width=15, wrap=tk.WORD)
@@ -1011,6 +1021,9 @@ class PlayerStats(tk.Toplevel):
             self.games_total_number.config(
                 text=round(self.player.adjusted_games, 2))
 
+            self.games_off_number.config(text=self.player.time_since_last)
+            self.games_on_number.config(text=self.player.consecutive_games_on)
+
             # self.player_notes.insert(1.0, self.player.player_notes)
 
             #######
@@ -1068,20 +1081,25 @@ class PlayerStats(tk.Toplevel):
             self.late_penalty_entry.grid(column=1, row=12)
             self.games_total_label.grid(column=0, row=13)
             self.games_total_number.grid(column=1, row=13)
-            self.game_history_label.grid(column=0, row=14)
-            self.game_number_combo.grid(column=1, row=14)
-            self.single_game_label.grid(column=0, row=15)
-            self.played_with_label.grid(column=1, row=15)
-            self.played_against_label.grid(column=1, row=16)
-            self.hunger_label.grid(column = 0, row = 17)
-            self.hunger_value.grid(column=1, row=17)
+            self.games_off_label.grid(column=0, row=14)
+            self.games_off_number.grid(column=1, row=14)
+            self.games_on_label.grid(column=0, row=15)
+            self.games_on_number.grid(column=1, row=15)
+
+            self.game_history_label.grid(column=0, row=16)
+            self.game_number_combo.grid(column=1, row=16)
+            self.single_game_label.grid(column=0, row=17)
+            self.played_with_label.grid(column=1, row=17)
+            self.played_against_label.grid(column=1, row=18)
+            self.hunger_label.grid(column = 0, row = 19)
+            self.hunger_value.grid(column=1, row=19)
 
 
         # self.player_notes_label.grid(column=1, row=17, columnspan=6)
         # self.player_notes.grid(column=0, row=18, columnspan=2,
         #                        padx=5, pady=5, sticky='nsew')
 
-        self.save_player_button.grid(column=1, row=19, columnspan=3)
+        self.save_player_button.grid(column=1, row=21, columnspan=3)
 
     def game_number_config(self):
         if self.player.total_games == 0:

@@ -32,8 +32,9 @@ find_best_game() returns this as best_players."""
 import itertools
 import operator
 import pickle
-
 import datetime
+
+
 
 # The user can adjust the weightings of elements of score_courts()
 try:
@@ -160,20 +161,20 @@ def score_court(court, trial_players, explain = False):
 
 
 
-    # We then want to penalise playing the same people over and over.
-
-    # How much the discount rate for each round is for the purposes of mixing
-    # i.e. there's a larger penalty for playing someone you played in the
-    # previous round than for someone you played three games ago
+    # # We then want to penalise playing the same people over and over.
+    #
+    # # How much the discount rate for each round is for the purposes of mixing
+    # # i.e. there's a larger penalty for playing someone you played in the
+    # # previous round than for someone you played three games ago
     discount_rate = 0.1
-
-    # For each player, see how many times they've played with their partner
-    # and their opponents. Larger penalty for playing someone in the same
-    # position (i.e. played against someone twice in a row, vs played with them
-    # and then against them)
-    # Also: if player has affinity for another player, subtract the affinity
-    # score from the total score.
-    # (This seems all very nested and duplicative)
+    #
+    # # For each player, see how many times they've played with their partner
+    # # and their opponents. Larger penalty for playing someone in the same
+    # # position (i.e. played against someone twice in a row, vs played with them
+    # # and then against them)
+    # # Also: if player has affinity for another player, subtract the affinity
+    # # score from the total score.
+    # # (This seems all very nested and duplicative)
     for player in new_court:
         if player is not None:
             if player in new_court[0:2]:
@@ -286,12 +287,15 @@ def best_score(combo, trial_players):
 
 
 def find_best_game(trial_players):
+
     '''From a list of 12 player objects, return the best three games possible'''
     scores = []
 
     # Score all the combos
+
     for combo in court_1s:
         best_score(combo, trial_players)
+
 
     # Look up each combo's score, add together.
     for combo in all_combos:
