@@ -21,7 +21,7 @@ class Application(tk.Tk):
         tk.Tk.__init__(self)
 
         # A (probably unPythonic) way of randomly loading the bench
-        self.test_mode = False
+        self.test_mode = True
 
 
         self.title("Badminton Matchmaker")
@@ -499,11 +499,12 @@ class Application(tk.Tk):
         """Return a current player to absent players, then update relevant
         information"""
 
+
         are_you_sure = tk.messagebox.askyesno("Are you sure?",
                                               "Are you sure this player is "
                                               "leaving?")
 
-        if are_you_sure is True:
+        if are_you_sure:
             b_scorer.remove_player(court_number, index, player)
             self.colour_dict = b_scorer.colour_sorter(
                 b_scorer.all_current_players)
@@ -763,6 +764,7 @@ class Application(tk.Tk):
 
     def refresh_combobox(self):
         """Refresh the combobox of absent players"""
+
         self.all_player_names = sorted([player.name
                                         for player in b_scorer.absent_players])
         self.all_player_names.insert(0, "")

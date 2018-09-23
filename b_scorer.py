@@ -596,13 +596,16 @@ def test_mixing():
 
 
 def remove_player(court_number, index, player):
-    if court_number:
+
+    if court_number is not None:
         player = courts[court_number].spaces[index]
+
     # Update lists of players
     absent_players.append(player)
+
     all_current_players.remove(player)
 
-    if not court_number:
+    if court_number is None:
         # remove player from bench
         bench.remove(player)
     else:
