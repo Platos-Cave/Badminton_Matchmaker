@@ -21,7 +21,7 @@ class Application(tk.Tk):
         tk.Tk.__init__(self)
 
         # A (probably unPythonic) way of randomly loading the bench
-        self.test_mode = True
+        self.test_mode = False
 
 
         self.title("Badminton Matchmaker")
@@ -165,7 +165,7 @@ class Application(tk.Tk):
 
         if self.test_mode:
             random.shuffle(b_scorer.every_player)
-            for player in b_scorer.every_player[0:17]:
+            for player in b_scorer.every_player[0:12]:
                 b_scorer.add_player(player)
                 self.add_bench_menus(player)
                 self.colour_dict = b_scorer.colour_sorter(
@@ -1919,12 +1919,15 @@ class Timer(tk.Frame):
                                                         override=False))
         self.pause_button = ttk.Button(self, text="Pause", state="disabled",
                                        command= self.pause)
+        self.bell_button = ttk.Button(self, text = "Ring Bell",
+                                      command = self.ring_bell)
 
         self.timer_label.grid(column=0, row=0, sticky='nsew', rowspan = 3)
         self.plus_one_button.grid(column= 1, row = 0,  sticky='nsew')
         self.minus_one_button.grid(column= 2, row= 0,  sticky='nsew')
         self.reset_button.grid(column=1, row=1, sticky='nsew')
         self.pause_button.grid(column=2, row=1, sticky='nsew')
+        self.bell_button.grid(column = 3, row = 0, sticky = 'nsew', rowspan = 3)
 
 
     def timer_go(self):
@@ -1997,25 +2000,35 @@ class Timer(tk.Frame):
             self.duration -= 60
             self.update_timer()
 
-    def reset_timer(self, override = True):
+    def reset_timer(self, override = True, bell = False):
         '''If timer on, verify first if called by button. If timer off,
         stop beeping. In either
-        case, reset and update the timer'''
+        case, reset and update the timer.
+        Does too many things, should break up?'''
+
+        # when called from the bell ring button
+        if self.timer_on and bell:
+            sure = tk.messagebox.askokcancel('Are you sure?', 'Are you sure '
+                                                              'you want to '
+                                                              'end the round '
+                                                              'early?')
+            if not sure:
+                return True # silly
 
         # if undo confirm
         if self.reset_button['text'] == "Restart" and override:
             self.reset_button.config(text="Reset", state='disabled')
             return
 
-        # if called from button
-        if self.reset_button['text'] == "Restart" and not override:
+        # if called from button and not bell
+        if self.reset_button['text'] == "Restart" and not override and not bell:
             self.timer_on = True
             self.reset_button.config(text="Reset")
             self.pause_button.config(text="Pause", state='normal')
             self.go = self.after(1000, lambda: self.timer_go())
             return
 
-        if self.timer_on and not override:
+        if self.timer_on and not override and not bell:
             sure = tk.messagebox.askokcancel('Are you sure?', 'Are you sure '
                                                               'you '
                                                              'want to reset '
@@ -2023,7 +2036,7 @@ class Timer(tk.Frame):
             if sure:
                 self.reset_button.config(text="Restart")
             else:
-                return
+                return True
 
         elif not self.timer_on:
             # Stop the alarm if it's on
@@ -2043,7 +2056,11 @@ class Timer(tk.Frame):
         self.timer_count = 0
         self.update_timer()
 
-
+    def ring_bell(self):
+        if not self.reset_timer(override=False, bell = True):
+            self.bell = Bell()
+            self.bell.start()
+            self.controller.config_buttons()
 
 class Alarm(Thread):
     '''Multithread so the alarm doesn't freeze the GUI'''
@@ -2074,6 +2091,16 @@ class Alarm(Thread):
 
     def stop(self):
         self._stop.set()
+
+class Bell(Thread):
+    '''Multithread so the alarm doesn't freeze the GUI'''
+    def __init__(self):
+        Thread.__init__(self)
+    def run(self):
+        winsound.PlaySound('Bell_Ring.wav', winsound.SND_FILENAME)
+
+
+
 
 
 class HelpMenu(tk.Toplevel):
