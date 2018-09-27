@@ -647,7 +647,12 @@ def add_player(player):
     #                                            player.partner_affinities))
     # print("{}'s opp affinities: {}".format(player.name,
     #                                            player.opponent_affinities))
-
+def swap_courts(court_a, court_b):
+    '''Assign each court the players of each other'''
+    a_spaces = court_a.spaces
+    b_spaces = court_b.spaces
+    court_a.spaces = b_spaces
+    court_b.spaces = a_spaces
 
 def empty_courts():
     for court in courts:

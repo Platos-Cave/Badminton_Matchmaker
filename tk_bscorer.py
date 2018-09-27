@@ -21,8 +21,7 @@ class Application(tk.Tk):
         tk.Tk.__init__(self)
 
         # A (probably unPythonic) way of randomly loading the bench
-        self.test_mode = False
-
+        self.test_mode = True
 
         self.title("Badminton Matchmaker")
 
@@ -31,14 +30,16 @@ class Application(tk.Tk):
         # For the sake of configuring buttons
         self.unchanged_board = False
 
+        self.court_label_menus = {}
         self.bench_popup_menus = {}
         self.court_menus = {}
         self.space_menus = {}
 
-        start_menu = Menu(self)
-        self.config(menu=start_menu)
-
-        start_menu.add_cascade(label="Help", command = lambda: self.help())
+        # START MENU COMMENTED OUT
+        # start_menu = Menu(self)
+        # self.config(menu=start_menu)
+        #
+        # start_menu.add_cascade(label="Help", command = lambda: self.help())
 
         self.court_labels = [ttk.Label(text="Court {}".format(i + 1),
                                        background=bg_colour,
@@ -46,6 +47,7 @@ class Application(tk.Tk):
                              in range(3)]
 
         self.court_frames = [CourtFrame(self, i) for i in range(3)]
+
         self.absent_label = ttk.Label(text="Absent Players",
                                       background=bg_colour,
                                       font=('Helvetica', 16, 'bold'))
@@ -112,7 +114,20 @@ class Application(tk.Tk):
         # self.court_labels[1].grid(column=7, row=2, sticky='nsew',
         #                           padx=10, pady=10, columnspan =1)
         # self.court_labels[2].grid(column=13, row=2, sticky='nsew',
-        #                           padx=10, pady=10, columnspan =1)
+        #
+        #              padx=10, pady=10, columnspan =1)
+        # Add swap menus
+        for i, lab1 in enumerate(self.court_labels):
+            self.court_label_menus[i] = Menu(self, tearoff=0)
+            for j, lab2 in enumerate(self.court_labels):
+                if i!=j:
+                    self.court_label_menus[i].add_command(label = f'Swap with '
+                                                              f'Court {j+1}',
+                                                          command = lambda i=i, j=j:
+                                                          self.swap(i,j))
+            lab1.bind("<ButtonPress-3>", lambda event,
+                                                i=i: self.display_swap_menu(
+                event, i))
 
 
         for i, court in enumerate(self.court_frames):
@@ -165,7 +180,7 @@ class Application(tk.Tk):
 
         if self.test_mode:
             random.shuffle(b_scorer.every_player)
-            for player in b_scorer.every_player[0:12]:
+            for player in b_scorer.every_player[0:26]:
                 b_scorer.add_player(player)
                 self.add_bench_menus(player)
                 self.colour_dict = b_scorer.colour_sorter(
@@ -210,6 +225,14 @@ class Application(tk.Tk):
             except UnboundLocalError:
                 pass
 
+        self.update_board()
+
+
+    def display_swap_menu(self, event, court_no):
+        self.court_label_menus[court_no].post(event.x_root, event.y_root)
+
+    def swap(self, court_a, court_b):
+        b_scorer.swap_courts(b_scorer.courts[court_a], b_scorer.courts[court_b])
         self.update_board()
 
     def help(self):
@@ -320,7 +343,7 @@ class Application(tk.Tk):
             label="Pay Tonight's Fee")
 
         self.bench_popup_menus[player].add_cascade(menu=self.court_menus[player],
-                                                   label="Pin to Court...", )
+                                                   label="Add to Court...", )
         # Add menu options for manually adding players to courts
         for j in range(3):
             self.space_menus[player].append(Menu(self, tearoff=0))
@@ -613,7 +636,6 @@ class Application(tk.Tk):
         #     print("Timer off!")
 
 
-
         if self.timer.timer_on or self.timer.reset_button['text'] == \
                 "Restart" or \
                 self.unchanged_board:
@@ -628,10 +650,8 @@ class Application(tk.Tk):
 
 
 
-
-
     def show_bench_options(self, event, player):
-        """When bench label clicked, show the menu"""
+        """When bench label clicked, show the menu. Update for Keep Off/On"""
 
         if player.keep_off is False:
             self.bench_popup_menus[player].entryconfigure(2,label="Keep "
