@@ -849,18 +849,6 @@ class CourtFrame(tk.Frame):
         for row in range(2):
             self.grid_rowconfigure(row, weight=1)
 
-    # def _on_configure(self, event):
-    #
-    #     # first, grow the font until the text is too big,
-    #     size = self.base_font.actual("size")
-    #     # while size < event.width:
-    #     #     size += 1
-    #     #     self.base_font.configure(size=size)
-    #     # ... then shrink it until it fits
-    #     while size > 1 and self.base_font.measure("text") > event.width:
-    #         size -= 1
-    #         self.base_font.configure(size=size)
-
 
 class BenchFrame(tk.Frame):
     """A frame for placing the labels of the players who are on the bench.
@@ -1046,9 +1034,7 @@ class PlayerStats(tk.Toplevel):
             self.games_off_number.config(text=self.player.time_since_last)
             self.games_on_number.config(text=self.player.consecutive_games_on)
 
-            # self.player_notes.insert(1.0, self.player.player_notes)
 
-            #######
             self.game_history_label = ttk.Label(self, text = "Tonight's Games")
 
             self.game_number_combo = ttk.Combobox(self, width=15, values= [],
@@ -1069,7 +1055,7 @@ class PlayerStats(tk.Toplevel):
                                             event: self.update_game_display())
 
 
-            ####
+
 
         self.name_label.grid(column=0, row=1)
         self.name_entry.grid(column=1, row=1, columnspan=3, sticky='ew')
@@ -1116,11 +1102,6 @@ class PlayerStats(tk.Toplevel):
             self.hunger_label.grid(column = 0, row = 19)
             self.hunger_value.grid(column=1, row=19)
 
-
-        # self.player_notes_label.grid(column=1, row=17, columnspan=6)
-        # self.player_notes.grid(column=0, row=18, columnspan=2,
-        #                        padx=5, pady=5, sticky='nsew')
-
         self.save_player_button.grid(column=1, row=21, columnspan=3)
 
     def game_number_config(self):
@@ -1147,8 +1128,6 @@ class PlayerStats(tk.Toplevel):
         self.played_against_label.config(text="{} and {}".format(opps[0],
                                                                  opps[1]))
 
-        # print("{} and {} vs \n {} amd {}".format(player, partner[0], opps[0],
-        #                                          opps[1]))
 
     def switch_aff(self, side):
         '''Bind the aff level combo to the aff name combo'''
@@ -1410,18 +1389,17 @@ class PlayerStats(tk.Toplevel):
                             pass
                         player.opponent_affinities.append(name)
 
-            # Recalculating hunger:
-            old_ability = self.player.ability
-            new_ability = ability
-            self.player.hunger= new_ability - old_ability
-            self.player.old_hunger = self.player.hunger
+            # Recalculating hunger - @todo: WRONG - RESETS HUNGER
+            # old_ability = self.player.ability
+            # new_ability = ability
+            # self.player.hunger= new_ability - old_ability
+            # self.player.old_hunger = self.player.hunger
 
             self.player.name = name
             self.player.sex = sex
             self.player.ability = ability
             self.player.player_notes = notes
             self.player.membership = membership
-
 
 
             # Not ideal place for this
@@ -1450,7 +1428,6 @@ class PlayerStats(tk.Toplevel):
         self.controller.update_board()
 
         self.destroy()
-
 
 
 
@@ -1631,6 +1608,7 @@ class GameStats(tk.Toplevel):
         self.shuffle_combo.current(b_scorer.enumerate_b.scoring_vars[(
             'Shuffle', profile)])
 
+# todo: update using numpy or pandas
 class HistoryPopup(tk.Toplevel):
     def __init__(self, controller):
 
@@ -1870,7 +1848,7 @@ class HistoryPopup(tk.Toplevel):
                                                             len(self.sessions)))
                 
                 # Let's find all the games they've played in
-                #print(self.sessions[0].games)
+
                 played_with = []
                 for session in self.sessions:
                     for round in session.games:
@@ -1879,8 +1857,7 @@ class HistoryPopup(tk.Toplevel):
                                                              not None]:
                                 for p in court:
                                     played_with.append(p.name)
-                #print(played_with)
-                #sorted(played_with, key = )
+
     #def print_payments(self):
 
 
@@ -2118,7 +2095,6 @@ class Bell(Thread):
         Thread.__init__(self)
     def run(self):
         winsound.PlaySound('Bell_Ring.wav', winsound.SND_FILENAME)
-
 
 
 

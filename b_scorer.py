@@ -149,7 +149,6 @@ class Player:
         # basic version first: just assume it's $5 for everyone
         try:
             today = datetime.today().weekday()
-            #today = 3
             fee_key = (self.membership, today)
 
             # if this player has a membership that requires them to have money
@@ -161,7 +160,7 @@ class Player:
                 self.money_owed += fee_structure[fee_key]
             except KeyError: # in case it's the wrong day/stuffed up
                 pass
-                #print("Key Error on fees!")
+
 
         except TypeError:
             print(self.money_owed)
@@ -275,7 +274,6 @@ def select_players(shuffle_version):
 
     (Probably too long and should be split up)
     """
-    #@todo Replace prints with logging
 
     # The players who have been selected by this function to go on the board.
     trial_players = []
@@ -300,11 +298,6 @@ def select_players(shuffle_version):
         # the indices of the players who've been off the longest so far
         players_most_due = find_most_off(players_to_pick)
 
-        # print('Players off the longest:')
-        # print([p.name for p in players_most_due])
-        # print('Current Players')
-        # print([p.name for p in trial_players])
-
 
         # If there are fewer players left who have have N games off than
         # there are slots remaining, add all of them to trial_players
@@ -323,11 +316,6 @@ def select_players(shuffle_version):
 
             players_with_least = find_least_games(players_most_due)
 
-            # print('Players with least:')
-            # print([p.name for p in players_with_least])
-            # print('Current Players')
-            # print([p.name for p in trial_players])
-
             #  If players with the least number of games fill the courts,
             # add them
             if len(players_with_least) <= (total_court_space - taken):
@@ -340,28 +328,19 @@ def select_players(shuffle_version):
                     # put players with least consecutive games on first
                     least_consec = find_least_consecutive(players_with_least)
 
-                    # print('Players with least conse:')
-                    # print([p.name for p in least_consec])
-                    # print('Current Players')
-                    # print([p.name for p in trial_players])
 
                     if len(least_consec) <= (total_court_space - taken):
                         for player in least_consec:
                             trial_players.append(player)
-                            # print(f'Least consec added:: {player.name}')
+
                     else:
                     # To hopefully ensure tiebreaks are fair
                         random.shuffle(least_consec)
 
-                        # print('Current Players')
-                        # print([p.name for p in trial_players])
+
 
                         for i in range(total_court_space - taken):
                             trial_players.append(least_consec[i])
-                        #     print(f'{players_with_least[i].name} added at '
-                        #             'random')
-                        # print('Final')
-                        # print([p.name for p in trial_players])
 
                 elif shuffle_version == "Segregated":
                     # To hopefully ensure tiebreaks are fair
@@ -518,7 +497,6 @@ def generate_new_game():
 
         scores += enumerate_b.score_court(((0,1),(2,3)),courts[i].spaces,
                                        explain = False)
-   # print("Total Court Score: {} \n".format(scores))
 
 
 def confirm_game():
@@ -643,10 +621,7 @@ def add_player(player):
     all_current_players.append(player)
     today_session.player_arrivals[player] = datetime.now().time()
 
-    # print("{}'s partner affinities: {}".format(player.name,
-    #                                            player.partner_affinities))
-    # print("{}'s opp affinities: {}".format(player.name,
-    #                                            player.opponent_affinities))
+
 def swap_courts(court_a, court_b):
     '''Assign each court the players of each other'''
     a_spaces = court_a.spaces
@@ -779,19 +754,14 @@ try:
     for player in every_player:
         if not hasattr(player, 'membership'):
             player.membership = "Member (incl. feathers)"
-            #print("Added membership!")
         else:
             pass
-            #print("Membership is", player.membership)
         if not hasattr(player, 'money_owed'):
             player.money_owed = 0
-            #print("Added money owed!")
         if not hasattr(player, "paid_tonight"):
             player.paid_tonight = True
-            #print("Added Played Tonight!")
         if not hasattr(player, 'keep_on'):
             player.keep_on = False
-            #print("Added Played Tonight!")
 
         # Grandfather in new affinities
         temp_partners = []

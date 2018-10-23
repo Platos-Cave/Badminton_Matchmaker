@@ -1,3 +1,4 @@
+# todo: update using numpy or pandas
 """I want to to store data about the games that were played in a given
 night, as well as other factors."""
 import csv

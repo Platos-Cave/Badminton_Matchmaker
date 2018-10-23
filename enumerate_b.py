@@ -313,7 +313,7 @@ def find_best_game(trial_players):
     # Possible drawback: no tie-breaking mechanism might cause a small bias?
 
     best_game = [best_combos[best_unsorted[i]] for i in range(3)]
-    #print(best_game)
+
 
     # Index the players to the numbers representing them.
     # Ugly, should be able to make more succinct and readable
