@@ -14,6 +14,7 @@ from threading import Thread, Event
 import time
 import datetime
 from datetime import datetime # huh?
+import player_probs as pp
 
 class Application(tk.Tk):
     """The main application"""
@@ -179,12 +180,21 @@ class Application(tk.Tk):
 
 
         if self.test_mode:
-            random.shuffle(b_scorer.every_player)
-            for player in b_scorer.every_player[0:26]:
-                b_scorer.add_player(player)
-                self.add_bench_menus(player)
-                self.colour_dict = b_scorer.colour_sorter(
-                                     b_scorer.all_current_players)
+            for player in b_scorer.every_player:
+                try:
+                    if random.random() < pp.arrival_probs[player.name]:
+                        b_scorer.add_player(player)
+                        self.add_bench_menus(player)
+                        self.colour_dict = b_scorer.colour_sorter(
+                                                 b_scorer.all_current_players)
+                except KeyError:
+                    pass
+            # random.shuffle(b_scorer.every_player)
+            # for player in b_scorer.every_player[0:14]:
+            #     b_scorer.add_player(player)
+            #     self.add_bench_menus(player)
+            #     self.colour_dict = b_scorer.colour_sorter(
+            #                          b_scorer.all_current_players)
             # for player in b_scorer.every_player:
             #     if player.name.startswith(("A","B","I")):
             #         b_scorer.add_player(player)
@@ -1655,6 +1665,14 @@ class HistoryPopup(tk.Toplevel):
                                             command=lambda: self.export_to_csv(
                                                 "players"))
 
+        self.export_timer_CSV = ttk.Button(self,
+                                            text="Export Arrival History to "
+                                                 "CSV",
+                                            command=lambda: self.export_to_csv(
+                                                "times"))
+
+
+
         self.every_player_combo = ttk.Combobox(self, width = 20, values =
             sorted([p.name for p in b_scorer.every_player]), state =
         'readonly')
@@ -1681,7 +1699,8 @@ class HistoryPopup(tk.Toplevel):
         self.every_player_combo.grid(column=0, row=6)
         self.player_stats_button.grid(column=0, row=7)
         self.export_game_CSV.grid(column = 0, row = 8)
-        self.export_player_CSV.grid(column = 0, row = 9 )
+        self.export_player_CSV.grid(column = 0, row = 9)
+        self.export_timer_CSV.grid(column = 0, row = 10)
 
     def export_to_csv(self, type):
 
@@ -1883,6 +1902,8 @@ class CSVPopup(tk.Toplevel):
             b_sessions.export_game_data(self.entry.get())
         elif self.type == 'players':
             b_sessions.export_player_data(self.entry.get())
+        elif self.type == 'times':
+            b_sessions.export_arrival_data(self.entry.get())
         tk.messagebox.showinfo("Success", "Successfully exported!")
         self.destroy()
 

@@ -22,7 +22,7 @@ class Session:
 
 
 def export_game_data(filename):
-    session_data = open('badminton_session_data.obj', 'rb')
+    session_data = open('badminton_session_data_2.obj', 'rb')
     loaded_sessions = pickle.load(session_data)
     session_data.close()
 
@@ -31,8 +31,8 @@ def export_game_data(filename):
     with game_file:
         writer = csv.writer(game_file)
 
-        writer.writerow(['DATE', "ROUND #", "COURT #", "SPACE #", "NAME",
-                         "ABILITY"])
+        writer.writerow(['Date', "Round No", "Court No", "Space No", "Name",
+                         "Ability"])
 
         for i, session in enumerate(loaded_sessions):
             if len(session.games) > 0:
@@ -44,7 +44,8 @@ def export_game_data(filename):
                                              game[k][l].name, game[k][
                                     l].ability])
                             except AttributeError:
-                                writer.writerow([session.date, j + 1, k, l + 1,
+                                writer.writerow([session.date, j + 1, k+1,
+                                                 l + 1,
                                                  "NONE", 0])
 
             #
@@ -108,6 +109,29 @@ def export_player_data(filename):
         writer.writerow(['NAME', 'SEX', 'ABILITY', 'PARTNER AFFINITIES',
                          'OPPONENT AFFINITIES'])
         writer.writerows(zip_data)
+
+def export_arrival_data(filename):
+    session_data = open('badminton_session_data_2.obj', 'rb')
+    loaded_sessions = pickle.load(session_data)
+    session_data.close()
+    game_file = open('{}.csv'.format(filename), 'w', newline='')
+
+    with game_file:
+        writer = csv.writer(game_file)
+
+        writer.writerow(['DATE', "NAME", "ARRIVAL TIME", "DEPARTURE TIME"])
+
+        for i, session in enumerate(loaded_sessions):
+            if len(session.games) > 0:
+                for player in session.player_departures:
+                    try:
+                        writer.writerow([session.date, player.name,
+                                         session.player_arrivals[player],
+                                        session.player_departures[player]])
+
+                    except AttributeError:
+                        writer.writerow([session.date, "NONE", "NONE"])
+
 
 
 # A list of all the sessions.

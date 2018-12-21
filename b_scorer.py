@@ -539,7 +539,8 @@ def confirm_game():
     total_rounds += 1
 
     # saving session
-    today_session.games.append([courts[i].spaces for i in range(3)])
+    today_session.games.append([courts[i].spaces.copy() for i in range(3)])
+
 
 
 def undo_confirm():
