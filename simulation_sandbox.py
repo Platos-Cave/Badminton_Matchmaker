@@ -11,36 +11,38 @@ import player_probs as pp
 
 
 def initialise():
-    for player in b_scorer.absent_players:
-        try:
-            if random.random() < pp.arrival_probs[player.name]:
-                b_scorer.add_player(player)
-        except KeyError:
-            continue
-    #print(len(b_scorer.all_current_players))
-    if (len(b_scorer.all_current_players)) <12:
-        #print("Less than 12!")
-        random.shuffle(b_scorer.absent_players)
-        #print(len(b_scorer.absent_players))
-        count = 0
-        while len(b_scorer.all_current_players) <12:
-            #print(f'Now {len(b_scorer.all_current_players)} players!')
-            try:
-                player = b_scorer.absent_players[count]
-                if random.random() < pp.arrival_probs[
-                    player.name]:
-                    b_scorer.add_player(player)
-                    #print(f'Added {player.name}!')
-                    #print(f'Now {len(b_scorer.all_current_players)}!')
-            except KeyError:
-                pass
-            if count > len(b_scorer.absent_players):
-                count = 0
-                print("Needed the count!")
-            else:
-                count +=1
-
-        #print(f"Now {len(b_scorer.all_current_players)}!")
+    #for player in b_scorer.absent_players:
+    for player in b_scorer.every_player[0:8]:
+        b_scorer.add_player(player)
+    #     try:
+    #         if random.random() < pp.arrival_probs[player.name]:
+    #             b_scorer.add_player(player)
+    #     except KeyError:
+    #         continue
+    # #print(len(b_scorer.all_current_players))
+    # if (len(b_scorer.all_current_players)) <4*len(b_scorer.courts):
+    #     #print("Less than 12!")
+    #     random.shuffle(b_scorer.absent_players)
+    #     #print(len(b_scorer.absent_players))
+    #     count = 0
+    #     while len(b_scorer.all_current_players) <4*len(b_scorer.courts):
+    #         #print(f'Now {len(b_scorer.all_current_players)} players!')
+    #         try:
+    #             player = b_scorer.absent_players[count]
+    #             if random.random() < pp.arrival_probs[
+    #                 player.name]:
+    #                 b_scorer.add_player(player)
+    #                 #print(f'Added {player.name}!')
+    #                 #print(f'Now {len(b_scorer.all_current_players)}!')
+    #         except KeyError:
+    #             pass
+    #         if count > len(b_scorer.absent_players):
+    #             count = 0
+    #             print("Needed the count!")
+    #         else:
+    #             count +=1
+    #
+    #     #print(f"Now {len(b_scorer.all_current_players)}!")
 
 
 
@@ -102,7 +104,7 @@ def individual_player_test():
 
 def export_game_data():
 
-    game_file = open('{}.csv'.format("simulate_csv"), 'w', newline='')
+    game_file = open('{}.csv'.format("4 games"), 'w', newline='')
 
     with game_file:
         writer = csv.writer(game_file)
@@ -113,7 +115,7 @@ def export_game_data():
         for i, session in enumerate(every_session):
             if len(session.games) > 0:
                 for j, game in enumerate(session.games):
-                    for k in range(3):
+                    for k in range(len(b_scorer.courts)):
                         for l in range(4):
                             try:
                                 writer.writerow([session.date + timedelta(
@@ -130,7 +132,7 @@ every_session = []
 print("Started!")
 t1 = time.time()
 
-for i in range(1000):
+for i in range(1):
     if i%100 == 0:
         print(f'{i/100}% finished!')
     simulate_session(10)

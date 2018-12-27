@@ -51,6 +51,8 @@ class Player:
         self.keep_off = False
         # If True, player will always be selected in automatic games
         self.keep_on = False
+        # If True, player is in manual game, and goes above Keep_On
+        self.manual_game = False
 
         self.paid_tonight = True
 
@@ -249,7 +251,7 @@ def get_ability(player):
 
 
 
-def select_players(shuffle_version):
+def select_players(shuffle_version, no_courts = 2):
     """ Starting with a blank list (trial_players), append players to this list
     until there are 12.
 
@@ -284,10 +286,12 @@ def select_players(shuffle_version):
             trial_players.append(player)
 
     players_to_pick = [player for player in all_current_players if
-                       not player.keep_off and not player.keep_on]
+                       not player.keep_off and not player.keep_on] # and not
+                       #player.manual_game]
 
 
-    total_court_space = 12 # should be 4*len(courts) for extensibility
+    total_court_space = 4*(no_courts) # should be 4*len(courts) for
+    # extensibility
 
 
     # While the queue of players to go on is not full
@@ -405,11 +409,12 @@ def colour_sorter(players):
     for being due. Used in the GUI for colouring the bench labels.
     Seems out of place/should be integrated into the select_players()
     function?"""
+    num = 4*len(courts)
     players_left = players[:]
     colour_dict = {}
 
     # If there are 12 or fewer players, then they're all "due"
-    if len(players_left) < 13:
+    if len(players_left) <= 4*(len(courts)):
         for player in players_left:
             colour_dict[player] = "light green"
         return colour_dict
@@ -422,14 +427,14 @@ def colour_sorter(players):
     red_players = []
 
     # Much the same as select_players()
-    while len(green_players + orange_players) < 12:
+    while len(green_players + orange_players) <=  num:
         most_off = find_most_off(players_left)
-        if len(most_off) <= (12 - len(green_players + orange_players)):
+        if len(most_off) <= (num - len(green_players + orange_players)):
             for player in most_off:
                 green_players.append(player)
         else:
             least_off = find_least_games(most_off)
-            if len(least_off) <= (12 - len(green_players + orange_players)):
+            if len(least_off) <= (num - len(green_players + orange_players)):
                 for player in least_off:
                     green_players.append(player)
             else:
@@ -496,7 +501,9 @@ def generate_new_game():
                         bench.remove(player)
 
         scores += enumerate_b.score_court(((0,1),(2,3)),courts[i].spaces,
-                                       explain = False)
+                                       explain = True)
+    print(scores)
+
 
 
 def confirm_game():
@@ -539,7 +546,8 @@ def confirm_game():
     total_rounds += 1
 
     # saving session
-    today_session.games.append([courts[i].spaces.copy() for i in range(3)])
+    today_session.games.append([courts[i].spaces.copy() for i in range(len(
+        courts))])
 
 
 
@@ -681,7 +689,7 @@ today_session = b_sessions.Session(date, start_time)
 
 total_rounds = 0
 
-courts = [Court() for i in range(3)]
+courts = [Court() for i in range(2)]
 
 """36 sample players, four of each ability level from 1-9. The first letter 
 of their names correspond to their numerical ability, in order to make 
@@ -744,6 +752,9 @@ try:
         if not hasattr(player, 'consecutive_games_on'):
             player.consecutive_games_on = 0
             print("Add consec!")
+        if not hasattr(player, 'manual_game'):
+            player.manual_game = False
+            print("Added manual!")
 
     for player in every_player:
         if not hasattr(player, 'hunger'):

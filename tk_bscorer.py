@@ -45,9 +45,9 @@ class Application(tk.Tk):
         self.court_labels = [ttk.Label(text="Court {}".format(i + 1),
                                        background=bg_colour,
                                        font=('Helvetica', 33, 'bold')) for i
-                             in range(3)]
+                             in range(2)]
 
-        self.court_frames = [CourtFrame(self, i) for i in range(3)]
+        self.court_frames = [CourtFrame(self, i) for i in range(2)]
 
         self.absent_label = ttk.Label(text="Absent Players",
                                       background=bg_colour,
@@ -180,21 +180,21 @@ class Application(tk.Tk):
 
 
         if self.test_mode:
-            for player in b_scorer.every_player:
-                try:
-                    if random.random() < pp.arrival_probs[player.name]:
-                        b_scorer.add_player(player)
-                        self.add_bench_menus(player)
-                        self.colour_dict = b_scorer.colour_sorter(
-                                                 b_scorer.all_current_players)
-                except KeyError:
-                    pass
-            # random.shuffle(b_scorer.every_player)
-            # for player in b_scorer.every_player[0:14]:
-            #     b_scorer.add_player(player)
-            #     self.add_bench_menus(player)
-            #     self.colour_dict = b_scorer.colour_sorter(
-            #                          b_scorer.all_current_players)
+            # for player in b_scorer.every_player:
+            #     try:
+            #         if random.random() < pp.arrival_probs[player.name]:
+            #             b_scorer.add_player(player)
+            #             self.add_bench_menus(player)
+            #             self.colour_dict = b_scorer.colour_sorter(
+            #                                      b_scorer.all_current_players)
+            #     except KeyError:
+            #         pass
+            random.shuffle(b_scorer.every_player)
+            for player in b_scorer.every_player[0:1]:
+                b_scorer.add_player(player)
+                self.add_bench_menus(player)
+                self.colour_dict = b_scorer.colour_sorter(
+                                     b_scorer.all_current_players)
             # for player in b_scorer.every_player:
             #     if player.name.startswith(("A","B","I")):
             #         b_scorer.add_player(player)
@@ -438,6 +438,7 @@ class Application(tk.Tk):
         if b_scorer.courts[court].spaces[space] is not None:
             tk.messagebox.showerror("Error", "Player already in that space")
         else:
+            player.manual_game = True
             b_scorer.courts[court].spaces[space] = player
             b_scorer.bench.remove(player)
             self.unchanged_board = False
@@ -553,7 +554,7 @@ class Application(tk.Tk):
         way of creating singles matches, I'm just going to leave it up to the
         person to do it manually"""
 
-        if len(b_scorer.all_current_players) < 12:
+        if len(b_scorer.all_current_players) < 4*len(b_scorer.courts):
             tk.messagebox.showerror(
                 "Error", "There are fewer players available than spaces"
                          " on courts! This program can't handle that.")
@@ -724,21 +725,24 @@ class Application(tk.Tk):
     def keep_player_off(self, court_number, index, player=None):
         """Ensure player isn't put onto the next game. Should probably be in """
 
-        # Ensure there aren't too many players off
-        players_available = [player for player in b_scorer.all_current_players
-                             if not player.keep_off]
-        if len(players_available) <=12:
-            tk.messagebox.showerror("Error", "Keeping this player off would "
-                                             "leave you with too few "
-                                             "players!", parent= self)
-            return
-
-
         # Differentiating between players on the court and the bench
         if court_number is None:
             player = player # due to reconfiguring the way menus work
         else:
             player = b_scorer.courts[court_number].spaces[index]
+
+
+        # Ensure there aren't too many players off
+        players_available = [player for player in b_scorer.all_current_players
+                             if not player.keep_off]
+
+        if not player.keep_off and len(players_available) <= 4*len(
+                b_scorer.courts):
+            tk.messagebox.showerror("Error", "Keeping this player off would "
+                                             "leave you with too few "
+                                             "players!", parent= self)
+            return
+
 
         # toggle on/off
         if player.keep_off is True:
@@ -754,7 +758,7 @@ class Application(tk.Tk):
         # Ensure there aren't too many players on
         players_kept_on = [player for player in b_scorer.all_current_players
                              if player.keep_on]
-        if len(players_kept_on) >=12:
+        if len(players_kept_on) >= len(b_scorer.courts):
             tk.messagebox.showerror("Error", "You can't keep on more players "
                                              "than there are spaces on the "
                                              "court!", parent= self)
