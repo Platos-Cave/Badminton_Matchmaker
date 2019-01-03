@@ -45,9 +45,11 @@ class Application(tk.Tk):
         self.court_labels = [ttk.Label(text="Court {}".format(i + 1),
                                        background=bg_colour,
                                        font=('Helvetica', 33, 'bold')) for i
-                             in range(2)]
+                             in range(len(
+            b_scorer.courts))]
 
-        self.court_frames = [CourtFrame(self, i) for i in range(2)]
+        self.court_frames = [CourtFrame(self, i) for i in range(len(
+            b_scorer.courts))]
 
         self.absent_label = ttk.Label(text="Absent Players",
                                       background=bg_colour,
@@ -120,6 +122,9 @@ class Application(tk.Tk):
         # Add swap menus
         for i, lab1 in enumerate(self.court_labels):
             self.court_label_menus[i] = Menu(self, tearoff=0)
+            self.court_label_menus[i].add_command(label = "Make Game Manual",
+                                                  command = lambda i=i:
+            self.make_manual(i))
             for j, lab2 in enumerate(self.court_labels):
                 if i!=j:
                     self.court_label_menus[i].add_command(label = f'Swap with '
@@ -134,6 +139,7 @@ class Application(tk.Tk):
         for i, court in enumerate(self.court_frames):
             court.grid(column=5 * i, row=5, rowspan=5, columnspan=5,
                        padx=10, pady=10, sticky='nsew')
+
 
         self.absent_label.grid(column=1, row=15, columnspan=2)
         self.abs_plyr_cbox.grid(column=1, row=16, columnspan=2,
@@ -180,21 +186,23 @@ class Application(tk.Tk):
 
 
         if self.test_mode:
-            # for player in b_scorer.every_player:
-            #     try:
-            #         if random.random() < pp.arrival_probs[player.name]:
-            #             b_scorer.add_player(player)
-            #             self.add_bench_menus(player)
-            #             self.colour_dict = b_scorer.colour_sorter(
-            #                                      b_scorer.all_current_players)
-            #     except KeyError:
-            #         pass
-            random.shuffle(b_scorer.every_player)
-            for player in b_scorer.every_player[0:1]:
-                b_scorer.add_player(player)
-                self.add_bench_menus(player)
-                self.colour_dict = b_scorer.colour_sorter(
-                                     b_scorer.all_current_players)
+            for player in b_scorer.every_player:
+                try:
+                    if random.random() < pp.arrival_probs[player.name]:
+                        b_scorer.add_player(player)
+                        self.add_bench_menus(player)
+                        self.colour_dict = b_scorer.colour_sorter(
+                                                 b_scorer.all_current_players)
+                    if len(b_scorer.all_current_players) >9:
+                        break
+                except KeyError:
+                    pass
+            # random.shuffle(b_scorer.every_player)
+            # for player in b_scorer.every_player[0:16]:
+            #     b_scorer.add_player(player)
+            #     self.add_bench_menus(player)
+            #     self.colour_dict = b_scorer.colour_sorter(
+            #                          b_scorer.all_current_players)
             # for player in b_scorer.every_player:
             #     if player.name.startswith(("A","B","I")):
             #         b_scorer.add_player(player)
@@ -202,7 +210,7 @@ class Application(tk.Tk):
             #         self.colour_dict = b_scorer.colour_sorter(
             #                     b_scorer.all_current_players)
             # avoid having to reset timer. Should cancel timer entirely
-            self.timer.duration = 0
+            self.timer.duration = 30
 
         # If program crashed or exited otherwise normally, reload all data
         try:
@@ -218,6 +226,7 @@ class Application(tk.Tk):
             b_scorer.total_rounds = board_data["total_rounds"]
             b_scorer.bench = board_data["bench"]
             b_scorer.courts = board_data["courts"]
+            b_scorer.court_count = board_data["court_count"]
             b_scorer.today_session = board_data["today_session"]
             self.colour_dict = board_data["colour_dict"]
             self.confirm_button.configure(state=board_data["confirm_state"])
@@ -227,6 +236,8 @@ class Application(tk.Tk):
                 self.undo_confirm_button.configure(state="disabled")
             for player in b_scorer.all_current_players:
                 self.add_bench_menus(player)
+            for i, court in enumerate(b_scorer.courts):
+                self.update_manual_colours(i, court.manual)
             pickle_in.close()
             # If it hasn't been saved before, or was blanked when it quit
         except KeyError:  # board_data was blanked on exit
@@ -240,6 +251,44 @@ class Application(tk.Tk):
 
     def display_swap_menu(self, event, court_no):
         self.court_label_menus[court_no].post(event.x_root, event.y_root)
+
+    def update_manual_colours(self, court_no, manual):
+
+        if manual:
+            for label in self.court_frames[court_no].labels:
+                label.config(background="blue")
+
+            self.update_board()
+
+            self.court_label_menus[court_no].entryconfigure(0,
+                                                            label="Make Game "
+                                                                  "Automatic")
+        else:
+            self.court_label_menus[court_no].entryconfigure(0,
+                                                              label="Make Game "
+                                                                    "Manual")
+            for label in self.court_frames[court_no].labels:
+                label.config(background="black")
+
+            self.update_board()
+
+
+    def make_manual(self, court_no, toggle=True, empty = True):
+
+
+        b_scorer.make_manual(court_no, toggle)
+
+        if b_scorer.courts[court_no].manual and toggle:
+
+            if empty:
+                b_scorer.courts[court_no].empty()
+            self.update_manual_colours(court_no, True)
+
+        else:
+            self.update_manual_colours(court_no, False)
+
+
+
 
     def swap(self, court_a, court_b):
         b_scorer.swap_courts(b_scorer.courts[court_a], b_scorer.courts[court_b])
@@ -262,6 +311,7 @@ class Application(tk.Tk):
         board_data["total_rounds"] = b_scorer.total_rounds
         board_data["bench"] = b_scorer.bench
         board_data["courts"] = b_scorer.courts
+        board_data['court_count'] = b_scorer.court_count
         board_data["today_session"] = b_scorer.today_session
         board_data["colour_dict"] = self.colour_dict
 
@@ -355,7 +405,7 @@ class Application(tk.Tk):
         self.bench_popup_menus[player].add_cascade(menu=self.court_menus[player],
                                                    label="Add to Court...", )
         # Add menu options for manually adding players to courts
-        for j in range(3):
+        for j in range(len(b_scorer.courts)):
             self.space_menus[player].append(Menu(self, tearoff=0))
             self.court_menus[player].add_cascade(label="#{}...".format(j + 1),
                                                  menu=self.space_menus[player][j])
@@ -553,8 +603,12 @@ class Application(tk.Tk):
         Can't make game with <12 players. Rather than figure out a
         way of creating singles matches, I'm just going to leave it up to the
         person to do it manually"""
+        if b_scorer.court_count == 0:
+            tk.messagebox.showerror(
+                "Error", "You can't generate games with zero automatic courts!")
 
-        if len(b_scorer.all_current_players) < 4*len(b_scorer.courts):
+
+        elif len(b_scorer.all_current_players) < 4*(b_scorer.court_count):
             tk.messagebox.showerror(
                 "Error", "There are fewer players available than spaces"
                          " on courts! This program can't handle that.")
@@ -576,6 +630,8 @@ class Application(tk.Tk):
 
         if are_you_sure:
             b_scorer.confirm_game()
+            for i in range(len(b_scorer.courts)):
+                self.make_manual(i, toggle=False)
             self.colour_dict = b_scorer.colour_sorter(
                 b_scorer.all_current_players)
             self.unchanged_board = True
@@ -592,6 +648,9 @@ class Application(tk.Tk):
 
         if are_you_sure:
             b_scorer.undo_confirm()
+            for i, court in enumerate(b_scorer.courts):
+                if court.old_manual:
+                    self.make_manual(i, empty=False)
             self.colour_dict = b_scorer.colour_sorter(
                 b_scorer.all_current_players)
             self.unchanged_board = False
@@ -1134,11 +1193,26 @@ class PlayerStats(tk.Toplevel):
             self.played_against_label.config(text = "N/A")
             return
         index = int(self.game_number_combo.get()[-1]) -1
-        partner = [p.name for p in self.player.played_with[index]]
-        opps = [p.name for p in self.player.played_against[index]]
+        #partner = [p.name for p in self.player.played_with[index] if p]
+        #opps = [p.name for p in self.player.played_against[index] if p]
+
+        # list comps can't handle exceptions well
+        if self.player.played_with[index][0]:
+            partner = self.player.played_with[index][0].name
+        else:
+            partner = "NONE"
+
+        opps = []
+        for p in self.player.played_against[index]:
+            if p:
+                opps.append(p.name)
+            else:
+                opps.append("NONE")
+
+
         player = self.player.name.upper()
         self.played_with_label.config(text ="{} and {} [VS]".format(player,
-                                                               partner[0]))
+                                                               partner))
         self.played_against_label.config(text="{} and {}".format(opps[0],
                                                                  opps[1]))
 

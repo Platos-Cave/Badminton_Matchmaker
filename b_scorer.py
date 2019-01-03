@@ -202,6 +202,13 @@ class Court:
         Seems like each side should be its own list?  But that makes it
         annoying to unpack'''
         self.spaces = [None, None, None, None]
+        # If the game is to be made manually on this court
+        self.manual = False
+        self.old_manual = False
+
+    def update_manual(self):
+        self.old_manual = self.manual
+
 
     def view_players(self):
 
@@ -251,7 +258,7 @@ def get_ability(player):
 
 
 
-def select_players(shuffle_version, no_courts = 2):
+def select_players(shuffle_version, no_courts = 3):
     """ Starting with a blank list (trial_players), append players to this list
     until there are 12.
 
@@ -284,6 +291,13 @@ def select_players(shuffle_version, no_courts = 2):
     for player in all_current_players:
         if player.keep_on:
             trial_players.append(player)
+
+    # Ensure don't pick manual games
+    for court in courts:
+        if court.manual:
+            for player in court.spaces:
+                if player:
+                    player.keep_off = True
 
     players_to_pick = [player for player in all_current_players if
                        not player.keep_off and not player.keep_on] # and not
@@ -485,24 +499,38 @@ def generate_new_game():
     # segregated if you've saved that
     if (total_rounds == 0) or (enumerate_b.scoring_vars['Shuffle',
                              enumerate_b.profile] == 0):
-        best_game = (enumerate_b.find_best_game(select_players("Random")))
-    else:
-        best_game = (enumerate_b.find_best_game(select_players("Segregated")))
 
-    empty_courts()
+        players = select_players("Random", court_count)
+    else:
+        players = select_players("Segregated", court_count)
+
+    best_game = (enumerate_b.find_best_game(players, courts = court_count))
+
+
+    for court in courts:
+        if court.manual:
+            continue
+        else:
+            court.empty()
 
     scores = 0
-    for i, court in enumerate(best_game):
-        for j, side in enumerate(court):
-            for k, player in enumerate(side):
-                if player:
-                    courts[i].spaces[(2 * j) + k] = player
-                    if player in bench:
-                        bench.remove(player)
+    count = 0
 
-        scores += enumerate_b.score_court(((0,1),(2,3)),courts[i].spaces,
-                                       explain = True)
-    print(scores)
+    for i, court in enumerate(courts):
+        if court.manual:
+            continue
+        else:
+            #for i, game in enumerate(best_game):
+            for j, side in enumerate(best_game[count]):
+                for k, player in enumerate(side):
+                    if player:
+                        court.spaces[(2 * j) + k] = player
+                        if player in bench:
+                            bench.remove(player)
+            count +=1 # because 'i' goes up
+
+       # scores += enumerate_b.score_court(((0,1),(2,3)),courts[i].spaces,
+       #                                explain = False)
 
 
 
@@ -535,7 +563,6 @@ def confirm_game():
     for player in bench:
         # should be Player Method?
         player.update_when_benched()
-
 
     for player in all_current_players:
         player.keep_off = False
@@ -642,6 +669,34 @@ def empty_courts():
     for court in courts:
         court.empty()
 
+# should be class attribute
+def make_manual(court_no, toggle=True):
+    '''Toggle court on to manual or automatic'''
+
+    if courts[court_no].manual:
+        add_court()
+        courts[court_no].manual = False
+
+    elif not toggle: # when resetting
+        pass
+    else:
+        remove_court()
+        courts[court_no].manual = True
+
+    # Save the old manual state for undoing purposes
+    if toggle:
+        courts[court_no].update_manual()
+
+
+
+def remove_court():
+    global court_count
+    court_count -= 1
+
+def add_court():
+    global court_count
+    court_count += 1
+
 def save_and_quit(pickling=True):
     """Reset everything only when exited properly.
     Otherwise, you can reload your previous state."""
@@ -689,7 +744,9 @@ today_session = b_sessions.Session(date, start_time)
 
 total_rounds = 0
 
-courts = [Court() for i in range(2)]
+courts = [Court() for i in range(3)]
+court_count = len(courts)
+
 
 """36 sample players, four of each ability level from 1-9. The first letter 
 of their names correspond to their numerical ability, in order to make 

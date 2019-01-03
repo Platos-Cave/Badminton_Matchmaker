@@ -34,9 +34,7 @@ from itertools import combinations
 import operator
 import pickle
 import datetime
-#from b_scorer import courts
-courts = 2
-
+import time
 
 
 # The user can adjust the weightings of elements of score_courts()
@@ -86,6 +84,7 @@ else:
 # Defines the multipliers for each level of affinity
 level_dict = {'Low': 0.5, 'Medium': 1, 'High': 2, 'Maximum': 1000000}
 
+
 # # Integers standing in for players
 # players = [i for i in range(12)]
 # # Will be appended until it has all possible three-court combos
@@ -115,12 +114,16 @@ level_dict = {'Low': 0.5, 'Medium': 1, 'High': 2, 'Maximum': 1000000}
 #             if court_3 not in tested_combos_2:
 #                 if court_3 not in tested_combos:
 #                     all_combos.append([court_1, court_2, court_3])
+
+
 #
+# print(court_1s)
 # #
-# # print(all_combos[0])
-# # print(all_combos[1000])
-# # print(all_combos[-1])
-# print(len(all_combos))
+# # #
+# # # print(all_combos[0])
+# # # print(all_combos[1000])
+# # # print(all_combos[-1])
+# # print(len(all_combos))
 
 def partitions(s, r):
     """
@@ -141,14 +144,22 @@ def partitions(s, r):
         for p in partitions(rest.difference(c), r):
             yield (first_subset,) + p
 
-players = [i for i in range(8)]
-combos = list(partitions(range(8),4))
-all_combos = []
-for games in combos:
-    all_combos.append([])
-    for game in games:
-        all_combos[-1].append(tuple(sorted(game)))
-court_1s = list(itertools.combinations(players, 4))
+combos_total = []
+
+for i in range(1,4):
+    players = [p for p in range(i*4)]
+    combos = list(partitions(range(i*4), 4))
+    all_combos = []
+    # should modify 'partitions' function to do this
+    for games in combos:
+        all_combos.append([])
+        for game in games:
+            all_combos[-1].append(tuple(sorted(game)))
+    court_1s = list(itertools.combinations(players, 4))
+    combos_total.append((court_1s, all_combos))
+
+
+
 
 
 ''' For a given combo (e.g. [0,1,6,7], score all three distinct combos
@@ -173,6 +184,7 @@ def score_court(court, trial_players, explain = False):
     ''' Returns the "score" of a game, where "trial_players" is a list of
      player objects and "court" is a pair of tuples, representing indices
      of those players'''
+
     score = 0
     # Create the court using the indices from "court" on "trial_players"
     # Unpacked for easier referencing
@@ -322,34 +334,32 @@ def best_score(combo, trial_players):
     best_combos[combo] = three_combos[index]
 
 
-def find_best_game(trial_players):
+def find_best_game(players, courts):
 
     '''From a list of 12 player objects, return the best three games possible'''
     scores = []
 
     # Score all the combos
+    #print(combos_total[courts-1][0])
 
-    for combo in court_1s:
-        best_score(combo, trial_players)
-
+    for combo in combos_total[courts-1][0]:
+        best_score(combo, players)
 
     # Look up each combo's score, add together.
-    for combo in all_combos:
-        scores.append(
-            [scores_dict[combo[i]] for i in range(courts)])
+
+    for combo in combos_total[courts-1][1]:
+        scores.append(sum([scores_dict[combo[i]] for i in range(courts)]))
 
     index, lowest_score = min(enumerate(scores), key=operator.itemgetter(1))
-    print(f'Lowest score: {lowest_score}')
 
     # The best combinations of players on each of the three courts (unsorted)
-    best_unsorted = all_combos[index]
+    best_unsorted = combos_total[courts-1][1][index]
 
     # For each of the unsorted courts, find the best of the 3 combos,
     # then set that as the court.
     # Possible drawback: no tie-breaking mechanism might cause a small bias?
 
     best_game = [best_combos[best_unsorted[i]] for i in range(courts)]
-
 
     # Index the players to the numbers representing them.
     # Ugly, should be able to make more succinct and readable
@@ -362,15 +372,9 @@ def find_best_game(trial_players):
     # ((trial_players[best_game[2][0][0]], trial_players[best_game[2][0][1]]),
     #  (trial_players[best_game[2][1][0]], trial_players[best_game[2][1][1]])))
 
-    best_players = (
-    ((trial_players[best_game[0][0][0]], trial_players[best_game[0][0][1]]),
-     (trial_players[best_game[0][1][0]], trial_players[best_game[0][1][1]])),
-    ((trial_players[best_game[1][0][0]], trial_players[best_game[1][0][1]]),
-     (trial_players[best_game[1][1][0]], trial_players[best_game[1][1][1]])))
-
-    print(all_combos)
-    print([p.name for p in trial_players])
-    print(best_combos)
-    print(scores_dict)
+    best_players =  [((players[best_game[i][0][0]],
+                       players[best_game[i][0][1]]),
+          (players[best_game[i][1][0]],
+           players[best_game[i][1][1]])) for i in range(courts)]
 
     return best_players
