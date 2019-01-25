@@ -7,6 +7,8 @@ import enumerate_b
 import b_sessions
 import datetime
 from datetime import datetime
+import operator
+from statistics import mean
 
 class Player:
     def __init__(self, name, sex, ability, partner_affinities=[],
@@ -40,6 +42,10 @@ class Player:
         self.played_with = []
         # who this player's opponents have been this night
         self.played_against = []
+
+        # how deserving is this player of another game?
+        # a replacement for looking at "total games"
+        self.desert = 0
 
         self.hunger = 0
         self.mean_game_abs = self.ability
@@ -251,10 +257,19 @@ def find_least_games(lst):
     times = [player.adjusted_games for player in lst if player is not None]
     return [lst[i] for i, j in enumerate(times) if j == min(times)]
 
+def find_most_deserving(lst):
+    """Of a list of players, find those with the highest "deserving" score,
+    which is similar to 'least games' in practice"""
+    times = [player.desert for player in lst if player is not None]
+    return [lst[i] for i, j in enumerate(times) if j == max(times)]
+
+
 def get_ability(player):
     """To give a key for the next function to sort by ability. Unnecessary?
     Could use lambda?"""
     return player.ability
+
+
 
 
 
@@ -332,7 +347,13 @@ def select_players(shuffle_version, no_courts = 3):
             # number of games than slots left,
             # then add the players who have played the fewest games first
 
-            players_with_least = find_least_games(players_most_due)
+            if shuffle_version == "Smart":
+                players_with_least = players_most_due
+
+            else:
+                players_with_least = find_least_games(players_most_due)
+
+
 
             #  If players with the least number of games fill the courts,
             # add them
@@ -341,10 +362,14 @@ def select_players(shuffle_version, no_courts = 3):
                     trial_players.append(player)
             else:
 
-                if shuffle_version == "Random":
+                if shuffle_version in ("Random", "Smart"):
 
+                    if shuffle_version == "Random":
                     # put players with least consecutive games on first
-                    least_consec = find_least_consecutive(players_with_least)
+                        least_consec = find_least_consecutive(players_with_least)
+
+                    else:
+                        least_consec = players_with_least
 
 
                     if len(least_consec) <= (total_court_space - taken):
@@ -354,8 +379,6 @@ def select_players(shuffle_version, no_courts = 3):
                     else:
                     # To hopefully ensure tiebreaks are fair
                         random.shuffle(least_consec)
-
-
 
                         for i in range(total_court_space - taken):
                             trial_players.append(least_consec[i])
@@ -409,6 +432,8 @@ def select_players(shuffle_version, no_courts = 3):
                             for i in range(total_court_space - taken):
                                 trial_players.append(
                                     ability_sorted_players[-(i + 1)])
+
+
 
         # The remaining players who are not yet selected
         players_to_pick = [i for i in players_to_pick if i not in trial_players]
@@ -492,21 +517,53 @@ def view_bench():
                                                                     player.time_since_last,
                                                                     player.adjusted_games))
 
+# Make work for multiple versions
 def generate_new_game():
     """Find the best game possible, then add those players to the courts"""
 
     # Quick and dirty rule to always start with random shuffle, then use
     # segregated if you've saved that
-    if (total_rounds == 0) or (enumerate_b.scoring_vars['Shuffle',
-                             enumerate_b.profile] == 0):
-
+    profile = enumerate_b.scoring_vars['Shuffle',
+                             enumerate_b.profile]
+    if profile == 0 or profile == 2:
         players = select_players("Random", court_count)
-    else:
+    elif profile == 1:
         players = select_players("Segregated", court_count)
+    else:
+        return AttributeError
 
-    best_game = (enumerate_b.find_best_game(players, courts = court_count))
+    if profile == 2:
+        trials = 100
+        games = []
+        scores = []
+        tolerance_scores = []
+
+        for i in range(trials):
+            players = select_players("Smart", court_count)
+            total = (enumerate_b.find_best_game(players, courts =
+                    court_count, scored = True))
+            games.append(total[0])
+            scores.append(total[1])
+            tolerance_scores.append(total[2])
 
 
+        # print_game(best_game[0])
+        # print('')
+        # print_game(best_game_2[0])
+        index, lowest_score = min(enumerate(scores), key=operator.itemgetter(1))
+        #print(f'Max score of {trials} games: {max(scores)}')
+        #print(f'Mean score of {trials} games: {mean(scores)}')
+        #print(f'Score of this game: {lowest_score} (Tolerance: {
+        # tolerance_scores[index]})')
+
+        best_game = games[index]
+
+    else:
+        best_game = (enumerate_b.find_best_game(players, courts = court_count))
+
+    place_on_courts(best_game)
+
+def place_on_courts(best_game):
     for court in courts:
         if court.manual:
             continue
@@ -530,8 +587,17 @@ def generate_new_game():
             count +=1 # because 'i' goes up
 
        # scores += enumerate_b.score_court(((0,1),(2,3)),courts[i].spaces,
-       #                                explain = False)
+       #         #                            explain = False)
+    enumerate_b.score_num = 0
 
+def print_game(game):
+     for i, court in enumerate(game):
+        print("*Court {}* \n".format(i + 1))
+        for side in court:
+            print("{} and {}".format(side[0].name,
+                                          side[1].name))
+        print('')
+     print("--------------------")
 
 
 def confirm_game():
@@ -575,6 +641,12 @@ def confirm_game():
     # saving session
     today_session.games.append([courts[i].spaces.copy() for i in range(len(
         courts))])
+
+    # Updating desert.
+    update_desert()
+    # print_desert()
+
+
 
 
 
@@ -688,7 +760,6 @@ def make_manual(court_no, toggle=True):
         courts[court_no].update_manual()
 
 
-
 def remove_court():
     global court_count
     court_count -= 1
@@ -696,6 +767,22 @@ def remove_court():
 def add_court():
     global court_count
     court_count += 1
+
+def update_desert():
+
+    for player in bench: # as opposed to checking the courts
+        player.desert += 1
+    for player in all_current_players:
+        player.desert += ((4 * len(courts))/len(all_current_players)) - 1
+
+
+def print_desert():
+    for player in every_player:
+        #print(player.name, player.total_games)
+        #if player.name in ('Henry', 'David', 'Jack', 'Desmond'):
+        #print(f'{player.name} played {player.total_games}')
+        print(f'{player.name}s desert is {player.desert}')
+
 
 def save_and_quit(pickling=True):
     """Reset everything only when exited properly.
@@ -714,6 +801,7 @@ def save_and_quit(pickling=True):
         player.keep_on = False
         player.mean_game_abs = player.ability
         player.hunger = 0
+        #print(f'{player.name} reset!')
 
     # Save departure times
     for player in all_current_players:
@@ -813,14 +901,14 @@ try:
             player.manual_game = False
             print("Added manual!")
 
-    for player in every_player:
+
         if not hasattr(player, 'hunger'):
             player.hunger = player.ability
         if not hasattr(player, 'mean_game_abs'):
             player.mean_game_abs = player.ability
 
-    # temporary backwards compatibility code
-    for player in every_player:
+    # backwards compatibility code
+
         if not hasattr(player, 'membership'):
             player.membership = "Member (incl. feathers)"
         else:
@@ -831,6 +919,9 @@ try:
             player.paid_tonight = True
         if not hasattr(player, 'keep_on'):
             player.keep_on = False
+
+        if not hasattr(player, 'desert'):
+            player.desert = 0
 
         # Grandfather in new affinities
         temp_partners = []
@@ -854,6 +945,7 @@ try:
         player.opponent_affinities = temp_opps
 
 
+
 except FileNotFoundError:
     every_player = [Aaron, Andrew, Amanda, Anna, Barry, Beth, Bill, Bob, Caleb,
                 Calvin, Cindy, Charles, David, Derek, Denise, Doris, Edward,
@@ -873,6 +965,8 @@ try:
 except FileNotFoundError:
     all_sessions = b_sessions.all_sessions
 
+
+
 all_current_players = []
 # player not in all_current_players would duplicate it
 absent_players = [player for player in every_player if player.name not in
@@ -888,3 +982,5 @@ fee_structure = {("Casual", 1): 5, ("Casual", 3): 10,
                  ("Member (no feathers)", 1): 0,
                  ("Member (no feathers)", 3): 3}
 
+#for player in every_player:
+#    player.desert = 0

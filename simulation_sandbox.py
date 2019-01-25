@@ -11,52 +11,55 @@ import player_probs as pp
 
 
 def initialise():
+
+
     #for player in b_scorer.absent_players:
-    for player in b_scorer.every_player[0:8]:
-        b_scorer.add_player(player)
-    #     try:
-    #         if random.random() < pp.arrival_probs[player.name]:
-    #             b_scorer.add_player(player)
-    #     except KeyError:
-    #         continue
-    # #print(len(b_scorer.all_current_players))
-    # if (len(b_scorer.all_current_players)) <4*len(b_scorer.courts):
-    #     #print("Less than 12!")
-    #     random.shuffle(b_scorer.absent_players)
-    #     #print(len(b_scorer.absent_players))
-    #     count = 0
-    #     while len(b_scorer.all_current_players) <4*len(b_scorer.courts):
-    #         #print(f'Now {len(b_scorer.all_current_players)} players!')
-    #         try:
-    #             player = b_scorer.absent_players[count]
-    #             if random.random() < pp.arrival_probs[
-    #                 player.name]:
-    #                 b_scorer.add_player(player)
-    #                 #print(f'Added {player.name}!')
-    #                 #print(f'Now {len(b_scorer.all_current_players)}!')
-    #         except KeyError:
-    #             pass
-    #         if count > len(b_scorer.absent_players):
-    #             count = 0
-    #             print("Needed the count!")
-    #         else:
-    #             count +=1
+    for player in b_scorer.every_player:
+        try:
+            if random.random() < pp.arrival_probs[player.name]:
+                b_scorer.add_player(player)
+        except KeyError:
+            continue
+    #print(len(b_scorer.all_current_players))
+    if len(b_scorer.all_current_players) < 4*len(b_scorer.courts):
+        #print("Less than 12!")
+        random.shuffle(b_scorer.absent_players)
+        #print(len(b_scorer.absent_players))
+        count = 0
+        while len(b_scorer.all_current_players) < 4*len(b_scorer.courts):
+            #print(f'Now {len(b_scorer.all_current_players)} players!')
+            try:
+                player = b_scorer.absent_players[count]
+                if random.random() < pp.arrival_probs[
+                    player.name]:
+                    b_scorer.add_player(player)
+                    #print(f'Added {player.name}!')
+                    #print(f'Now {len(b_scorer.all_current_players)}!')
+            except KeyError:
+                pass
+            if count > len(b_scorer.absent_players):
+                count = 0
+                print("Needed the count!")
+            else:
+                count +=1
     #
     #     #print(f"Now {len(b_scorer.all_current_players)}!")
-
-
+    #print(len(b_scorer.all_current_players))
 
 def simulate():
+
     b_scorer.generate_new_game()
     b_scorer.confirm_game()
+    b_scorer.update_desert()
 
 def simulate_session(trials):
     initialise()
     for i in range(trials):
         simulate()
+
     every_session.append(b_scorer.today_session)
-    b_scorer.save_and_quit(pickling=False)
-    # need to make this easier
+        # need to make this easier
+
     date = datetime.now().date()
     start_time = datetime.now().time()
     b_scorer.today_session = b_sessions.Session(date, start_time)
@@ -66,6 +69,8 @@ def simulate_session(trials):
     b_scorer.bench = []
     b_scorer.all_current_players = []
     b_scorer.total_rounds = 0
+
+    b_scorer.save_and_quit(pickling=False)
 
 # How often is a game balanced?
 def balance_test():
@@ -104,7 +109,7 @@ def individual_player_test():
 
 def export_game_data():
 
-    game_file = open('{}.csv'.format("4 games"), 'w', newline='')
+    game_file = open('{}.csv'.format("Desert 3"), 'w', newline='')
 
     with game_file:
         writer = csv.writer(game_file)
@@ -132,10 +137,17 @@ every_session = []
 print("Started!")
 t1 = time.time()
 
-for i in range(1):
-    if i%100 == 0:
-        print(f'{i/100}% finished!')
-    simulate_session(10)
+for player in b_scorer.every_player:
+    player.desert = 0
+
+for i in range(1000):
+    print(f'{i}% finished!')
+    if i%2 == 0:
+        simulate_session(5)
+    else:
+        simulate_session(4)
+
+b_scorer.print_desert()
 
 export_game_data()
 

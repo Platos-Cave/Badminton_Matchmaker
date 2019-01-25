@@ -22,7 +22,7 @@ class Application(tk.Tk):
         tk.Tk.__init__(self)
 
         # A (probably unPythonic) way of randomly loading the bench
-        self.test_mode = True
+        self.test_mode = False
 
         self.title("Badminton Matchmaker")
 
@@ -193,7 +193,7 @@ class Application(tk.Tk):
                         self.add_bench_menus(player)
                         self.colour_dict = b_scorer.colour_sorter(
                                                  b_scorer.all_current_players)
-                    if len(b_scorer.all_current_players) >9:
+                    if len(b_scorer.all_current_players) >11:
                         break
                 except KeyError:
                     pass
@@ -1552,7 +1552,8 @@ class GameStats(tk.Toplevel):
         self.aff_entry = ttk.Entry(self, width=4)
         self.female_aff_entry = ttk.Entry(self, width=4)
         self.shuffle_combo = ttk.Combobox(self, width=10, state = 'readonly',
-                                          values=["Random", "Segregated"])
+                                          values=["Random", "Segregated",
+                                                  "Smart"])
 
         # not used ATM
         # self.default_button = ttk.Button(self, text="Return to Default",
@@ -1604,6 +1605,7 @@ class GameStats(tk.Toplevel):
             #  rather than reference the module names
             try:
                 day = self.profile_combo.get()
+
                 b_scorer.enumerate_b.scoring_vars['Balance', day] = float(
                     self.bal_entry.get())
                 b_scorer.enumerate_b.scoring_vars['Ability_Seg', day] = float(

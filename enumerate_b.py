@@ -180,10 +180,14 @@ best_combos = {}
 # e.g. 8)
 scores_dict = {}
 
+score_num = 0
+
 def score_court(court, trial_players, explain = False):
     ''' Returns the "score" of a game, where "trial_players" is a list of
      player objects and "court" is a pair of tuples, representing indices
      of those players'''
+    global score_num
+    score_num +=1
 
     score = 0
     # Create the court using the indices from "court" on "trial_players"
@@ -334,23 +338,33 @@ def best_score(combo, trial_players):
     best_combos[combo] = three_combos[index]
 
 
-def find_best_game(players, courts):
+def find_best_game(players, courts, scored=False, log=False):
+
+    t1 = time.time()
 
     '''From a list of 12 player objects, return the best three games possible'''
     scores = []
 
+
     # Score all the combos
-    #print(combos_total[courts-1][0])
+    # print(combos_total[courts-1][0])
 
     for combo in combos_total[courts-1][0]:
         best_score(combo, players)
 
+    t2 = time.time()
+
     # Look up each combo's score, add together.
+
 
     for combo in combos_total[courts-1][1]:
         scores.append(sum([scores_dict[combo[i]] for i in range(courts)]))
 
+    t3 = time.time()
+
     index, lowest_score = min(enumerate(scores), key=operator.itemgetter(1))
+
+    t4 = time.time()
 
     # The best combinations of players on each of the three courts (unsorted)
     best_unsorted = combos_total[courts-1][1][index]
@@ -372,9 +386,36 @@ def find_best_game(players, courts):
     # ((trial_players[best_game[2][0][0]], trial_players[best_game[2][0][1]]),
     #  (trial_players[best_game[2][1][0]], trial_players[best_game[2][1][1]])))
 
-    best_players =  [((players[best_game[i][0][0]],
-                       players[best_game[i][0][1]]),
+    best_players = [((players[best_game[i][0][0]],
+                    players[best_game[i][0][1]]),
           (players[best_game[i][1][0]],
            players[best_game[i][1][1]])) for i in range(courts)]
 
-    return best_players
+    t5 = time.time()
+
+
+    if log:
+        print(f'{t2-t1} to score the combos')
+        print(f'{t3-t2} for adding')
+        print(f'{t4-t3} for finding index')
+        print(f'{t5-t4} for the rest')
+
+    # For "tolerance" testing:
+    tolerance_score = 0
+
+    for player in players:
+        tolerance_score -= player.desert * abs(player.desert)
+
+    # print(f'Tolerance score is {10*tolerance_score}')
+    tolerance_score = 10*tolerance_score
+
+    lowest_score += tolerance_score
+
+
+    if not scored:
+        return best_players
+    if scored: # for finding more
+        return (best_players, lowest_score, tolerance_score)
+
+
+
