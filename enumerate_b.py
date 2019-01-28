@@ -338,7 +338,7 @@ def best_score(combo, trial_players):
     best_combos[combo] = three_combos[index]
 
 
-def find_best_game(players, courts, scored=False, log=False):
+def find_best_game(players, courts, benched = [], scored=False, log=False):
 
     t1 = time.time()
 
@@ -400,22 +400,47 @@ def find_best_game(players, courts, scored=False, log=False):
         print(f'{t4-t3} for finding index')
         print(f'{t5-t4} for the rest')
 
-    # For "tolerance" testing:
+    # For "tolerance"
     tolerance_score = 0
 
     for player in players:
-        tolerance_score -= player.desert * abs(player.desert)
-
-    # print(f'Tolerance score is {10*tolerance_score}')
-    tolerance_score = 10*tolerance_score
+        # games with more deserving players -> lower cost
+        tolerance_score -= 10*(player.desert * abs(player.desert))
+        # games with players on more times in a row -> higher cost
+        tolerance_score += 5*(player.consecutive_games_on**1.5)
+        # fraction ?
 
     lowest_score += tolerance_score
 
+    # checking affinities in benched players
+    bench_score = (bench_cost(benched))*(0.5*scoring_vars[('Affinity',profile)])
+
+    lowest_score -= bench_score
 
     if not scored:
         return best_players
     if scored: # for finding more
-        return (best_players, lowest_score, tolerance_score)
+        return (best_players, lowest_score, tolerance_score, bench_score)
+
+def bench_cost(benched):
+    cost = 0
+    for player in benched:
+        #partner_affs = [i[0] for i in (player.partner_affinities)]
+        #opp_affs = [i[0] for i in (player.opponent_affinities)]
+
+        for other_player in benched:
+            for aff in player.partner_affinities:
+                if other_player.name == aff[0]:
+                    cost += 1 * level_dict[aff[1]]
+            for aff in player.opponent_affinities:
+                if other_player.name == aff[0]:
+                    cost += 1 * level_dict[aff[1]]
+
+    return cost
+
+
+
+
 
 
 

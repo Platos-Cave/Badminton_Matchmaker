@@ -46,6 +46,7 @@ class Player:
         # how deserving is this player of another game?
         # a replacement for looking at "total games"
         self.desert = 0
+        self.old_desert = 0
 
         self.hunger = 0
         self.mean_game_abs = self.ability
@@ -142,7 +143,9 @@ class Player:
         del self.played_with[-1]
         del self.played_against[-1]
         self.hunger = self.old_hunger
+        self.desert = self.old_desert
         self.mean_game_abs = self.old_mean_game_abs
+
 
 
     def accumulate_fee(self):
@@ -537,26 +540,36 @@ def generate_new_game():
         games = []
         scores = []
         tolerance_scores = []
+        bench_scores = []
 
         for i in range(trials):
             players = select_players("Smart", court_count)
+            benched = [p for p in all_current_players if p not in players]
             total = (enumerate_b.find_best_game(players, courts =
-                    court_count, scored = True))
+                    court_count, benched = benched, scored = True))
             games.append(total[0])
             scores.append(total[1])
             tolerance_scores.append(total[2])
+            bench_scores.append(total[3])
 
 
-        # print_game(best_game[0])
-        # print('')
-        # print_game(best_game_2[0])
-        index, lowest_score = min(enumerate(scores), key=operator.itemgetter(1))
-        #print(f'Max score of {trials} games: {max(scores)}')
-        #print(f'Mean score of {trials} games: {mean(scores)}')
-        #print(f'Score of this game: {lowest_score} (Tolerance: {
-        # tolerance_scores[index]})')
+        display = False
 
+        index, lowest_score = min(enumerate(scores), key=operator.itemgetter(
+            1))
         best_game = games[index]
+
+        if display:
+            #print_game(best_game[0])
+            # print('')
+            #print_game(best_game_2[0])
+
+            print(f'Max score of {trials} games: {max(scores)}')
+            print(f'Mean score of {trials} games: {mean(scores)}')
+            print(f'Score of this game: {lowest_score} (Tolerance: {tolerance_scores[index]})'
+                  f'(Bench score: {bench_scores[index]})')
+
+
 
     else:
         best_game = (enumerate_b.find_best_game(players, courts = court_count))
@@ -652,13 +665,16 @@ def confirm_game():
 
 def undo_confirm():
 
+
     for court in courts:
         for player in court.spaces:
             if player is not None:
                 player.undo_game()
 
+    # should be part of the undo game method
     for player in bench:
         player.time_since_last -= 1
+        player.desert = player.old_desert
 
     # not ideal to use globals, what but else should I do?
     global total_rounds
@@ -760,20 +776,23 @@ def make_manual(court_no, toggle=True):
         courts[court_no].update_manual()
 
 
+# For purposes of manual game court counting
 def remove_court():
     global court_count
     court_count -= 1
 
 def add_court():
     global court_count
-    court_count += 1
+    court_
 
+# Should work only
 def update_desert():
-
-    for player in bench: # as opposed to checking the courts
-        player.desert += 1
-    for player in all_current_players:
+     for player in all_current_players:
+        player.old_desert = player.desert
         player.desert += ((4 * len(courts))/len(all_current_players)) - 1
+     for player in bench:  # as opposed to checking the courts
+         player.desert += 1
+
 
 
 def print_desert():

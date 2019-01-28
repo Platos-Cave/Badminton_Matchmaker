@@ -193,7 +193,7 @@ class Application(tk.Tk):
                         self.add_bench_menus(player)
                         self.colour_dict = b_scorer.colour_sorter(
                                                  b_scorer.all_current_players)
-                    if len(b_scorer.all_current_players) >11:
+                    if len(b_scorer.all_current_players) >15:
                         break
                 except KeyError:
                     pass
@@ -1022,6 +1022,9 @@ class PlayerStats(tk.Toplevel):
         self.games_on_number = ttk.Label(self, text="0",
                                         font=self.label_font)
 
+        self.desert_label = ttk.Label(self, text = "Player Desert")
+        self.desert_display = ttk.Label(self, text="0",
+                                        font=self.label_font)
 
 
         self.player_notes_label = ttk.Label(self, text="Player Notes")
@@ -1127,8 +1130,8 @@ class PlayerStats(tk.Toplevel):
                                         lambda
                                             event: self.update_game_display())
 
-
-
+            self.desert_display = ttk.Label(self, text=round(player.desert,
+                                                               2))
 
         self.name_label.grid(column=0, row=1)
         self.name_entry.grid(column=1, row=1, columnspan=3, sticky='ew')
@@ -1174,6 +1177,9 @@ class PlayerStats(tk.Toplevel):
             self.played_against_label.grid(column=1, row=18)
             self.hunger_label.grid(column = 0, row = 19)
             self.hunger_value.grid(column=1, row=19)
+            self.desert_label.grid(column=0, row=20)
+            self.desert_display.grid(column=1, row=20)
+
 
         self.save_player_button.grid(column=1, row=21, columnspan=3)
 
