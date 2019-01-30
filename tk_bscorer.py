@@ -193,7 +193,7 @@ class Application(tk.Tk):
                         self.add_bench_menus(player)
                         self.colour_dict = b_scorer.colour_sorter(
                                                  b_scorer.all_current_players)
-                    if len(b_scorer.all_current_players) >15:
+                    if len(b_scorer.all_current_players) >6:
                         break
                 except KeyError:
                     pass
@@ -210,7 +210,7 @@ class Application(tk.Tk):
             #         self.colour_dict = b_scorer.colour_sorter(
             #                     b_scorer.all_current_players)
             # avoid having to reset timer. Should cancel timer entirely
-            self.timer.duration = 30
+            self.timer.duration = 0
 
         # If program crashed or exited otherwise normally, reload all data
         try:

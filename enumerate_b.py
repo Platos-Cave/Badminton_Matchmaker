@@ -241,23 +241,36 @@ def score_court(court, trial_players, explain = False):
                              i is not None]
 
         for o_player in opponents:
-            count = 1
-            base_score = 0
-            for i, game in enumerate(player.played_against):
-                if o_player in game:
-                    base_score += scoring_vars[('Mixing', profile)] * 2 * (
-                    (1 / (1 + discount_rate) ** (player.total_games - i - 1)))
-                    count += 0.2
-            for i, game in enumerate(player.played_with):
-                if o_player in game:
-                    base_score += scoring_vars[('Mixing', profile)] * (
-                                1 / (1 + discount_rate) ** (
-                                     player.total_games - i - 1))
-                    count += 0.1
-            # "Count" is a means of pseudo-exponentiation - i.e. we want it
-            # to be proportionally worse to play someone three times in a row
-            # than twice in a row
-            score += base_score * (count)
+            # count = 1
+            # base_score = 0
+            # for i, game in enumerate(player.played_against):
+            #     if o_player in game:
+            #         base_score += scoring_vars[('Mixing', profile)] * 2 * (
+            #         (1 / (1 + discount_rate) ** (player.total_games - i - 1)))
+            #         count += 0.2
+            # for i, game in enumerate(player.played_with):
+            #     if o_player in game:
+            #         base_score += scoring_vars[('Mixing', profile)] * (
+            #                     1 / (1 + discount_rate) ** (
+            #                          player.total_games - i - 1))
+            #         count += 0.1
+            # #"Count" is a means of pseudo-exponentiation - i.e. we want it
+            # #to be proportionally worse to play someone three times in a row
+            # # than twice in a row
+            # adjusted_score = base_score * (count)
+
+            new_score = scoring_vars[('Mixing',
+                                      profile)]*player.opp_histories[
+                o_player]
+
+
+            if explain:
+                if player.name == "Henry":
+                    # print(f'(Henry score with opponent is {adjusted_score}')
+                    print(f'(Henry new score with opponent is {new_score}')
+
+            #score += adjusted_score
+            score += new_score
             # Subtract affinity variable from score
             for aff in player.opponent_affinities:
                 if aff[0] == o_player.name:
@@ -266,21 +279,34 @@ def score_court(court, trial_players, explain = False):
                                                            profile)])
                     break
 
-        for o_player in partner:  # there's only 1 partner, so loop seems silly?
-            count = 1
-            base_score = 0
-            for i, game in enumerate(player.played_against):
-                if o_player in game:
-                    base_score += scoring_vars[('Mixing', profile)] * (
-                                1 / (1 + discount_rate) ** (
-                                    player.total_games - i - 1))
-                    count += 0.1
-            for i, game in enumerate(player.played_with):
-                if o_player in game:
-                    base_score += scoring_vars[('Mixing', profile)] * 3 * (
-                    (1 / (1 + discount_rate) ** (player.total_games - i - 1)))
-                    count += 0.2
-            score += base_score * (count)
+        for o_player in partner:  # there's only 1 partner, so loop seems
+             # silly?
+        #     count = 1
+        #     base_score = 0
+        #     for i, game in enumerate(player.played_against):
+        #         if o_player in game:
+        #             base_score += scoring_vars[('Mixing', profile)] * (
+        #                         1 / (1 + discount_rate) ** (
+        #                             player.total_games - i - 1))
+        #             count += 0.1
+        #     for i, game in enumerate(player.played_with):
+        #         if o_player in game:
+        #             base_score += scoring_vars[('Mixing', profile)] * 3 * (
+        #             (1 / (1 + discount_rate) ** (player.total_games - i - 1)))
+        #             count += 0.2
+        #
+        #     adjusted_score = base_score * (count)
+
+            new_score = scoring_vars[('Mixing',
+                                      profile)]*player.partner_histories[
+                o_player]
+
+            if explain:
+                if player.name == "Henry":
+                    # print(f'(Henry score with partner is {adjusted_score}')
+                    print(f'(Henry new score with opponent is {new_score}')
+            #score += adjusted_score
+            score += new_score
 
             for aff in player.partner_affinities:
                 if aff[0] == o_player.name:
@@ -391,15 +417,6 @@ def find_best_game(players, courts, benched = [], scored=False, log=False):
           (players[best_game[i][1][0]],
            players[best_game[i][1][1]])) for i in range(courts)]
 
-    t5 = time.time()
-
-
-    if log:
-        print(f'{t2-t1} to score the combos')
-        print(f'{t3-t2} for adding')
-        print(f'{t4-t3} for finding index')
-        print(f'{t5-t4} for the rest')
-
     # For "tolerance"
     tolerance_score = 0
 
@@ -416,6 +433,16 @@ def find_best_game(players, courts, benched = [], scored=False, log=False):
     bench_score = (bench_cost(benched))*(0.5*scoring_vars[('Affinity',profile)])
 
     lowest_score -= bench_score
+
+    t5 = time.time()
+
+
+    if log:
+        print(f'{t2-t1} to score the combos')
+        print(f'{t3-t2} for adding')
+        print(f'{t4-t3} for finding index')
+        print(f'{t5-t4} for the rest')
+
 
     if not scored:
         return best_players

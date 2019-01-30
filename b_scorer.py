@@ -9,6 +9,7 @@ import datetime
 from datetime import datetime
 import operator
 from statistics import mean
+from collections import defaultdict
 
 class Player:
     def __init__(self, name, sex, ability, partner_affinities=[],
@@ -42,6 +43,10 @@ class Player:
         self.played_with = []
         # who this player's opponents have been this night
         self.played_against = []
+
+        # NEW: for more efficient matching
+        self.partner_histories = defaultdict(float)
+        self.opp_histories = defaultdict(float)
 
         # how deserving is this player of another game?
         # a replacement for looking at "total games"
@@ -599,8 +604,9 @@ def place_on_courts(best_game):
                             bench.remove(player)
             count +=1 # because 'i' goes up
 
-       # scores += enumerate_b.score_court(((0,1),(2,3)),courts[i].spaces,
-       #         #                            explain = False)
+        # scores += enumerate_b.score_court(((0,1),(2,3)),courts[i].spaces,
+        #                                     explain = True)
+        # print(scores)
     enumerate_b.score_num = 0
 
 def print_game(game):
@@ -659,7 +665,94 @@ def confirm_game():
     update_desert()
     # print_desert()
 
+    #todo - trialing out new pvp
+    update_pvp()
 
+# should be able to make more concise, lots of duplication
+def update_pvp():
+
+
+    # discount
+    for player in all_current_players:
+        for key in player.partner_histories.keys():
+            player.partner_histories[key] *= 0.9
+        for key in player.opp_histories.keys():
+            player.opp_histories[key] *= 0.9
+        # if player.name == "Henry":
+        #     print(player.partner_histories)
+        #     print(player.opp_histories)
+
+
+
+    for court in courts:
+        for player in court.spaces:
+            if player: # i.e. not NONE, an empty space
+                if player in court.spaces[0:2]:
+                    partner = [i for i in court.spaces[0:2] if i is not
+                               player if i is not None]
+                    opponents = [i for i in court.spaces[2:4] if i is not
+                                 player if i is not None]
+                else:
+                    partner = [i for i in court.spaces[2:4] if i is not
+                               player if i is not None]
+                    opponents = [i for i in court.spaces[0:2] if i is not
+                                 player if i is not None]
+
+                    # if player on side 1. Time to split list?
+                for o_player in partner:
+                    #try:
+                    player.partner_histories[o_player] += 3*(1 + (
+                            1/10)*player.partner_histories[o_player])
+                    player.opp_histories[o_player] += 1*(1 + (
+                            1/10)*player.opp_histories[o_player])
+                    #except KeyError:
+                        #player.partner_histories[o_player] = 1
+
+
+                for o_player in opponents:
+                    #try:
+                    player.opp_histories[o_player] += 2*(1 + (
+                            1/10)*player.opp_histories[o_player])
+                    player.partner_histories[o_player] += 1*(1 + (
+                            1/10)*player.partner_histories[o_player])
+                    #except KeyError:
+                    #    player.opp_histories[o_player] = 1
+
+
+                # else:  # if on side #2
+                #     if player in court.spaces[
+                #                  2:4]:
+                #         for o_player in [i for i in court.spaces[2:4] if i is not player]:
+                #             player.partner_histories[o_player] += 3 * (1 + (
+                #                     1 / 10) * player.partner_histories[
+                #                                                            o_player])
+                #             player.opp_histories[o_player] += 1 * (1 + (
+                #                     1 / 10) * player.opp_histories[o_player])
+                #
+                #
+                #         for o_player in [i for i in court.spaces[0:2] if i is not
+                #                                                      player]:
+                #             player.opp_histories[o_player] += 2 * (1 + (
+                #                     1 / 10) * player.opp_histories[o_player])
+                #             player.partner_histories[o_player] += 1 * (1 + (
+                #                     1 / 10) * player.partner_histories[o_player])
+
+                # if player.name == "Henry":
+                #     print("Partner Histories")
+                #     for p in player.partner_histories:
+                #         print(p.name, player.partner_histories[p])
+                #     print("Opponent Histories")
+                #     for p in player.opp_histories:
+                #         print(p.name, player.opp_histories[p])
+
+
+    # names = [courts[0].spaces[i].opp_histories for i in range(4)]
+    #
+    # for i, history in enumerate(names):
+    #     print(f'{courts[0].spaces[i].name}')
+    #     for p in history:
+    #         print(p.name, history[p])
+    #     print('')
 
 
 
@@ -941,6 +1034,19 @@ try:
 
         if not hasattr(player, 'desert'):
             player.desert = 0
+
+        if not hasattr(player, 'partner_histories'):
+            player.partner_histories = defaultdict(float)
+            player.opp_histories = defaultdict(float)
+
+        # deweighting histories.
+        # todo: make sure doesn't happen with autosave
+        for key in player.partner_histories.keys():
+            player.partner_histories[key] *= 0.0 # 0.5
+        for key in player.opp_histories.keys():
+            player.opp_histories[key] *= 0.0
+
+
 
         # Grandfather in new affinities
         temp_partners = []

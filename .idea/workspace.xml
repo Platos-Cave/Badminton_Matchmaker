@@ -4,14 +4,13 @@
     <option name="SPLITTER_PROPORTION" value="0.5007622" />
   </component>
   <component name="BookmarkManager">
-    <bookmark url="file://$PROJECT_DIR$/b_scorer.py" line="555" mnemonic="3" />
+    <bookmark url="file://$PROJECT_DIR$/b_scorer.py" line="573" mnemonic="3" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="12b4690e-7fa1-496f-b4cf-baaf01e9f6e0" name="Default" comment="minor clean up">
+    <list default="true" id="12b4690e-7fa1-496f-b4cf-baaf01e9f6e0" name="Default" comment="smart shuffle update">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/b_scorer.py" beforeDir="false" afterPath="$PROJECT_DIR$/b_scorer.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/enumerate_b.py" beforeDir="false" afterPath="$PROJECT_DIR$/enumerate_b.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/simulation_sandbox.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulation_sandbox.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tk_bscorer.py" beforeDir="false" afterPath="$PROJECT_DIR$/tk_bscorer.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -40,15 +39,15 @@
         <counts>
           <entry key="Python Console" value="40" />
           <entry key="dummy" value="19" />
-          <entry key="py" value="35255" />
+          <entry key="py" value="40298" />
           <entry key="spec" value="204" />
-          <entry key="txt" value="57" />
+          <entry key="txt" value="85" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="PLAIN_TEXT" value="280" />
-          <entry key="Python" value="35295" />
+          <entry key="PLAIN_TEXT" value="308" />
+          <entry key="Python" value="40338" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
@@ -78,23 +77,29 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/b_scorer.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="180">
-              <caret line="404" column="42" selection-start-line="404" selection-start-column="31" selection-end-line="404" selection-end-column="42" />
+            <state relative-caret-position="16524">
+              <caret line="1034" column="14" selection-start-line="1034" selection-start-column="14" selection-end-line="1034" selection-end-column="14" />
               <folding>
                 <element signature="e#120#133#0" expanded="true" />
-                <marker date="1548142411091" expanded="true" signature="9199:9467" ph="..." />
-                <marker date="1548142411091" expanded="true" signature="27263:27268" ph="..." />
-                <marker date="1548142411091" expanded="true" signature="27565:27570" ph="..." />
+                <marker date="1548886184313" expanded="true" signature="9446:9714" ph="..." />
+                <marker date="1548886184313" expanded="true" signature="24948:28374" ph="..." />
+                <marker date="1548886184313" expanded="true" signature="28393:28400" ph="..." />
+                <marker date="1548886184313" expanded="true" signature="31938:31943" ph="..." />
+                <marker date="1548886184313" expanded="true" signature="32240:32245" ph="..." />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/simulation_sandbox.py">
+        <entry file="file://$PROJECT_DIR$/enumerate_b.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="2312">
-              <caret line="144" column="16" selection-start-line="144" selection-start-column="16" selection-end-line="144" selection-end-column="16" />
+            <state relative-caret-position="265">
+              <caret line="366" column="73" selection-start-line="366" selection-start-column="73" selection-end-line="366" selection-end-column="73" />
+              <folding>
+                <element signature="e#1557#1573#0" expanded="true" />
+                <marker date="1548885747823" expanded="true" signature="17891:17897" ph="..." />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -102,8 +107,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/tk_bscorer.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="316">
-              <caret line="195" column="60" selection-start-line="195" selection-start-column="60" selection-end-line="195" selection-end-column="60" />
+            <state relative-caret-position="408">
+              <caret line="24" column="30" selection-start-line="24" selection-start-column="30" selection-end-line="24" selection-end-column="30" />
               <folding>
                 <element signature="e#108#128#0" expanded="true" />
               </folding>
@@ -126,7 +131,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/comb_test.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1445">
+            <state relative-caret-position="539">
               <caret line="88" column="21" selection-start-line="88" selection-start-column="21" selection-end-line="88" selection-end-column="21" />
               <folding>
                 <element signature="e#700#716#0" expanded="true" />
@@ -137,13 +142,10 @@
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/enumerate_b.py">
+        <entry file="file://$PROJECT_DIR$/simulation_sandbox.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="3043">
-              <caret line="184" column="12" selection-start-line="184" selection-start-column="4" selection-end-line="184" selection-end-column="12" />
-              <folding>
-                <element signature="e#1557#1573#0" expanded="true" />
-              </folding>
+            <state relative-caret-position="396">
+              <caret line="144" column="16" selection-start-line="144" selection-start-column="16" selection-end-line="144" selection-end-column="16" />
             </state>
           </provider>
         </entry>
@@ -159,36 +161,36 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>every_player_pi</find>
-      <find>every_player_p</find>
-      <find>print_deser</find>
-      <find>Henrys</find>
-      <find>David</find>
-      <find>attr</find>
-      <find>update_deser</find>
-      <find>print_des</find>
-      <find>update_de</find>
-      <find>every_player</find>
-      <find>find_least_g</find>
-      <find>print_d</find>
-      <find>Desmond</find>
-      <find>find_mo</find>
-      <find>smart</find>
-      <find>Smart</find>
+      <find>tolerance_</find>
+      <find>player.desert =</find>
+      <find>recal</find>
+      <find>update_desert</find>
+      <find>player.old_desert</find>
+      <find>desert =</find>
+      <find>select_player</find>
+      <find>level_dict</find>
+      <find>scoring_vars</find>
+      <find>trials</find>
+      <find>&quot;Smart&quot;</find>
+      <find>display</find>
+      <find>confirm_</find>
+      <find>update</find>
+      <find>played_with</find>
+      <find>defaultdic</find>
+      <find>'affinity</find>
+      <find>partner_histo</find>
+      <find>hasatt</find>
+      <find>test_m</find>
+      <find>affinity</find>
+      <find>affin</find>
+      <find>update_pvp</find>
+      <find>explain</find>
+      <find>pvp</find>
+      <find>score_num</find>
+      <find>desert</find>
+      <find>log</find>
       <find>test_mode</find>
-      <find>== 2</find>
-      <find>find_most_De</find>
-      <find>find_most_d</find>
-      <find>find_</find>
-      <find>print(</find>
-      <find>print_de</find>
-      <find>Henry</find>
-      <find>test_mo</find>
-      <find>find_most_off</find>
-      <find>find_least_con</find>
-      <find>print_desert</find>
-      <find>score_co</find>
-      <find>all_current</find>
+      <find>hasattr</find>
     </findStrings>
     <replaceStrings>
       <replace>0</replace>
@@ -226,9 +228,9 @@
         <option value="$PROJECT_DIR$/b_sessions.py" />
         <option value="$PROJECT_DIR$/player_probs.py" />
         <option value="$PROJECT_DIR$/comb_test.py" />
+        <option value="$PROJECT_DIR$/simulation_sandbox.py" />
         <option value="$PROJECT_DIR$/enumerate_b.py" />
         <option value="$PROJECT_DIR$/b_scorer.py" />
-        <option value="$PROJECT_DIR$/simulation_sandbox.py" />
         <option value="$PROJECT_DIR$/tk_bscorer.py" />
       </list>
     </option>
@@ -516,7 +518,21 @@
       <option name="project" value="LOCAL" />
       <updated>1545898055851</updated>
     </task>
-    <option name="localTasksCounter" value="13" />
+    <task id="LOCAL-00013" summary="smart shuffle initial">
+      <created>1548407388941</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1548407388941</updated>
+    </task>
+    <task id="LOCAL-00014" summary="smart shuffle update">
+      <created>1548710262857</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1548710262857</updated>
+    </task>
+    <option name="localTasksCounter" value="15" />
     <servers />
   </component>
   <component name="TodoView" selected-index="4">
@@ -532,27 +548,6 @@
     <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.06691254" />
-      <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
-      <window_info id="Favorites" order="2" side_tool="true" />
-      <window_info anchor="bottom" id="Message" order="0" />
-      <window_info anchor="bottom" id="Find" order="1" sideWeight="0.49947312" weight="0.3286334" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" sideWeight="0.48524764" visible="true" weight="0.3264642" />
-      <window_info anchor="bottom" id="Debug" order="3" sideWeight="0.49683878" weight="0.39804772" />
-      <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
-      <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
-      <window_info anchor="bottom" id="TODO" order="6" sideWeight="0.49947312" weight="0.3286334" />
-      <window_info anchor="bottom" id="Version Control" order="7" sideWeight="0.49789253" weight="0.3275488" />
-      <window_info anchor="bottom" id="Python Console" order="8" weight="0.19305857" />
-      <window_info anchor="bottom" id="Terminal" order="9" />
-      <window_info anchor="bottom" id="Inspection Results" order="10" weight="0.24094488" />
-      <window_info anchor="bottom" id="Event Log" order="11" sideWeight="0.5147524" side_tool="true" weight="0.3264642" />
-      <window_info anchor="bottom" id="Messages" order="12" />
-      <window_info anchor="right" id="Commander" order="0" weight="0.4" />
-      <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
-      <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
-    </layout>
-    <layout-to-restore>
       <window_info content_ui="combo" id="Project" order="0" weight="0.06691254" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
@@ -564,11 +559,32 @@
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" sideWeight="0.49947312" weight="0.3286334" />
       <window_info anchor="bottom" id="Version Control" order="7" sideWeight="0.49789253" weight="0.3275488" />
-      <window_info anchor="bottom" id="Python Console" order="8" weight="0.19305857" />
-      <window_info anchor="bottom" id="Terminal" order="9" />
-      <window_info anchor="bottom" id="Inspection Results" order="10" weight="0.24094488" />
-      <window_info anchor="bottom" id="Event Log" order="11" sideWeight="0.5147524" side_tool="true" weight="0.3264642" />
-      <window_info anchor="bottom" id="Messages" order="12" />
+      <window_info anchor="bottom" id="Terminal" order="8" />
+      <window_info anchor="bottom" id="Inspection Results" order="9" weight="0.24094488" />
+      <window_info anchor="bottom" id="Event Log" order="10" sideWeight="0.5147524" side_tool="true" weight="0.3264642" />
+      <window_info anchor="bottom" id="Messages" order="11" />
+      <window_info anchor="bottom" id="Python Console" order="12" weight="0.19305857" />
+      <window_info anchor="right" id="Commander" order="0" weight="0.4" />
+      <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
+      <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
+    </layout>
+    <layout-to-restore>
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.06691254" />
+      <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
+      <window_info id="Favorites" order="2" side_tool="true" />
+      <window_info anchor="bottom" id="Message" order="0" />
+      <window_info anchor="bottom" id="Find" order="1" sideWeight="0.49947312" weight="0.3286334" />
+      <window_info active="true" anchor="bottom" id="Run" order="2" sideWeight="0.48524764" visible="true" weight="0.3264642" />
+      <window_info anchor="bottom" id="Debug" order="3" sideWeight="0.49683878" weight="0.39804772" />
+      <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
+      <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
+      <window_info anchor="bottom" id="TODO" order="6" sideWeight="0.49947312" weight="0.3286334" />
+      <window_info anchor="bottom" id="Version Control" order="7" sideWeight="0.49789253" weight="0.3275488" />
+      <window_info anchor="bottom" id="Terminal" order="8" />
+      <window_info anchor="bottom" id="Inspection Results" order="9" weight="0.24094488" />
+      <window_info anchor="bottom" id="Event Log" order="10" sideWeight="0.5147524" side_tool="true" weight="0.3264642" />
+      <window_info anchor="bottom" id="Messages" order="11" />
+      <window_info anchor="bottom" id="Python Console" order="12" weight="0.19305857" />
       <window_info anchor="right" id="Commander" order="0" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
@@ -622,7 +638,9 @@
     <MESSAGE value="commit recent" />
     <MESSAGE value="minor clean up" />
     <MESSAGE value="simulation" />
-    <option name="LAST_COMMIT_MESSAGE" value="simulation" />
+    <MESSAGE value="smart shuffle initial" />
+    <MESSAGE value="smart shuffle update" />
+    <option name="LAST_COMMIT_MESSAGE" value="smart shuffle update" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -639,7 +657,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/tk_bscorer.py</url>
-          <line>2168</line>
+          <line>2174</line>
           <option name="timeStamp" value="8" />
         </line-breakpoint>
       </breakpoints>
@@ -785,22 +803,20 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/b_scorer.py">
+    <entry file="file://$PROJECT_DIR$/comb_test.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="180">
-          <caret line="404" column="42" selection-start-line="404" selection-start-column="31" selection-end-line="404" selection-end-column="42" />
+        <state relative-caret-position="539">
+          <caret line="88" column="21" selection-start-line="88" selection-start-column="21" selection-end-line="88" selection-end-column="21" />
           <folding>
-            <element signature="e#120#133#0" expanded="true" />
-            <marker date="1548142411091" expanded="true" signature="9199:9467" ph="..." />
-            <marker date="1548142411091" expanded="true" signature="27263:27268" ph="..." />
-            <marker date="1548142411091" expanded="true" signature="27565:27570" ph="..." />
+            <element signature="e#700#716#0" expanded="true" />
+            <marker date="1547525698676" expanded="true" signature="1356:1500" ph="..." />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/simulation_sandbox.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2312">
+        <state relative-caret-position="396">
           <caret line="144" column="16" selection-start-line="144" selection-start-column="16" selection-end-line="144" selection-end-column="16" />
         </state>
       </provider>
@@ -815,31 +831,36 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/comb_test.py">
+    <entry file="file://$PROJECT_DIR$/enumerate_b.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1445">
-          <caret line="88" column="21" selection-start-line="88" selection-start-column="21" selection-end-line="88" selection-end-column="21" />
+        <state relative-caret-position="265">
+          <caret line="366" column="73" selection-start-line="366" selection-start-column="73" selection-end-line="366" selection-end-column="73" />
           <folding>
-            <element signature="e#700#716#0" expanded="true" />
-            <marker date="1547525698676" expanded="true" signature="1356:1500" ph="..." />
+            <element signature="e#1557#1573#0" expanded="true" />
+            <marker date="1548885747823" expanded="true" signature="17891:17897" ph="..." />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/enumerate_b.py">
+    <entry file="file://$PROJECT_DIR$/b_scorer.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="3043">
-          <caret line="184" column="12" selection-start-line="184" selection-start-column="4" selection-end-line="184" selection-end-column="12" />
+        <state relative-caret-position="16524">
+          <caret line="1034" column="14" selection-start-line="1034" selection-start-column="14" selection-end-line="1034" selection-end-column="14" />
           <folding>
-            <element signature="e#1557#1573#0" expanded="true" />
+            <element signature="e#120#133#0" expanded="true" />
+            <marker date="1548886184313" expanded="true" signature="9446:9714" ph="..." />
+            <marker date="1548886184313" expanded="true" signature="24948:28374" ph="..." />
+            <marker date="1548886184313" expanded="true" signature="28393:28400" ph="..." />
+            <marker date="1548886184313" expanded="true" signature="31938:31943" ph="..." />
+            <marker date="1548886184313" expanded="true" signature="32240:32245" ph="..." />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/tk_bscorer.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="316">
-          <caret line="195" column="60" selection-start-line="195" selection-start-column="60" selection-end-line="195" selection-end-column="60" />
+        <state relative-caret-position="408">
+          <caret line="24" column="30" selection-start-line="24" selection-start-column="30" selection-end-line="24" selection-end-column="30" />
           <folding>
             <element signature="e#108#128#0" expanded="true" />
           </folding>
