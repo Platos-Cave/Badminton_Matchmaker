@@ -35,6 +35,8 @@ import operator
 import pickle
 import datetime
 import time
+from numpy import sign
+from random import shuffle
 
 
 # The user can adjust the weightings of elements of score_courts()
@@ -146,6 +148,16 @@ def partitions(s, r):
 
 combos_total = []
 
+# t0 = time.time()
+# sel = list(itertools.combinations([i for i in range (24)], 12))
+# print(len(sel))
+# print(sel[0], sel[1345], sel[66666])
+#
+# #for s in selections:
+# #    combos = list(partitions(s, 4))
+# t1 = time.time()
+# print(f'{t1-t0} is the partitioning')
+
 for i in range(1,4):
     players = [p for p in range(i*4)]
     combos = list(partitions(range(i*4), 4))
@@ -194,6 +206,18 @@ def score_court(court, trial_players, explain = False):
     # Unpacked for easier referencing
     new_court = [trial_players[court[0][0]], trial_players[court[0][1]],
                  trial_players[court[1][0]], trial_players[court[1][1]]]
+
+    #############################
+    for player in new_court:
+        # games with more deserving players -> lower cost
+        # tricky to come up with. Convoluted way of keeping sign.
+        score -= 10 * ((abs(player.desert) ** 1.5) * sign(
+            player.desert))
+        # games with players on more times in a row -> higher cost
+        # assumption that stronger players = fitter = less tired?
+        score += ((15-player.ability)/2)*(
+                player.consecutive_games_on**1.5)
+    ###########################
 
     abilities = [player.ability for player in new_court]
     # The imbalance between team abilities. High imbalance = highly penalised
@@ -356,12 +380,15 @@ def best_score(combo, trial_players):
     scores = []
     three_combos = find_combos_of_four(combo)
 
-    for com in three_combos: # EXCEPT RULED-OUT PINNED
+    for com in three_combos:
         scores.append(score_court(com, trial_players))
 
+    # consider frozenset(combo) for alternative method
     index, scores_dict[combo] = min(enumerate(scores),
                                     key=operator.itemgetter(1))
+    # try making best_combos[frozenset(combo)]
     best_combos[combo] = three_combos[index]
+    # best_combos[combo] = three_combos[index]
 
 
 def find_best_game(players, courts, benched = [], scored=False, log=False):
@@ -422,9 +449,19 @@ def find_best_game(players, courts, benched = [], scored=False, log=False):
 
     for player in players:
         # games with more deserving players -> lower cost
-        tolerance_score -= 10*(player.desert * abs(player.desert))
+        # tricky to come up with. Convoluted way of keeping sign.
+        tolerance_score -= 10 * ((abs(player.desert) ** 1.5) * sign(
+            player.desert))
+        # if player.name == "Henry":
+        #     print(player.desert)
+        #     print(10 * ((abs(player.desert) ** 1.5) * sign(
+        #     player.desert)))
+
+
         # games with players on more times in a row -> higher cost
-        tolerance_score += 5*(player.consecutive_games_on**1.5)
+        # assumption that stronger players = fitter = less tired?
+        tolerance_score += ((15-player.ability)/2)*(
+                player.consecutive_games_on**1.5)
         # fraction ?
 
     lowest_score += tolerance_score
@@ -464,6 +501,382 @@ def bench_cost(benched):
                     cost += 1 * level_dict[aff[1]]
 
     return cost
+
+
+#############
+# Testing "score all combos'
+
+
+def find_best_exhaustive(players, runs, check):
+    #combo_2 = [player.name for player in players]
+
+    shuffle(players)
+    t1 = time.time()
+    combos = list(itertools.combinations([i for i in range(len(players))], 4))
+    t2 = time.time()
+    for combo in combos:
+        best_score_2(combo, players)
+    t3 = time.time()
+    print(f'{t2-t1} to create the combos')
+    print(f'{t3-t2} to score the combos')
+    # print(scores_dict)
+    best_unsorted, cost = (greedy_solve(scores_dict, len(players), m=3,
+                               extra_runs=runs, check_factor=check))
+
+    best_game = [best_combos[best_unsorted[i]] for i in range(3)]
+
+    t4 = time.time()
+    print(f'{t4-t3} to do rest')
+
+    best_players = [((players[best_game[i][0][0]],
+                    players[best_game[i][0][1]]),
+          (players[best_game[i][1][0]],
+           players[best_game[i][1][1]])) for i in range(3)]
+
+
+    return best_players
+
+    #
+    #
+    # for i, court in enumerate(best):
+    #     print(f'Court {i}')
+    #     for num in court:
+    #         print(players[num].name)
+    # t4 = time.time()
+    # print(f'{t4-t3} to find the best')
+
+
+
+
+def greedy_solve(const_dict, n, m, extra_runs=10, check_factor=2):
+    pairs = sorted(const_dict.items(), key=lambda x: x[1])
+
+    lookup = [set([]) for _ in range(n)]
+    nset = set([])
+
+    min_sums = []
+    min_key, min_val = None, None
+    for i, (pkey, pval) in enumerate(pairs):
+        valid = set(nset)
+        for x in pkey:
+            valid -= lookup[x]
+            lookup[x].add(len(min_sums))
+
+        nset.add(len(min_sums))
+        min_sums.append(((pkey,), pval))
+
+        for x in pkey:
+            lookup[x].update(
+                range(len(min_sums), len(min_sums) + len(valid)))
+        for idx in valid:
+            comb, val = min_sums[idx]
+            for key in comb:
+                for x in key:
+                    lookup[x].add(len(min_sums))
+            nset.add(len(min_sums))
+            min_sums.append((comb + (pkey,), val + pval))
+            if len(comb) == m - 1 and (not min_key or min_val > val + pval):
+                min_key, min_val = min_sums[-1]
+
+        if min_key:
+            if not extra_runs: break
+            extra_runs -= 1
+
+    for pkey, pval in pairs[:int(check_factor * i)]:
+        valid = set(nset)
+        for x in pkey:
+            valid -= lookup[x]
+
+        for idx in valid:
+            comb, val = min_sums[idx]
+            if len(comb) < m - 1:
+                nset.remove(idx)
+            elif min_val > val + pval:
+                min_key, min_val = comb + (pkey,), val + pval
+    return min_key, min_val
+
+def dp_solve(const_dict, n, m):
+
+    lookup = {comb: (comb,) for comb in const_dict.keys()}
+
+    keys = set(range(n))
+    for size in range(8, 4 * m + 1, 4):
+        for key_total in combinations(keys, size):
+            key_set = set(key_total)
+            min_keys = (key_total[:4], key_total[4:])
+            min_val = const_dict[min_keys[0]] + const_dict[min_keys[1]]
+
+            key1, key2 = min(zip(combinations(key_total, 4), reversed(
+                list(combinations(key_total, size - 4)))),
+                             key=lambda x: const_dict[x[0]] + const_dict[
+                                 x[1]])
+
+            k = tuple(sorted(x for x in key1 + key2))
+            const_dict[k] = const_dict[key1] + const_dict[key2]
+            lookup[k] = lookup[key1] + lookup[key2]
+
+    key, val = min(((key, val) for key, val in const_dict.items() if
+                    len(key) == 4 * m), key=lambda x: x[1])
+    return lookup[key], val
+
+    # courts = 3
+    #
+    # scores = []
+    #
+    # t = 0
+    # for combo in combos_total[courts-1][1]:
+    #     t4 = time.time()
+    #     new_court = (players[combo[0][0]].name, players[combo[0][
+    #         1]].name,
+    #                  players[combo[1][0]].name, players[combo[1][1]].name)
+    #     t5 = time.time()
+    #     t += t5-t4
+    #     scores.append(sum([scores_dict[frozenset(new_court)]]))
+    #
+    # print(f'{t} to get the player names')
+    #
+    # t4 = time.time()
+    # print(f'{t4-t3} to add the combos')
+
+
+
+    scores = []
+    # for combo in scores_dict:
+    #     #scores.append(scores_dict[combo])
+    #     for other_combo in scores_dict:
+    #         if other_combo.isdisjoint(combo):
+    #             #scores[-1] += scores_dict[other_combo]
+    #             for third_combo in scores_dict:
+    #                 both = frozenset().union([combo, other_combo])
+    #                 if third_combo.isdisjoint(both):
+    #                     pass
+    #                     #scores[-1] += scores_dict[third_combo]
+    # t4 = time.time()
+    # print(f'{t4-t3} to add up combos')
+
+def best_score_3(combo, players):
+    '''From four numbers, find the matchup with the lowest score.
+    Add the combo as a key to two dictionaries: one the best combo,
+    the other the score of said result'''
+    scores = []
+    three_combos = find_combos_of_four(combo)
+
+    for com in three_combos:
+        scores.append(score_court(com, players))
+
+    new_court = (players[combo[0]].name, players[combo[1]].name,
+                 players[combo[2]].name, players[combo[3]].name)
+
+    # consider frozenset(combo) for alternative method
+    # got the scores with all the names.
+    index, scores_dict[frozenset(new_court)] = min(enumerate(scores),
+                                    key=operator.itemgetter(1))
+    # try making best_combos[frozenset(combo)]
+    best_combos[combo] = three_combos[index]
+    # best_combos[combo] = three_combos[index]
+
+# def best_score_2(combo):
+#     '''From four players, find the matchup with the lowest score.
+#     Add the combo as a key to two dictionaries: one the best combo,
+#     the other the score of said result'''
+#     scores = []
+#     three_combos = find_combos_of_four(combo)
+#
+#     for com in three_combos:
+#         nums = score_court
+#         scores.append(score_court_2(com))
+#
+#     index, scores_dict[combo] = min(enumerate(scores),
+#     #                                key=operator.itemgetter(1))
+#     best_combos[combo] = three_combos[index]
+def best_score_2(combo, trial_players):
+    '''From four numbers, find the matchup with the lowest score.
+    Add the combo as a key to two dictionaries: one the best combo,
+    the other the score of said result'''
+    scores = []
+    three_combos = find_combos_of_four(combo)
+
+    for com in three_combos:
+        scores.append(score_court_2(com, trial_players))
+
+    # consider frozenset(combo) for alternative method
+    index, scores_dict[combo] = min(enumerate(scores),
+                                    key=operator.itemgetter(1))
+    # try making best_combos[frozenset(combo)]
+    best_combos[combo] = three_combos[index]
+    # best_combos[combo] = three_combos[index]
+
+
+def score_court_2(court, trial_players, explain = False):
+    ''' Returns the "score" of a game, where "trial_players" is a list of
+     player objects and "court" is a pair of tuples, representing indices
+     of those players'''
+    global score_num
+    score_num +=1
+
+    score = 0
+    # Create the court using the indices from "court" on "trial_players"
+    # Unpacked for easier referencing
+    new_court = [trial_players[court[0][0]], trial_players[court[0][1]],
+                 trial_players[court[1][0]], trial_players[court[1][1]]]
+
+    for player in new_court:
+        # games with more deserving players -> lower cost
+        # tricky to come up with. Convoluted way of keeping sign.
+        score -= 10 * ((abs(player.desert) ** 1.5) * sign(
+            player.desert))
+        # games with players on more times in a row -> higher cost
+        # assumption that stronger players = fitter = less tired?
+        score += ((15-player.ability)/2)*(
+                player.consecutive_games_on**1.5)
+        # fraction ?
+
+        #hackish ways of people players on/off. prefer alternative
+
+        if player.keep_on:
+            score -= 10**10
+        elif player.keep_off:
+            score += 10**10
+        else:
+            score -= (1000*player.time_since_last)
+
+    abilities = [player.ability for player in new_court]
+    # The imbalance between team abilities. High imbalance = highly penalised
+    score += scoring_vars[('Balance', profile)] * 5 * ((
+                sum(abilities[0:2]) - sum(abilities[2:4])) ** 2)
+    # It is generally better to not have strong and weak players in the same
+    #  game even if balanced, so this formula penalises that.
+    # Removing for now
+    score += scoring_vars[('Ability_Seg', profile)] * (
+                (max(abilities) - min(abilities)) ** 1.5)
+
+    #NEW: "Hungry" weighting
+    average_ability = sum(abilities)/4
+    for player in new_court:
+        score += scoring_vars[('Ability Alternation', profile)] * \
+                 player.hunger * (player.ability - average_ability)
+
+
+
+    # # We then want to penalise playing the same people over and over.
+    #
+    # # How much the discount rate for each round is for the purposes of mixing
+    # # i.e. there's a larger penalty for playing someone you played in the
+    # # previous round than for someone you played three games ago
+    discount_rate = 0.1
+    #
+    # # For each player, see how many times they've played with their partner
+    # # and their opponents. Larger penalty for playing someone in the same
+    # # position (i.e. played against someone twice in a row, vs played with them
+    # # and then against them)
+    # # Also: if player has affinity for another player, subtract the affinity
+    # # score from the total score.
+    # # (This seems all very nested and duplicative)
+    for player in new_court:
+        if player is not None:
+            if player in new_court[0:2]:
+                partner = [i for i in new_court[0:2] if i is not player if
+                           i is not None]
+                opponents = [i for i in new_court[2:4] if i is not player if
+                             i is not None]
+            else:
+                partner = [i for i in new_court[2:4] if i is not player if
+                           i is not None]
+                opponents = [i for i in new_court[0:2] if i is not player if
+                             i is not None]
+
+        for o_player in opponents:
+            # count = 1
+            # base_score = 0
+            # for i, game in enumerate(player.played_against):
+            #     if o_player in game:
+            #         base_score += scoring_vars[('Mixing', profile)] * 2 * (
+            #         (1 / (1 + discount_rate) ** (player.total_games - i - 1)))
+            #         count += 0.2
+            # for i, game in enumerate(player.played_with):
+            #     if o_player in game:
+            #         base_score += scoring_vars[('Mixing', profile)] * (
+            #                     1 / (1 + discount_rate) ** (
+            #                          player.total_games - i - 1))
+            #         count += 0.1
+            # #"Count" is a means of pseudo-exponentiation - i.e. we want it
+            # #to be proportionally worse to play someone three times in a row
+            # # than twice in a row
+            # adjusted_score = base_score * (count)
+
+            new_score = scoring_vars[('Mixing',
+                                      profile)]*player.opp_histories[
+                o_player]
+
+
+            if explain:
+                if player.name == "Henry":
+                    # print(f'(Henry score with opponent is {adjusted_score}')
+                    print(f'(Henry new score with opponent is {new_score}')
+
+            #score += adjusted_score
+            score += new_score
+            # Subtract affinity variable from score
+            for aff in player.opponent_affinities:
+                if aff[0] == o_player.name:
+                    aff_multiplier = level_dict[aff[1]]
+                    score -= aff_multiplier*(scoring_vars[('Affinity',
+                                                           profile)])
+                    break
+
+        for o_player in partner:  # there's only 1 partner, so loop seems
+             # silly?
+        #     count = 1
+        #     base_score = 0
+        #     for i, game in enumerate(player.played_against):
+        #         if o_player in game:
+        #             base_score += scoring_vars[('Mixing', profile)] * (
+        #                         1 / (1 + discount_rate) ** (
+        #                             player.total_games - i - 1))
+        #             count += 0.1
+        #     for i, game in enumerate(player.played_with):
+        #         if o_player in game:
+        #             base_score += scoring_vars[('Mixing', profile)] * 3 * (
+        #             (1 / (1 + discount_rate) ** (player.total_games - i - 1)))
+        #             count += 0.2
+        #
+        #     adjusted_score = base_score * (count)
+
+            new_score = scoring_vars[('Mixing',
+                                      profile)]*player.partner_histories[
+                o_player]
+
+            if explain:
+                if player.name == "Henry":
+                    # print(f'(Henry score with partner is {adjusted_score}')
+                    print(f'(Henry new score with opponent is {new_score}')
+            #score += adjusted_score
+            score += new_score
+
+            for aff in player.partner_affinities:
+                if aff[0] == o_player.name:
+                    aff_multiplier = level_dict[aff[1]]
+                    score -= aff_multiplier*(scoring_vars[('Affinity',
+                                                           profile)])
+                    break
+
+    # Female mini-affinity:
+    no_women = len([p for p in new_court if p.sex == "Female" if p])
+    women_score = scoring_vars[('Female Affinity', profile)] * (no_women*(
+            no_women - 1))
+    score -= women_score
+
+    if explain:
+        print("There are {} women in this game, subtracting {} from the game "
+              "score".format(no_women, women_score))
+        print(score)
+
+    return score
+
+
+
+
+
 
 
 

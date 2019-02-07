@@ -22,7 +22,7 @@ class Application(tk.Tk):
         tk.Tk.__init__(self)
 
         # A (probably unPythonic) way of randomly loading the bench
-        self.test_mode = False
+        self.test_mode = True
 
         self.title("Badminton Matchmaker")
 
@@ -186,31 +186,8 @@ class Application(tk.Tk):
 
 
         if self.test_mode:
-            for player in b_scorer.every_player:
-                try:
-                    if random.random() < pp.arrival_probs[player.name]:
-                        b_scorer.add_player(player)
-                        self.add_bench_menus(player)
-                        self.colour_dict = b_scorer.colour_sorter(
-                                                 b_scorer.all_current_players)
-                    if len(b_scorer.all_current_players) >6:
-                        break
-                except KeyError:
-                    pass
-            # random.shuffle(b_scorer.every_player)
-            # for player in b_scorer.every_player[0:16]:
-            #     b_scorer.add_player(player)
-            #     self.add_bench_menus(player)
-            #     self.colour_dict = b_scorer.colour_sorter(
-            #                          b_scorer.all_current_players)
-            # for player in b_scorer.every_player:
-            #     if player.name.startswith(("A","B","I")):
-            #         b_scorer.add_player(player)
-            #         self.add_bench_menus(player)
-            #         self.colour_dict = b_scorer.colour_sorter(
-            #                     b_scorer.all_current_players)
-            # avoid having to reset timer. Should cancel timer entirely
-            self.timer.duration = 0
+            self.start_in_test_mode()
+
 
         # If program crashed or exited otherwise normally, reload all data
         try:
@@ -247,6 +224,44 @@ class Application(tk.Tk):
                 pass
 
         self.update_board()
+
+    def start_in_test_mode(self):
+        self.timer.duration = 0
+        while len(b_scorer.all_current_players) < 26:
+            self.add_players_by_arrival()
+
+        # for player in b_scorer.every_player[0:32]:
+        #     b_scorer.add_player(player)
+        #     self.add_bench_menus(player)
+        #     self.colour_dict = b_scorer.colour_sorter(
+        #         b_scorer.all_current_players)
+
+        # random.shuffle(b_scorer.every_player)
+        # for player in b_scorer.every_player[0:16]:
+        #     b_scorer.add_player(player)
+        #     self.add_bench_menus(player)
+        #     self.colour_dict = b_scorer.colour_sorter(
+        #                          b_scorer.all_current_players)
+        # for player in b_scorer.every_player:
+        #     if player.name.startswith(("A","B","I")):
+        #         b_scorer.add_player(player)
+        #         self.add_bench_menus(player)
+        #         self.colour_dict = b_scorer.colour_sorter(
+        #                     b_scorer.all_current_players)
+        # avoid having to reset timer. Should cancel timer entirely
+
+    def add_players_by_arrival(self):
+        for player in b_scorer.absent_players:
+            try:
+                if random.random() < pp.arrival_probs[player.name]:
+                    b_scorer.add_player(player)
+                    self.add_bench_menus(player)
+                    self.colour_dict = b_scorer.colour_sorter(
+                        b_scorer.all_current_players)
+            except KeyError:
+                pass
+            if len(b_scorer.all_current_players) > 25:
+                break
 
 
     def display_swap_menu(self, event, court_no):
@@ -1387,6 +1402,7 @@ class PlayerStats(tk.Toplevel):
                 # new player?
                 print("I can't be bothered working this out")
 
+    # New player creation should be in b_scorer.py
     def save_player(self):
         """If the player is existing, then update their stats. If new,
         create a new player and add them to bench"""
@@ -1559,7 +1575,8 @@ class GameStats(tk.Toplevel):
         self.female_aff_entry = ttk.Entry(self, width=4)
         self.shuffle_combo = ttk.Combobox(self, width=10, state = 'readonly',
                                           values=["Random", "Segregated",
-                                                  "Smart"])
+                                                  "Smart", "Exhaustive",
+                                                  "Exhaustive 2"])
 
         # not used ATM
         # self.default_button = ttk.Button(self, text="Return to Default",

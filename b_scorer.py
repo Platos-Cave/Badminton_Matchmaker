@@ -8,6 +8,7 @@ import b_sessions
 import datetime
 from datetime import datetime
 import operator
+import time
 from statistics import mean
 from collections import defaultdict
 
@@ -18,6 +19,8 @@ class Player:
         self.sex = sex
         self.ability = ability  # An integer from 1-10 (1 being weakest)
 
+        # self.first_night = True
+
         # Other players this player likes to be partnered with/oppose
         # Newly updated to be (Player.name, Level) pairs, where Level is
         # (currently) Low/Medium/High
@@ -27,6 +30,7 @@ class Player:
         # backwards-compatible with pickle
         self.membership = membership
         self.money_owed = 0
+
 
         self.total_games = 0
         # if a player arrives late, add extra games for game priority purposes
@@ -48,13 +52,26 @@ class Player:
         self.partner_histories = defaultdict(float)
         self.opp_histories = defaultdict(float)
 
+        self.old_partner_histories = defaultdict(float)
+        self.old_opp_histories = defaultdict(float)
+
         # how deserving is this player of another game?
         # a replacement for looking at "total games"
-        self.desert = 0
-        self.old_desert = 0
+
+        # Brand new players start with a desert of 1, giving them likely an
+        # extra game
+        self.desert = 1
+        self.old_desert = 1
+
 
         self.hunger = 0
+        self.old_hunger = 0
         self.mean_game_abs = self.ability
+
+        # Our second court has a projector, we want to ensure players don't
+        # play too much on it, nor put strong players on it
+        self.court_2_attr = 0
+        self.old_court_2_attr = 0
 
         # user modifiable notes
         self.player_notes = ''
@@ -134,7 +151,10 @@ class Player:
         self.old_consecutive_games_on = self.consecutive_games_on # for undoing
         self.consecutive_games_on = 0
 
+
     def recalculate_hunger(self, last_game_ab):
+        '''Take the average ability of the last game the player was in,
+        add it to the mean (a moving average), divide by 2.'''
         self.old_hunger = self.hunger
         self.old_mean_game_abs = self.mean_game_abs
         self.mean_game_abs = (self.mean_game_abs + last_game_ab)/2
@@ -149,6 +169,8 @@ class Player:
         del self.played_against[-1]
         self.hunger = self.old_hunger
         self.desert = self.old_desert
+        self.partner_histories = self.old_partner_histories
+        self.opp_histories = self.old_opp_histories
         self.mean_game_abs = self.old_mean_game_abs
 
 
@@ -527,6 +549,7 @@ def view_bench():
 
 # Make work for multiple versions
 def generate_new_game():
+
     """Find the best game possible, then add those players to the courts"""
 
     # Quick and dirty rule to always start with random shuffle, then use
@@ -535,10 +558,21 @@ def generate_new_game():
                              enumerate_b.profile]
     if profile == 0 or profile == 2:
         players = select_players("Random", court_count)
+
+
     elif profile == 1:
         players = select_players("Segregated", court_count)
-    else:
-        return AttributeError
+    elif profile == 3:
+
+        best_game = enumerate_b.find_best_exhaustive(all_current_players, 0, 0)
+        place_on_courts(best_game)
+        return
+
+    elif profile == 4:
+
+        best_game = enumerate_b.find_best_exhaustive(all_current_players, 10, 2)
+        place_on_courts(best_game)
+        return
 
     if profile == 2:
         trials = 100
@@ -547,8 +581,11 @@ def generate_new_game():
         tolerance_scores = []
         bench_scores = []
 
+        # all_time = 0
         for i in range(trials):
             players = select_players("Smart", court_count)
+
+
             benched = [p for p in all_current_players if p not in players]
             total = (enumerate_b.find_best_game(players, courts =
                     court_count, benched = benched, scored = True))
@@ -599,15 +636,23 @@ def place_on_courts(best_game):
             for j, side in enumerate(best_game[count]):
                 for k, player in enumerate(side):
                     if player:
+                        # tolerance_score = 10*((abs(player.desert) ** 1.5)
+                        #                       * player.desert/abs(player.desert))
+                        # print(f'{player.name}s tolerance is {tolerance_score}')
+
                         court.spaces[(2 * j) + k] = player
                         if player in bench:
                             bench.remove(player)
             count +=1 # because 'i' goes up
 
-        # scores += enumerate_b.score_court(((0,1),(2,3)),courts[i].spaces,
-        #                                     explain = True)
-        # print(scores)
+        scores += enumerate_b.score_court(((0,1),(2,3)),courts[i].spaces,
+                                            explain = False)
+    print(scores)
     enumerate_b.score_num = 0
+
+    calculate_swap_TEST()
+
+
 
 def print_game(game):
      for i, court in enumerate(game):
@@ -668,25 +713,29 @@ def confirm_game():
     #todo - trialing out new pvp
     update_pvp()
 
+    #todo - trialing court_2_attr
+    update_court_2_attr(courts[1].spaces)
+
+
 # should be able to make more concise, lots of duplication
 def update_pvp():
 
-
     # discount
-    for player in all_current_players:
-        for key in player.partner_histories.keys():
-            player.partner_histories[key] *= 0.9
-        for key in player.opp_histories.keys():
-            player.opp_histories[key] *= 0.9
+
         # if player.name == "Henry":
         #     print(player.partner_histories)
         #     print(player.opp_histories)
 
-
-
     for court in courts:
         for player in court.spaces:
-            if player: # i.e. not NONE, an empty space
+            if player:
+                            # discounting, only when placed on the court.
+                for key in player.partner_histories.keys():
+                    player.partner_histories[key] *= 0.9
+                for key in player.opp_histories.keys():
+                    player.opp_histories[key] *= 0.9
+
+                # i.e. not NONE, an empty space
                 if player in court.spaces[0:2]:
                     partner = [i for i in court.spaces[0:2] if i is not
                                player if i is not None]
@@ -708,7 +757,6 @@ def update_pvp():
                     #except KeyError:
                         #player.partner_histories[o_player] = 1
 
-
                 for o_player in opponents:
                     #try:
                     player.opp_histories[o_player] += 2*(1 + (
@@ -717,6 +765,9 @@ def update_pvp():
                             1/10)*player.partner_histories[o_player])
                     #except KeyError:
                     #    player.opp_histories[o_player] = 1
+                player.old_partner_histories = player.partner_histories
+                player.old_opp_histories = player.opp_histories
+
 
 
                 # else:  # if on side #2
@@ -741,9 +792,9 @@ def update_pvp():
                 #     print("Partner Histories")
                 #     for p in player.partner_histories:
                 #         print(p.name, player.partner_histories[p])
-                #     print("Opponent Histories")
-                #     for p in player.opp_histories:
-                #         print(p.name, player.opp_histories[p])
+                #     print("Old Partner Histories")
+                #     for p in player.old_partner_histories:
+                #         print(p.name, player.old_partner_histories[p])
 
 
     # names = [courts[0].spaces[i].opp_histories for i in range(4)]
@@ -754,6 +805,45 @@ def update_pvp():
     #         print(p.name, history[p])
     #     print('')
 
+def update_court_2_attr(court_spaces):
+
+    for court in courts:
+        for player in court.spaces:
+            if player:
+                player.court_2_attr *= 0.8
+
+    for player in court_spaces:
+        if player:
+            player.court_2_attr += 1 * (1 +(1/2 * player.court_2_attr))
+        # print(player.name, player.court_2_attr)
+
+def calculate_swap_TEST():
+
+    #todo - make sure this doesn't stuff up/do weird with manual games
+
+    court_scores = []
+
+    for i, court in enumerate(courts):
+        abilities = [player.ability for player in court.spaces if player]
+        average_abilities = sum(abilities)/4
+        # print(f'Court {i+1} abilities: {average_abilities}')
+        ab_cost = average_abilities**1.3
+
+        court_2_costs = [player.court_2_attr for player in court.spaces if
+                         player]
+        average_c2 = sum(court_2_costs)
+        #average_c2 *= 2
+        # print(average_c2)
+
+        court_scores.append(ab_cost + average_c2)
+
+    # print(court_scores)
+
+
+    val = (court_scores.index(min(court_scores)))
+    if val != 1:
+        swap_courts(courts[1], courts[val])
+        # print(f"Swapped Court 2 with  Court {val+1}!")
 
 
 def undo_confirm():
@@ -876,7 +966,7 @@ def remove_court():
 
 def add_court():
     global court_count
-    court_
+    court_count += 1
 
 # Should work only
 def update_desert():
@@ -900,6 +990,13 @@ def save_and_quit(pickling=True):
     """Reset everything only when exited properly.
     Otherwise, you can reload your previous state."""
 
+    # Sum deserts for normalising
+    sum_deserts = 0
+    for player in every_player:
+        sum_deserts += player.desert
+
+    av_deserts = sum_deserts/len(every_player)
+
     # Reset all the players
     for player in every_player:
         player.total_games =  0
@@ -912,7 +1009,26 @@ def save_and_quit(pickling=True):
         player.keep_off = False
         player.keep_on = False
         player.mean_game_abs = player.ability
-        player.hunger = 0
+        player.hunger *= 0.3
+        player.old_hunger *= 0.3
+        player.court_2_attr *= 0.3
+        player.old_court_2_attr *= 0.3
+        player.desert -= av_deserts
+        # deweighting histories.
+        # todo: make sure the following two doen't happen with autosave
+        for key in player.partner_histories.keys():
+            player.partner_histories[key] *= 0.3 # 0.5
+        for key in player.opp_histories.keys():
+            player.opp_histories[key] *= 0.3
+
+        # try: # new players get first_night added
+        #     if player.first_night:
+        #         player.desert = 0
+        # except AttributeError:
+        #     pass
+
+        # deweighting court_2 relevance. Should it be 0.5? set to 0? else?
+
         #print(f'{player.name} reset!')
 
     # Save departure times
@@ -1016,6 +1132,8 @@ try:
 
         if not hasattr(player, 'hunger'):
             player.hunger = player.ability
+        if not hasattr(player, 'old_hunger'):
+            player.old_hunger = 0
         if not hasattr(player, 'mean_game_abs'):
             player.mean_game_abs = player.ability
 
@@ -1034,19 +1152,20 @@ try:
 
         if not hasattr(player, 'desert'):
             player.desert = 0
+        if not hasattr(player, 'old_desert'):
+            player.old_desert = 0
 
         if not hasattr(player, 'partner_histories'):
             player.partner_histories = defaultdict(float)
             player.opp_histories = defaultdict(float)
 
-        # deweighting histories.
-        # todo: make sure doesn't happen with autosave
-        for key in player.partner_histories.keys():
-            player.partner_histories[key] *= 0.0 # 0.5
-        for key in player.opp_histories.keys():
-            player.opp_histories[key] *= 0.0
+            player.old_partner_histories = defaultdict(float)
+            player.old_opp_histories = defaultdict(float)
 
-
+        if not hasattr(player, 'court_2_attr'):
+            player.court_2_attr = 0
+        if not hasattr(player, 'old_court_2_attr'):
+            player.old_court_2_attr = 0
 
         # Grandfather in new affinities
         temp_partners = []
