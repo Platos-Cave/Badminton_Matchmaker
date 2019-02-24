@@ -208,15 +208,15 @@ def score_court(court, trial_players, explain = False):
                  trial_players[court[1][0]], trial_players[court[1][1]]]
 
     #############################
-    for player in new_court:
-        # games with more deserving players -> lower cost
-        # tricky to come up with. Convoluted way of keeping sign.
-        score -= 10 * ((abs(player.desert) ** 1.5) * sign(
-            player.desert))
-        # games with players on more times in a row -> higher cost
-        # assumption that stronger players = fitter = less tired?
-        score += ((15-player.ability)/2)*(
-                player.consecutive_games_on**1.5)
+    # for player in new_court:
+    #     # games with more deserving players -> lower cost
+    #     # tricky to come up with. Convoluted way of keeping sign.
+    #     score -= 10 * ((abs(player.desert) ** 1.5) * sign(
+    #         player.desert))
+    #     # games with players on more times in a row -> higher cost
+    #     # assumption that stronger players = fitter = less tired?
+    #     score += ((15-player.ability)/2)*(
+    #             player.consecutive_games_on**1.5)
     ###########################
 
     abilities = [player.ability for player in new_court]
@@ -517,13 +517,29 @@ def find_best_exhaustive(players, runs, check):
     for combo in combos:
         best_score_2(combo, players)
     t3 = time.time()
-    print(f'{t2-t1} to create the combos')
-    print(f'{t3-t2} to score the combos')
+    #print(f'{t2-t1} to create the combos')
+    #print(f'{t3-t2} to score the combos')
     # print(scores_dict)
+    k = 0
+    fixed = set([players[i] for i in range(k)])
+    #print(fixed)
+    #print([players[i].name for i in range(k)])
     best_unsorted, cost = (greedy_solve(scores_dict, len(players), m=3,
-                               extra_runs=runs, check_factor=check))
+                               extra_runs=runs,
+
+                                        check_factor=check,
+                                        required_keys=[i for i in range(k)]))
+
+    # best_unsorted, cost = (dp_solve(scores_dict, len(players), m=3))
+
 
     best_game = [best_combos[best_unsorted[i]] for i in range(3)]
+
+    # if not check_for_duplicates(players, best_game, fixed):
+    #      return False
+    # else:
+    #     # pass
+    #     print("Yes!")
 
     t4 = time.time()
     print(f'{t4-t3} to do rest')
@@ -532,6 +548,7 @@ def find_best_exhaustive(players, runs, check):
                     players[best_game[i][0][1]]),
           (players[best_game[i][1][0]],
            players[best_game[i][1][1]])) for i in range(3)]
+
 
 
     return best_players
@@ -544,11 +561,21 @@ def find_best_exhaustive(players, runs, check):
     #         print(players[num].name)
     # t4 = time.time()
     # print(f'{t4-t3} to find the best')
+def check_for_duplicates(players, game, fixed):
+    board = set()
+    for court in game:
+        for side in court:
+            for player in side:
+                board.add(players[player])
+    #print([player.name for player in fixed])
+    #print([player.name for player in board])
+    if fixed.issubset(board):
+        return True
+    else:
+        return False
 
-
-
-
-def greedy_solve(const_dict, n, m, extra_runs=10, check_factor=2):
+def greedy_solve(const_dict, n, m, extra_runs=10, check_factor=2,
+                 required_keys = []):
     pairs = sorted(const_dict.items(), key=lambda x: x[1])
 
     lookup = [set([]) for _ in range(n)]
@@ -566,8 +593,7 @@ def greedy_solve(const_dict, n, m, extra_runs=10, check_factor=2):
         min_sums.append(((pkey,), pval))
 
         for x in pkey:
-            lookup[x].update(
-                range(len(min_sums), len(min_sums) + len(valid)))
+            lookup[x].update(range(len(min_sums), len(min_sums) + len(valid)))
         for idx in valid:
             comb, val = min_sums[idx]
             for key in comb:
@@ -582,7 +608,7 @@ def greedy_solve(const_dict, n, m, extra_runs=10, check_factor=2):
             if not extra_runs: break
             extra_runs -= 1
 
-    for pkey, pval in pairs[:int(check_factor * i)]:
+    for pkey, pval in pairs:
         valid = set(nset)
         for x in pkey:
             valid -= lookup[x]
@@ -592,8 +618,88 @@ def greedy_solve(const_dict, n, m, extra_runs=10, check_factor=2):
             if len(comb) < m - 1:
                 nset.remove(idx)
             elif min_val > val + pval:
-                min_key, min_val = comb + (pkey,), val + pval
+                if all(x in tuple(k for c in comb for k in c) + pkey for x in
+                       required_keys):
+                    min_key, min_val = comb + (pkey,), val + pval
     return min_key, min_val
+
+
+# def greedy_solve(const_dict, n, m, extra_runs=10, check_factor=2,
+#                  required_keys = []):
+#     m = 2
+#     pairs = sorted(const_dict.items(), key=lambda x: x[1])
+#     print("Sorted Pairs:")
+#     for item in pairs:
+#         print(item)
+#
+#
+#     lookup = [set([]) for _ in range(n)]
+#     nset = set([])
+#     print("Initial lookups")
+#     print(lookup)
+#     print("")
+#
+#     min_sums = []
+#     min_key, min_val = None, None
+#     print("Go through all pairs: \n")
+#     for i, (pkey, pval) in enumerate(pairs):
+#         print(f"For pair {pairs[i]}: \n")
+#         print("Check for valid")
+#
+#         valid = set(nset)
+#         print(f'Valid = {valid} \n')
+#
+#         for x in pkey:
+#
+#             print(f'For {x}')
+#             #print(f'lookup[x] is originally {lookup[x]}')
+#             valid -= lookup[x]
+#             lookup[x].add(len(min_sums))
+#             print(f'Valid becomes: {valid}')
+#             print(f'len(min_sums) is {len(min_sums)}')
+#             print(f'lookup[x] adds above, becoming: {lookup[x]} \n')
+#
+#
+#
+#         nset.add(len(min_sums))
+#         min_sums.append(((pkey,), pval))
+#         print(f'nset adds min sums, becoming {nset}')
+#         print(f'min_sums appens {((pkey,), pval)}')
+#
+#         for x in pkey:
+#             lookup[x].update(
+#                 range(len(min_sums), len(min_sums) + len(valid)))
+#
+#         for idx in valid:
+#             comb, val = min_sums[idx]
+#             for key in comb:
+#                 for x in key:
+#                     lookup[x].add(len(min_sums))
+#             nset.add(len(min_sums))
+#             min_sums.append((comb + (pkey,), val + pval))
+#             if len(comb) == m - 1 and (not min_key or min_val > val + pval):
+#             #     if all(x in tuple(k for c in comb for k in c) + pkey for x in
+#             #         required_keys):
+#                 min_key, min_val = min_sums[-1]
+#
+#         if min_key:
+#             if not extra_runs: break
+#             extra_runs -= 1
+#
+#     for pkey, pval in pairs[:int(check_factor * i)]:
+#         valid = set(nset)
+#         for x in pkey:
+#             valid -= lookup[x]
+#
+#         for idx in valid:
+#             comb, val = min_sums[idx]
+#             if len(comb) < m - 1:
+#                 nset.remove(idx)
+#             elif min_val > val + pval:
+#                 # if all(x in tuple(k for c in comb for k in c) + pkey for x in
+#                 #     required_keys):
+#                 min_key, min_val = comb + (pkey,), val + pval
+#     return min_key, min_val
 
 def dp_solve(const_dict, n, m):
 
@@ -738,7 +844,8 @@ def score_court_2(court, trial_players, explain = False):
         elif player.keep_off:
             score += 10**10
         else:
-            score -= (1000*player.time_since_last)
+            pass
+           #score -= (1000*player.time_since_last)
 
     abilities = [player.ability for player in new_court]
     # The imbalance between team abilities. High imbalance = highly penalised

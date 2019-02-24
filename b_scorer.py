@@ -169,10 +169,15 @@ class Player:
         del self.played_against[-1]
         self.hunger = self.old_hunger
         self.desert = self.old_desert
+        self.mean_game_abs = self.old_mean_game_abs
         self.partner_histories = self.old_partner_histories
         self.opp_histories = self.old_opp_histories
-        self.mean_game_abs = self.old_mean_game_abs
+        self.court_2_attr = self.old_court_2_attr
 
+
+        # if self.name == "David":
+        #     keys = sum([v for v in self.opp_histories.values()])
+        #     print(keys)
 
 
     def accumulate_fee(self):
@@ -562,15 +567,21 @@ def generate_new_game():
 
     elif profile == 1:
         players = select_players("Segregated", court_count)
-    elif profile == 3:
-
-        best_game = enumerate_b.find_best_exhaustive(all_current_players, 0, 0)
-        place_on_courts(best_game)
-        return
-
     elif profile == 4:
 
         best_game = enumerate_b.find_best_exhaustive(all_current_players, 10, 2)
+        place_on_courts(best_game)
+        return
+
+    elif profile == 3:
+
+        #for i in range(10):
+        best_game = enumerate_b.find_best_exhaustive(all_current_players,
+                                                         0, 0)
+            # if not best_game:
+            #      print("NOT!")
+            #      break
+        #print("FINISHED")
         place_on_courts(best_game)
         return
 
@@ -725,11 +736,17 @@ def update_pvp():
         # if player.name == "Henry":
         #     print(player.partner_histories)
         #     print(player.opp_histories)
+    # for undoing
+    #for player in all_current_players:
 
     for court in courts:
         for player in court.spaces:
             if player:
-                            # discounting, only when placed on the court.
+
+                player.old_partner_histories = player.partner_histories.copy()
+                player.old_opp_histories = player.opp_histories.copy()
+
+                # discounting, only when placed on the court.
                 for key in player.partner_histories.keys():
                     player.partner_histories[key] *= 0.9
                 for key in player.opp_histories.keys():
@@ -765,8 +782,6 @@ def update_pvp():
                             1/10)*player.partner_histories[o_player])
                     #except KeyError:
                     #    player.opp_histories[o_player] = 1
-                player.old_partner_histories = player.partner_histories
-                player.old_opp_histories = player.opp_histories
 
 
 
@@ -791,10 +806,10 @@ def update_pvp():
                 # if player.name == "Henry":
                 #     print("Partner Histories")
                 #     for p in player.partner_histories:
-                #         print(p.name, player.partner_histories[p])
+                #         print(p.name, player.partner_histories)
                 #     print("Old Partner Histories")
                 #     for p in player.old_partner_histories:
-                #         print(p.name, player.old_partner_histories[p])
+                #         print(p.name, player.old_partner_histories)
 
 
     # names = [courts[0].spaces[i].opp_histories for i in range(4)]
@@ -810,7 +825,9 @@ def update_court_2_attr(court_spaces):
     for court in courts:
         for player in court.spaces:
             if player:
+                player.old_court_2_attr = player.court_2_attr
                 player.court_2_attr *= 0.8
+
 
     for player in court_spaces:
         if player:
@@ -851,13 +868,15 @@ def undo_confirm():
 
     for court in courts:
         for player in court.spaces:
-            if player is not None:
+            if player:
                 player.undo_game()
 
     # should be part of the undo game method
     for player in bench:
         player.time_since_last -= 1
         player.desert = player.old_desert
+        #player.partner_histories = player.old_partner_histories
+        #player.opp_histories = player.old_opp_histories
 
     # not ideal to use globals, what but else should I do?
     global total_rounds
@@ -1226,5 +1245,8 @@ fee_structure = {("Casual", 1): 5, ("Casual", 3): 10,
                  ("Member (no feathers)", 1): 0,
                  ("Member (no feathers)", 3): 3}
 
+# Hackish way of doing "boost", should be better organsied
+old_seg = False
+old_aff = False
 #for player in every_player:
 #    player.desert = 0

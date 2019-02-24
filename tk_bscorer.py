@@ -22,7 +22,7 @@ class Application(tk.Tk):
         tk.Tk.__init__(self)
 
         # A (probably unPythonic) way of randomly loading the bench
-        self.test_mode = True
+        self.test_mode = False
 
         self.title("Badminton Matchmaker")
 
@@ -186,7 +186,7 @@ class Application(tk.Tk):
 
 
         if self.test_mode:
-            self.start_in_test_mode()
+            self.start_in_test_mode(12)
 
 
         # If program crashed or exited otherwise normally, reload all data
@@ -225,10 +225,10 @@ class Application(tk.Tk):
 
         self.update_board()
 
-    def start_in_test_mode(self):
+    def start_in_test_mode(self, max):
         self.timer.duration = 0
-        while len(b_scorer.all_current_players) < 26:
-            self.add_players_by_arrival()
+        while len(b_scorer.all_current_players) < max:
+            self.add_players_by_arrival(max)
 
         # for player in b_scorer.every_player[0:32]:
         #     b_scorer.add_player(player)
@@ -250,7 +250,7 @@ class Application(tk.Tk):
         #                     b_scorer.all_current_players)
         # avoid having to reset timer. Should cancel timer entirely
 
-    def add_players_by_arrival(self):
+    def add_players_by_arrival(self, max):
         for player in b_scorer.absent_players:
             try:
                 if random.random() < pp.arrival_probs[player.name]:
@@ -260,7 +260,7 @@ class Application(tk.Tk):
                         b_scorer.all_current_players)
             except KeyError:
                 pass
-            if len(b_scorer.all_current_players) > 25:
+            if len(b_scorer.all_current_players) >=max:
                 break
 
 
@@ -645,6 +645,10 @@ class Application(tk.Tk):
 
         if are_you_sure:
             b_scorer.confirm_game()
+
+            if b_scorer.old_seg:
+                self.undo_boost()
+
             for i in range(len(b_scorer.courts)):
                 self.make_manual(i, toggle=False)
             self.colour_dict = b_scorer.colour_sorter(
@@ -654,6 +658,34 @@ class Application(tk.Tk):
             self.timer.timer_go()
             self.update_board()
             self.autosave()
+
+    def undo_boost(self):
+
+        #non-extensible atm
+        today = datetime.today().weekday()
+        if today == 1:
+            profile = "Tuesday"
+        elif today == 3:
+            profile = "Thursday"
+        else:
+            profile = "Default"
+
+        b_scorer.enumerate_b.scoring_vars[
+            ('Ability_Seg', profile)] = b_scorer.old_seg
+        b_scorer.enumerate_b.scoring_vars[
+            ('Affinity', profile)] = b_scorer.old_aff
+
+        score_pi = open('score_pi.obj', 'wb')
+        pickle.dump(b_scorer.enumerate_b.scoring_vars, score_pi)
+        score_pi.close()
+
+        b_scorer.old_seg = False
+        b_scorer.old_aff = False
+
+
+
+
+
 
     def undo_confirm(self):
         """In case you made a mistake confirming"""
@@ -832,7 +864,7 @@ class Application(tk.Tk):
         # Ensure there aren't too many players on
         players_kept_on = [player for player in b_scorer.all_current_players
                              if player.keep_on]
-        if len(players_kept_on) >= len(b_scorer.courts):
+        if len(players_kept_on) >= len(b_scorer.courts)*4:
             tk.messagebox.showerror("Error", "You can't keep on more players "
                                              "than there are spaces on the "
                                              "court!", parent= self)
@@ -1581,6 +1613,8 @@ class GameStats(tk.Toplevel):
         # not used ATM
         # self.default_button = ttk.Button(self, text="Return to Default",
         #                                  command=self.return_default_weightings)
+        self.boost_button = ttk.Button(self, text = "Final Round Boost",
+                                       command = self.boost_weightings)
         self.save_button = ttk.Button(self, text="Save Weightings",
                                       command=self.save_weightings)
 
@@ -1604,7 +1638,9 @@ class GameStats(tk.Toplevel):
         self.shuffle_label.grid(column=0, row=7)
         self.shuffle_combo.grid(column=1, row=7)
         # self.default_button.grid(column=0, row=6)
+        self.boost_button.grid(column=0, row=8)
         self.save_button.grid(column=1, row=8)
+
 
         # Set profile based on day
         today = datetime.today().weekday()
@@ -1658,35 +1694,20 @@ class GameStats(tk.Toplevel):
                                                 "Please ensure all values are"
                                                 " numbers only.")
 
-    # OUT OF DATE ATM
-    # def return_default_weightings(self):
-    #     """Replace the user-defined weightings with default ones"""
-    #
-    #
-    #     are_you_sure = tk.messagebox.askyesno("Are you sure?",
-    #                                           "Are you sure you want to return "
-    #                                           "to the default weightings?")
-    #
-    #     if are_you_sure is True:
-    #         b_scorer.enumerate_b.scoring_vars['Balance'] = 5.0
-    #         b_scorer.enumerate_b.scoring_vars['Ability_Seg'] = 2.0
-    #         b_scorer.enumerate_b.scoring_vars['Mixing'] = 1.5
-    #         b_scorer.enumerate_b.scoring_vars['Affinity'] = 4.0
-    #
-    #         # should be able to loop?
-    #         self.bal_entry.delete(0, "end")
-    #         self.seg_entry.delete(0, "end")
-    #         self.mix_entry.delete(0, "end")
-    #         self.aff_entry.delete(0, "end")
-    #
-    #         self.bal_entry.insert(0,
-    #                               b_scorer.enumerate_b.scoring_vars['Balance'])
-    #         self.seg_entry.insert(0, b_scorer.enumerate_b.scoring_vars[
-    #             'Ability_Seg'])
-    #         self.mix_entry.insert(0,
-    #                               b_scorer.enumerate_b.scoring_vars['Mixing'])
-    #         self.aff_entry.insert(0,
-    #                               b_scorer.enumerate_b.scoring_vars['Affinity'])
+    def boost_weightings(self):
+        profile = self.profile_combo.get()
+        b_scorer.old_seg = b_scorer.enumerate_b.scoring_vars[
+            ('Ability_Seg', profile)]
+        b_scorer.old_aff = b_scorer.enumerate_b.scoring_vars[
+            ('Affinity', profile)]
+        #print(old_seg)
+        self.seg_entry.delete(0, "end")
+        self.aff_entry.delete(0, "end")
+        self.seg_entry.insert(0, b_scorer.old_seg*2)
+        self.aff_entry.insert(0, b_scorer.old_aff*3)
+
+
+
 
     def switch_profile(self):
         """When profile_combo selects a new profile, switch to those"""
