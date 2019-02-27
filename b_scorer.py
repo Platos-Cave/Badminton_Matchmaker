@@ -11,6 +11,7 @@ import operator
 import time
 from statistics import mean
 from collections import defaultdict
+from itertools import combinations
 
 class Player:
     def __init__(self, name, sex, ability, partner_affinities=[],
@@ -308,7 +309,7 @@ def get_ability(player):
 
 
 
-def select_players(shuffle_version, no_courts = 3):
+def select_players(shuffle_version, selectable, no_courts = 3):
     """ Starting with a blank list (trial_players), append players to this list
     until there are 12.
 
@@ -338,7 +339,7 @@ def select_players(shuffle_version, no_courts = 3):
     trial_players = []
 
     # Add kept on players
-    for player in all_current_players:
+    for player in selectable:
         if player.keep_on:
             trial_players.append(player)
 
@@ -349,7 +350,7 @@ def select_players(shuffle_version, no_courts = 3):
                 if player:
                     player.keep_off = True
 
-    players_to_pick = [player for player in all_current_players if
+    players_to_pick = [player for player in selectable if
                        not player.keep_off and not player.keep_on] # and not
                        #player.manual_game]
 
@@ -483,43 +484,50 @@ def colour_sorter(players):
     for being due. Used in the GUI for colouring the bench labels.
     Seems out of place/should be integrated into the select_players()
     function?"""
-    num = 4*len(courts)
-    players_left = players[:]
+    # num = 4*len(courts)
+    # players_left = players[:]
     colour_dict = {}
-
-    # If there are 12 or fewer players, then they're all "due"
-    if len(players_left) <= 4*(len(courts)):
-        for player in players_left:
-            colour_dict[player] = "light green"
-        return colour_dict
-
-    # players due on
-    green_players = []
-    # players maybe due on
-    orange_players = []
-    # players definitely not due on
-    red_players = []
-
-    # Much the same as select_players()
-    while len(green_players + orange_players) <=  num:
-        most_off = find_most_off(players_left)
-        if len(most_off) <= (num - len(green_players + orange_players)):
-            for player in most_off:
-                green_players.append(player)
-        else:
-            least_off = find_least_games(most_off)
-            if len(least_off) <= (num - len(green_players + orange_players)):
-                for player in least_off:
-                    green_players.append(player)
+    #
+    # # If there are 12 or fewer players, then they're all "due"
+    if len(players) <= 4*(court_count):
+        for player in players:
+            if player.keep_off:
+                colour_dict[player] = "gray"
+            elif player.keep_on:
+                colour_dict[player] = "white"
             else:
-                for player in least_off:
-                    orange_players.append(player)
+                colour_dict[player] = "light green"
 
-        players_left = [i for i in players_left if
-                        i not in green_players and i not in orange_players]
-
-    red_players = players_left
-
+        return colour_dict
+    #
+    # # players due on
+    # green_players = []
+    # # players maybe due on
+    # orange_players = []
+    # # players definitely not due on
+    # red_players = []
+    #
+    # # Much the same as select_players()
+    # while len(green_players + orange_players) <=  num:
+    #     most_off = find_most_off(players_left)
+    #     if len(most_off) <= (num - len(green_players + orange_players)):
+    #         for player in most_off:
+    #             green_players.append(player)
+    #     else:
+    #         least_off = find_least_games(most_off)
+    #         if len(least_off) <= (num - len(green_players + orange_players)):
+    #             for player in least_off:
+    #                 green_players.append(player)
+    #         else:
+    #             for player in least_off:
+    #                 orange_players.append(player)
+    #
+    #     players_left = [i for i in players_left if
+    #                     i not in green_players and i not in orange_players]
+    #
+    # red_players = players_left
+    green_players, orange_players, red_players = smart_select(players,
+                                                            court_count)
     for player in green_players:
         colour_dict[player] = "light green"
     for player in orange_players:
@@ -536,6 +544,67 @@ def colour_sorter(players):
 
 
     return colour_dict
+
+def smart_select(players, c_count=3):
+
+    players_left = players[:]
+    spaces = 4*c_count
+
+    green_players = []
+    orange_players = []
+    red_players = []
+
+    # Add kept on/off
+    for player in players_left:
+        if player.keep_on:
+            green_players.append(player)
+        if player.keep_off:
+            red_players.append(player)
+
+    # Could do some kind of pop() above instead?
+    players_left = [i for i in players_left if
+                    i not in green_players and i not in orange_players and i
+                    not in red_players]
+
+    if len(players_left + green_players) <= spaces:
+        for player in players_left:
+            green_players.append(player)
+        # print([p.name for p in green_players])
+        # print([p.name for p in orange_players])
+        # print([p.name for p in red_players])
+        for lst in green_players, orange_players, red_players:
+            random.shuffle(lst)
+        return (green_players, orange_players, red_players)
+
+    while len(green_players + orange_players) <= spaces:
+        if len(green_players) == spaces:
+            break
+        # Find most off
+        most_off = find_most_off(players_left)
+        if len(most_off) <= (spaces - len(green_players + orange_players)):
+            for player in most_off:
+                green_players.append(player)
+        else:
+            for player in most_off:
+                orange_players.append(player)
+
+
+        players_left = [i for i in players_left if
+                        i not in green_players and i not in orange_players
+                        and i not in red_players]
+
+    for player in players_left:
+        red_players.append(player)
+    #
+    # print([p.name for p in green_players])
+    # print([p.name for p in orange_players])
+    # print([p.name for p in red_players])
+    for lst in green_players, orange_players, red_players:
+        random.shuffle(lst)
+    return (green_players, orange_players, red_players)
+
+
+
 
 # Not needed in the GUI
 def view_all_courts():
@@ -561,12 +630,15 @@ def generate_new_game():
     # segregated if you've saved that
     profile = enumerate_b.scoring_vars['Shuffle',
                              enumerate_b.profile]
-    if profile == 0 or profile == 2:
-        players = select_players("Random", court_count)
+    if profile == 0:
+        players = select_players("Random", all_current_players, court_count)
+        best_game = (enumerate_b.find_best_game(players, courts=court_count))
 
 
     elif profile == 1:
-        players = select_players("Segregated", court_count)
+        players = select_players("Segregated", all_current_players,
+                                 court_count)
+        best_game = (enumerate_b.find_best_game(players, courts=court_count))
     elif profile == 4:
 
         best_game = enumerate_b.find_best_exhaustive(all_current_players, 10, 2)
@@ -575,27 +647,60 @@ def generate_new_game():
 
     elif profile == 3:
 
-        #for i in range(10):
-        best_game = enumerate_b.find_best_exhaustive(all_current_players,
-                                                         0, 0)
-            # if not best_game:
-            #      print("NOT!")
-            #      break
-        #print("FINISHED")
-        place_on_courts(best_game)
-        return
+        # #for i in range(10):
+        # best_game = enumerate_b.find_best_exhaustive(all_current_players,
+        #                                                  0, 0)
+        #     # if not best_game:
+        #     #      print("NOT!")
+        #     #      break
+        # #print("FINISHED")
+        # place_on_courts(best_game)
+        # return
+        best_game = enumerate_b.smart_shuffle_trial(all_current_players,
+                                         courts=court_count)
 
-    if profile == 2:
-        trials = 100
+
+    elif profile == 2:
+
+        trials = enumerate_b.scoring_vars["Trials", enumerate_b.profile]
+
+        greens, oranges, reds = smart_select(all_current_players, court_count)
+        spaces = 4 * court_count
+        no_oranges = spaces - len(greens)
+        if no_oranges > 0:
+            # adds time to convert to list, but not enough to worry about at
+            # this level
+            orange_combos = list(combinations(oranges, no_oranges))
+            # if too big, shuffle so the combos selected will be a random sample
+            if len(orange_combos) > trials:
+                random.shuffle(orange_combos)
+
+        else:
+            orange_combos = [()]
+
         games = []
         scores = []
         tolerance_scores = []
         bench_scores = []
+        t1 = time.time()
 
-        # all_time = 0
-        for i in range(trials):
-            players = select_players("Smart", court_count)
+        combo_count = 0
 
+
+        for combo in orange_combos:
+            if stop_generation:
+                return False
+
+            combo_count +=1
+            if combo_count > trials:
+                break
+
+            players = greens[:]
+            # print([p.name for p in combo])
+            for player in combo:
+                players.append(player)
+
+            #players = select_players("Smart", pickable, court_count)
 
             benched = [p for p in all_current_players if p not in players]
             total = (enumerate_b.find_best_game(players, courts =
@@ -612,6 +717,8 @@ def generate_new_game():
             1))
         best_game = games[index]
 
+        t2 = time.time()
+
         if display:
             #print_game(best_game[0])
             # print('')
@@ -621,6 +728,7 @@ def generate_new_game():
             print(f'Mean score of {trials} games: {mean(scores)}')
             print(f'Score of this game: {lowest_score} (Tolerance: {tolerance_scores[index]})'
                   f'(Bench score: {bench_scores[index]})')
+            print(f'Took {t2-t1} seconds')
 
 
 
@@ -628,6 +736,7 @@ def generate_new_game():
         best_game = (enumerate_b.find_best_game(players, courts = court_count))
 
     place_on_courts(best_game)
+    return True
 
 def place_on_courts(best_game):
     for court in courts:
@@ -658,7 +767,7 @@ def place_on_courts(best_game):
 
         scores += enumerate_b.score_court(((0,1),(2,3)),courts[i].spaces,
                                             explain = False)
-    print(scores)
+    # print(scores)
     enumerate_b.score_num = 0
 
     calculate_swap_TEST()
@@ -716,6 +825,9 @@ def confirm_game():
     # saving session
     today_session.games.append([courts[i].spaces.copy() for i in range(len(
         courts))])
+
+    # adding bench
+    today_session.games[-1].append(bench.copy())
 
     # Updating desert.
     update_desert()
@@ -956,6 +1068,19 @@ def swap_courts(court_a, court_b):
     court_b.spaces = a_spaces
 
 def empty_courts():
+
+    # greens, oranges, reds = smart_select(all_current_players, court_count)
+    # spaces = 4 * court_count
+    # no_oranges = spaces - len(greens)
+    # if no_oranges > 0:
+    #     orange_combos = combinations(oranges, no_oranges)
+    # for combo in orange_combos:
+    #     players = greens[:]
+    #     #print([p.name for p in combo])
+    #     for player in combo:
+    #         players.append(player)
+    #     print([p.name for p in players])
+
     for court in courts:
         court.empty()
 
@@ -987,13 +1112,20 @@ def add_court():
     global court_count
     court_count += 1
 
-# Should work only
+# How to work with fewer than 12 players? Can't make desert go up high,
+# or too low either?
+# For a temporary fix, just don't change desert?
 def update_desert():
-     for player in all_current_players:
+
+    # ignore deserts with low numbers for now
+    if len(all_current_players) < 4*len(courts):
+        return
+
+    for player in all_current_players:
         player.old_desert = player.desert
         player.desert += ((4 * len(courts))/len(all_current_players)) - 1
-     for player in bench:  # as opposed to checking the courts
-         player.desert += 1
+    for player in bench:  # as opposed to checking the courts
+        player.desert += 1
 
 
 
@@ -1018,7 +1150,7 @@ def save_and_quit(pickling=True):
 
     # Reset all the players
     for player in every_player:
-        player.total_games =  0
+        player.total_games = 0
         player.penalty_games = 0
         player.adjusted_games = 0
         player.time_since_last = 0
@@ -1146,7 +1278,6 @@ try:
             print("Add consec!")
         if not hasattr(player, 'manual_game'):
             player.manual_game = False
-            print("Added manual!")
 
 
         if not hasattr(player, 'hunger'):
@@ -1250,3 +1381,4 @@ old_seg = False
 old_aff = False
 #for player in every_player:
 #    player.desert = 0
+stop_generation = False

@@ -49,23 +49,34 @@ try:
         scoring_vars[('Ability Alternation', 'Tuesday')] = 2.0
         scoring_vars[('Ability Alternation', 'Thursday')] = 2.0
         print("Ability Alternation added!")
+    if ('Trials', 'Default') not in scoring_vars:
+        scoring_vars[('Trials', 'Default')] = 1000
+        scoring_vars[('Trials', 'Tuesday')] = 1000
+        scoring_vars[('Trials', 'Thursday')] = 1000
+        scoring_vars[('Shuffle', 'Tuesday')] = 2
+        scoring_vars[('Shuffle', 'Thursday')] = 2
+        scoring_vars[('Shuffle', 'Default')] = 2
+
+
+
+
     score_in.close()
 except FileNotFoundError:
     # seems ugly, should be mapped differently
     scoring_vars = {('Balance', "Default"): 5.0,
                     ('Ability_Seg', "Default"): 2.0,
                     ('Mixing', "Default"): 1.5,
-                    ('Affinity', "Default"): 4.0, ('Shuffle', "Default"): 0,
+                    ('Affinity', "Default"): 5.0, ('Shuffle', "Default"): 2,
                     ('Balance', 'Tuesday'): 5.0, ('Ability_Seg',
                                                   'Tuesday'): 2.0,
                     ('Mixing', 'Tuesday'): 2.0, ('Affinity',
-                                                 'Tuesday'): 4.0,
-                    ('Shuffle', 'Tuesday'): 0, ('Balance', 'Thursday'):
+                                                 'Tuesday'): 5.0,
+                    ('Shuffle', 'Tuesday'): 2, ('Balance', 'Thursday'):
                         6.0,
                     ('Ability_Seg', 'Thursday'): 3.0,
                     ('Mixing', 'Thursday'): 1.5,
                     ('Affinity', 'Thursday'): 5.0,
-                    ('Shuffle', 'Thursday'): 1,
+                    ('Shuffle', 'Thursday'): 2,
                     ('Female Affinity', 'Default'): 1.0,
                     ('Female Affinity', 'Tuesday'): 1.0,
                     ('Female Affinity', 'Thursday'): 1.0}
@@ -73,6 +84,10 @@ except FileNotFoundError:
         scoring_vars[('Ability Alternation', 'Default')] = 2.0
         scoring_vars[('Ability Alternation', 'Tuesday')] = 2.0
         scoring_vars[('Ability Alternation', 'Thursday')] = 2.0
+    if ('Trials', 'Default') not in scoring_vars:
+        scoring_vars[('Trials', 'Default')] = 1000
+        scoring_vars[('Trials', 'Tuesday')] = 1000
+        scoring_vars[('Trials', 'Thursday')] = 1000
 
 # what score profile to use
 day_of_week = datetime.datetime.today().weekday()
@@ -466,10 +481,14 @@ def find_best_game(players, courts, benched = [], scored=False, log=False):
 
     lowest_score += tolerance_score
 
-    # checking affinities in benched players
+    # Get a bonus for having players with an affinity be on or be off together
     bench_score = (bench_cost(benched))*(0.5*scoring_vars[('Affinity',profile)])
+    courts_score = (bench_cost(players)) * (0.5 * scoring_vars[('Affinity',
+                                                           profile)])
+
 
     lowest_score -= bench_score
+    lowest_score -= courts_score
 
     t5 = time.time()
 
@@ -561,6 +580,78 @@ def find_best_exhaustive(players, runs, check):
     #         print(players[num].name)
     # t4 = time.time()
     # print(f'{t4-t3} to find the best')
+def smart_shuffle_trial(players, courts, benched = [], scored=False, log=False):
+    from b_scorer import select_players
+    shuffle(players)
+    t1 = time.time()
+    combos = list(itertools.combinations([i for i in range(len(players))], 4))
+    t2 = time.time()
+    for combo in combos:
+        best_score_2(combo, players)
+    t3 = time.time()
+
+    indices_dict = {}
+
+    for i in range(1000):
+
+        scores = []
+
+        new_players = select_players("Smart", courts)
+        for i, play in enumerate(new_players):
+            # find the indice of the player in new players
+            for j, play2 in enumerate(players):
+                if play == play2:
+                    indices_dict[i] = j
+
+
+    # print([p.name for p in new_players])
+    # print([p.name for p in players])
+    # print(indices_dict)
+
+        for combo in combos_total[courts - 1][1]:
+            # translate the indices
+            combo_2 = [() for i in range (3)]
+            for i, game in enumerate(combo):
+                combo_2[i] = [indices_dict[j] for j in game]
+            #print(combo_2)
+
+            scores.append(sum([scores_dict[combo[i]] for i in range(courts)]))
+
+
+        index, lowest_score = min(enumerate(scores),
+                                  key=operator.itemgetter(1))
+
+
+        # The best combinations of players on each of the three courts (unsorted)
+        best_unsorted = combos_total[courts - 1][1][index]
+
+        # For each of the unsorted courts, find the best of the 3 combos,
+        # then set that as the court.
+        # Possible drawback: no tie-breaking mechanism might cause a small bias?
+
+        best_game = [best_combos[best_unsorted[i]] for i in range(courts)]
+
+        # Index the players to the numbers representing them.
+        # Ugly, should be able to make more succinct and readable
+
+        best_players = [((players[best_game[i][0][0]],
+                          players[best_game[i][0][1]]),
+                         (players[best_game[i][1][0]],
+                          players[best_game[i][1][1]])) for i in
+                        range(courts)]
+
+    t4 = time.time()
+    print(t4-t1)
+    print(t4-t3)
+
+    return best_players
+
+
+
+
+
+
+
 def check_for_duplicates(players, game, fixed):
     board = set()
     for court in game:

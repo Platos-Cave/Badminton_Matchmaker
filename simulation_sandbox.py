@@ -109,7 +109,7 @@ def individual_player_test():
 
 def export_game_data():
 
-    game_file = open('{}.csv'.format("Thing"), 'w', newline='')
+    game_file = open('{}.csv'.format("Smart Shuffle 2nd"), 'w', newline='')
 
     with game_file:
         writer = csv.writer(game_file)
@@ -140,7 +140,7 @@ t1 = time.time()
 for player in b_scorer.every_player:
     player.desert = 0
 
-trials = 10
+trials = 1000
 for i in range(trials):
     print(f'{i*(100/trials)}% finished!')
     if i%2 == 0:
@@ -153,7 +153,7 @@ b_scorer.print_desert()
 #for player in b_scorer.every_player:
 #    print((player.court_2_attr / 0.3))
 
-# export_game_data()
+export_game_data()
 
 t2 = time.time()
 print(f'Took {t2-t1}!')

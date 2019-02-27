@@ -6,7 +6,7 @@ import pickle
 import b_scorer
 
 class Session:
-    def __init__(self, date, start_time):
+    def __init__(self, date, start_time ):
 
         self.date = date
         self.start_time = start_time
@@ -22,7 +22,7 @@ class Session:
 
 
 def export_game_data(filename):
-    session_data = open('badminton_session_data_2.obj', 'rb')
+    session_data = open('badminton_session_data.obj', 'rb')
     loaded_sessions = pickle.load(session_data)
     session_data.close()
 
@@ -37,16 +37,25 @@ def export_game_data(filename):
         for i, session in enumerate(loaded_sessions):
             if len(session.games) > 0:
                 for j, game in enumerate(session.games):
-                    for k in range(3):
-                        for l in range(4):
-                            try:
-                                writer.writerow([session.date, j+1, k+1, l+1,
-                                             game[k][l].name, game[k][
-                                    l].ability])
-                            except AttributeError:
-                                writer.writerow([session.date, j + 1, k+1,
-                                                 l + 1,
-                                                 "NONE", 0])
+                    #print([p.name for p in game])
+                    for k, court in enumerate(game):
+                        #print([p.name for p in court])
+                        if k<3:
+                            for l in range(4):
+                                try:
+                                    writer.writerow([session.date, j+1, k+1, l+1,
+                                                 game[k][l].name, game[k][
+                                        l].ability])
+                                except AttributeError:
+                                    writer.writerow([session.date, j + 1, k+1,
+                                                     l + 1,
+                                                     "NONE", 0])
+                        else:
+                            for player in court: #bench
+                                writer.writerow(
+                                    [session.date, j + 1, "B", "B",
+                                     player.name, player.ability])
+
 
             #
             # if len(session.games) > 0:
