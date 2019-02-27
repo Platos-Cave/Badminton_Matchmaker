@@ -65,6 +65,8 @@ class Application(tk.Tk):
 
         self.timer = Timer(self)
 
+        self.generator = None
+
         # These attempts to format my lines to >80 characters seem unnatural
 
         # The names of the Players who haven't joined
@@ -186,7 +188,7 @@ class Application(tk.Tk):
 
 
         if self.test_mode:
-            self.start_in_test_mode(12)
+            self.start_in_test_mode(18)
 
 
         # If program crashed or exited otherwise normally, reload all data
@@ -206,11 +208,23 @@ class Application(tk.Tk):
             b_scorer.court_count = board_data["court_count"]
             b_scorer.today_session = board_data["today_session"]
             self.colour_dict = board_data["colour_dict"]
-            self.confirm_button.configure(state=board_data["confirm_state"])
+            self.timer.timer_on = board_data["timer_status"]
+           # self.timer.timer_count = board_data["timer_count"]
+           #
+           #  if self.timer.timer_on:
+           #      self.timer.timer_go()
+
+            self.confirm_button.configure(state= str(board_data[
+                                                          "confirm_state"]))
+
             if str(board_data["confirm_state"]) == "disabled":
                 self.undo_confirm_button.configure(state = "normal")
             elif str(board_data["confirm_state"]) == "normal":
                 self.undo_confirm_button.configure(state="disabled")
+
+
+
+
             for player in b_scorer.all_current_players:
                 self.add_bench_menus(player)
             for i, court in enumerate(b_scorer.courts):
@@ -329,6 +343,9 @@ class Application(tk.Tk):
         board_data['court_count'] = b_scorer.court_count
         board_data["today_session"] = b_scorer.today_session
         board_data["colour_dict"] = self.colour_dict
+        board_data["timer_status"] = self.timer.timer_on
+        board_data["timer_count"] = self.timer.timer_count
+
 
         # For some reason, wouldn't work otherwise
         button_state = str(self.confirm_button["state"])
@@ -598,6 +615,11 @@ class Application(tk.Tk):
         """Return a current player to absent players, then update relevant
         information"""
 
+        if self.generator:
+            tk.messagebox.showerror("Error", "You can't remove players while"
+                                             " generating a board!")
+            return
+
 
         are_you_sure = tk.messagebox.askyesno("Are you sure?",
                                               "Are you sure this player is "
@@ -611,6 +633,14 @@ class Application(tk.Tk):
             self.update_board()
             self.autosave()
 
+    def stop_generation(self):
+        # print("Stop!")
+        b_scorer.stop_generation = True
+        self.start_button.config(text="Generate New Board", command =
+                                                        self.generate)
+
+
+
 
     def generate(self):
         """Calls b_scorer.generate_new_game.
@@ -618,6 +648,9 @@ class Application(tk.Tk):
         Can't make game with <12 players. Rather than figure out a
         way of creating singles matches, I'm just going to leave it up to the
         person to do it manually"""
+        # print("Generating!")
+
+
         if b_scorer.court_count == 0:
             tk.messagebox.showerror(
                 "Error", "You can't generate games with zero automatic courts!")
@@ -629,13 +662,26 @@ class Application(tk.Tk):
                          " on courts! This program can't handle that.")
         else:
 
-            b_scorer.generate_new_game()
-            self.unchanged_board = False
-            self.update_board()
+            self.generator = Generate()
+            self.generator.start()
+
+            self.start_button.config(text="Abort!")
+            self.start_button.config(command=self.stop_generation)
+
+            # cancel for removing purposes
+
+            # b_scorer.generate_new_game()
+            # self.unchanged_board = False
+            # self.update_board()
 
 
     def confirm(self):
         """Call b_scorer's confirm_game() function, update and autosave"""
+
+        if self.generator:
+            tk.messagebox.showerror("Error", "You can't confirm while"
+                                             "generating a board!")
+            return
 
         are_you_sure = tk.messagebox.askyesno("Are you sure?",
                                               "Are you sure you want to "
@@ -689,6 +735,12 @@ class Application(tk.Tk):
 
     def undo_confirm(self):
         """In case you made a mistake confirming"""
+
+        if self.generator:
+            tk.messagebox.showerror("Error", "You can't undo confirm while "
+                                             "generating a board!")
+            return
+
         are_you_sure = tk.messagebox.askyesno("Are you sure?",
                                               "Are you sure you want to undo "
                                               "the confirmation?")
@@ -1052,14 +1104,14 @@ class PlayerStats(tk.Toplevel):
         self.pay_owed_button = ttk.Button(self, text = "Pay Off", command =
                                           self.pay_off)
 
-        self.games_played_label = ttk.Label(self, text="Actual Games Played")
+        self.games_played_label = ttk.Label(self, text="Games Played")
         self.games_played_number = ttk.Label(self, text="0", font = self.label_font)
 
-        self.late_penalty_label = ttk.Label(self, text="Lateness Penalty")
-        self.late_penalty_entry = ttk.Entry(self, width=4)
+        # self.late_penalty_label = ttk.Label(self, text="Lateness Penalty")
+        # self.late_penalty_entry = ttk.Entry(self, width=4)
 
-        self.games_total_label = ttk.Label(self, text="Adjusted Games")
-        self.games_total_number = ttk.Label(self, text="0", font = self.label_font)
+        # self.games_total_label = ttk.Label(self, text="Adjusted Games")
+        # self.games_total_number = ttk.Label(self, text="0", font = self.label_font)
 
         self.games_off_label = ttk.Label(self, text = "Rounds since last "
                                                       "played")
@@ -1148,11 +1200,11 @@ class PlayerStats(tk.Toplevel):
 
             self.games_played_number.config(
                 text=round(self.player.total_games, 2))
-            self.late_penalty_entry.insert(0,
-                                           round(self.player.penalty_games,
-                                                 2))
-            self.games_total_number.config(
-                text=round(self.player.adjusted_games, 2))
+            # self.late_penalty_entry.insert(0,
+            #                                round(self.player.penalty_games,
+            #                                      2))
+            # self.games_total_number.config(
+            #     text=round(self.player.adjusted_games, 2))
 
             self.games_off_number.config(text=self.player.time_since_last)
             self.games_on_number.config(text=self.player.consecutive_games_on)
@@ -1208,24 +1260,23 @@ class PlayerStats(tk.Toplevel):
         if not self.new:
             self.games_played_label.grid(column=0, row=11)
             self.games_played_number.grid(column=1, row=11)
-            self.late_penalty_label.grid(column=0, row=12)
-            self.late_penalty_entry.grid(column=1, row=12)
-            self.games_total_label.grid(column=0, row=13)
-            self.games_total_number.grid(column=1, row=13)
-            self.games_off_label.grid(column=0, row=14)
-            self.games_off_number.grid(column=1, row=14)
-            self.games_on_label.grid(column=0, row=15)
-            self.games_on_number.grid(column=1, row=15)
-
+            # self.late_penalty_label.grid(column=0, row=12)
+            # self.late_penalty_entry.grid(column=1, row=12)
+            # self.games_total_label.grid(column=0, row=13)
+            # self.games_total_number.grid(column=1, row=13)
+            self.games_off_label.grid(column=0, row=12)
+            self.games_off_number.grid(column=1, row=12)
+            self.games_on_label.grid(column=0, row=13)
+            self.games_on_number.grid(column=1, row=13)
+            self.desert_label.grid(column=0, row=14)
+            self.desert_display.grid(column=1, row=14)
+            self.hunger_label.grid(column=0, row=15)
+            self.hunger_value.grid(column=1, row=15)
             self.game_history_label.grid(column=0, row=16)
             self.game_number_combo.grid(column=1, row=16)
             self.single_game_label.grid(column=0, row=17)
             self.played_with_label.grid(column=1, row=17)
             self.played_against_label.grid(column=1, row=18)
-            self.hunger_label.grid(column = 0, row = 19)
-            self.hunger_value.grid(column=1, row=19)
-            self.desert_label.grid(column=0, row=20)
-            self.desert_display.grid(column=1, row=20)
 
 
         self.save_player_button.grid(column=1, row=21, columnspan=3)
@@ -1594,6 +1645,7 @@ class GameStats(tk.Toplevel):
         self.aff_label = ttk.Label(self, text="Player Affinity Weighting")
         self.female_aff_label = ttk.Label(self, text="Female Affinity "
                                                      "Weighting")
+        self.trials_label = ttk.Label(self, text="Smart Shuffle Max Trials")
         self.shuffle_label = ttk.Label(self, text="Shuffle Algorithm")
 
         self.profile_combo = ttk.Combobox(self, width = 10, state = 'readonly',
@@ -1605,10 +1657,10 @@ class GameStats(tk.Toplevel):
         self.mix_entry = ttk.Entry(self, width=4)
         self.aff_entry = ttk.Entry(self, width=4)
         self.female_aff_entry = ttk.Entry(self, width=4)
+        self.trials_entry = ttk.Entry(self, width=5)
         self.shuffle_combo = ttk.Combobox(self, width=10, state = 'readonly',
                                           values=["Random", "Segregated",
-                                                  "Smart", "Exhaustive",
-                                                  "Exhaustive 2"])
+                                                  "Smart"])
 
         # not used ATM
         # self.default_button = ttk.Button(self, text="Return to Default",
@@ -1635,11 +1687,13 @@ class GameStats(tk.Toplevel):
         self.aff_entry.grid(column=1, row=5)
         self.female_aff_label.grid(column=0, row=6)
         self.female_aff_entry.grid(column=1, row=6)
-        self.shuffle_label.grid(column=0, row=7)
-        self.shuffle_combo.grid(column=1, row=7)
+        self.trials_label.grid(column=0, row=7)
+        self.trials_entry.grid(column=1, row=7)
+        self.shuffle_label.grid(column=0, row=8)
+        self.shuffle_combo.grid(column=1, row=8)
         # self.default_button.grid(column=0, row=6)
-        self.boost_button.grid(column=0, row=8)
-        self.save_button.grid(column=1, row=8)
+        self.boost_button.grid(column=0, row=9)
+        self.save_button.grid(column=1, row=9)
 
 
         # Set profile based on day
@@ -1681,6 +1735,8 @@ class GameStats(tk.Toplevel):
                     self.female_aff_entry.get())
                 b_scorer.enumerate_b.scoring_vars[
                     'Shuffle', day] = self.shuffle_combo.current()
+                b_scorer.enumerate_b.scoring_vars['Trials', day] = int(
+                    self.trials_entry.get())
 
                 # MMmmmm score pie
                 score_pi = open('score_pi.obj', 'wb')
@@ -1721,6 +1777,7 @@ class GameStats(tk.Toplevel):
         self.mix_entry.delete(0, "end")
         self.aff_entry.delete(0, "end")
         self.female_aff_entry.delete(0, "end")
+        self.trials_entry.delete(0, "end")
 
         self.bal_entry.insert(0,
                               b_scorer.enumerate_b.scoring_vars[('Balance',
@@ -1739,6 +1796,8 @@ class GameStats(tk.Toplevel):
                               b_scorer.enumerate_b.scoring_vars[(
                                   'Female Affinity',
                                                                  profile)])
+        self.trials_entry.insert(0,b_scorer.enumerate_b.scoring_vars[(
+                                  'Trials', profile)])
         self.shuffle_combo.current(b_scorer.enumerate_b.scoring_vars[(
             'Shuffle', profile)])
 
@@ -1864,12 +1923,19 @@ class HistoryPopup(tk.Toplevel):
         for i, game in enumerate(session.games):
             print("***Game {}*** \n".format(i+1))
             for i, court in enumerate(game):
-                print("*Court {}* \n".format(i+1))
-                print("{} and {} [VERSUS]".format(court[0].name,
-                                                 court[1].name))
-                print("{} and {}".format(court[2].name,
-                                                 court[3].name))
-                print("")
+                if i<3:
+                    print("*Court {}* \n".format(i+1))
+                    print("{} and {} [VERSUS]".format(court[0].name,
+                                                     court[1].name))
+                    print("{} and {}".format(court[2].name,
+                                                     court[3].name))
+                    print("")
+                else:
+                    print("*BENCH* \n")
+                    for player in court:
+                        print(player.name)
+                    print("")
+
             print("--------------------")
 
 
@@ -2203,6 +2269,29 @@ class Timer(tk.Frame):
             self.bell = Bell()
             self.bell.start()
             self.controller.config_buttons()
+
+class Generate(Thread):
+    def __init__(self):
+        Thread.__init__(self)
+        self._stop = Event()
+
+    def run(self):
+        self._stop.clear()
+        b_scorer.stop_generation = False
+        go = b_scorer.generate_new_game()
+        if go:
+            app.unchanged_board = False
+            app.update_board()
+        app.generator = None
+        app.stop_generation()
+
+
+    def stop(self):
+        self._stop.set()
+        b_scorer.stop_generation = True
+
+
+
 
 class Alarm(Thread):
     '''Multithread so the alarm doesn't freeze the GUI'''
