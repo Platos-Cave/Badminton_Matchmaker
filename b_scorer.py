@@ -949,6 +949,10 @@ def update_court_2_attr(court_spaces):
 def calculate_swap_TEST():
 
     #todo - make sure this doesn't stuff up/do weird with manual games
+    # this probably works?
+    for court in courts:
+        if court.manual:
+            return
 
     court_scores = []
 

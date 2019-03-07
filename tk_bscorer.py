@@ -65,6 +65,7 @@ class Application(tk.Tk):
 
         self.timer = Timer(self)
 
+        # if you're in the process of generating a new board
         self.generator = None
 
         # These attempts to format my lines to >80 characters seem unnatural
@@ -188,7 +189,7 @@ class Application(tk.Tk):
 
 
         if self.test_mode:
-            self.start_in_test_mode(18)
+            self.start_in_test_mode(11)
 
 
         # If program crashed or exited otherwise normally, reload all data
@@ -665,7 +666,7 @@ class Application(tk.Tk):
             self.generator = Generate()
             self.generator.start()
 
-            self.start_button.config(text="Abort!")
+            self.start_button.config(text="Abort Generation")
             self.start_button.config(command=self.stop_generation)
 
             # cancel for removing purposes
@@ -1554,15 +1555,15 @@ class PlayerStats(tk.Toplevel):
                     # print(player.opponent_affinities)
         else:
             # if player is existing, update their stats
-            try:
-                # issue: rounds the lateness penalty when people get stats
-                # updated, which may cause random bias
-                late_penalty = float(self.late_penalty_entry.get())
-            except ValueError:
-                tk.messagebox.showerror("Error", "Please enter a valid "
-                                                 "lateness penalty",
-                                                  parent = self)
-                return
+            # try:
+            #     # issue: rounds the lateness penalty when people get stats
+            #     # updated, which may cause random bias
+            #     late_penalty = float(self.late_penalty_entry.get())
+            # except ValueError:
+            #     tk.messagebox.showerror("Error", "Please enter a valid "
+            #                                      "lateness penalty",
+            #                                       parent = self)
+            #     return
 
 
             # if the player's name is changed, update all the affinities
@@ -1610,8 +1611,9 @@ class PlayerStats(tk.Toplevel):
             self.player.money_owed = owed
 
 
-            self.player.penalty_games = late_penalty
-            self.player.adjusted_games = self.player.total_games + late_penalty
+            # self.player.penalty_games = late_penalty
+            # self.player.adjusted_games = self.player.total_games +
+            # late_penalty
 
         # save stuff
         every_pi = open('every_player_pi_2.obj', 'wb')

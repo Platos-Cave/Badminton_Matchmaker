@@ -483,7 +483,7 @@ def find_best_game(players, courts, benched = [], scored=False, log=False):
 
     # Get a bonus for having players with an affinity be on or be off together
     bench_score = (bench_cost(benched))*(0.5*scoring_vars[('Affinity',profile)])
-    courts_score = (bench_cost(players)) * (0.5 * scoring_vars[('Affinity',
+    courts_score = (bench_cost(players)) * (0.4 * scoring_vars[('Affinity',
                                                            profile)])
 
 
@@ -506,18 +506,29 @@ def find_best_game(players, courts, benched = [], scored=False, log=False):
         return (best_players, lowest_score, tolerance_score, bench_score)
 
 def bench_cost(benched):
+    # O(n**2), can do better? Not too important for these levels of n
     cost = 0
     for player in benched:
         #partner_affs = [i[0] for i in (player.partner_affinities)]
         #opp_affs = [i[0] for i in (player.opponent_affinities)]
 
         for other_player in benched:
+            partner_checks = {}
             for aff in player.partner_affinities:
                 if other_player.name == aff[0]:
                     cost += 1 * level_dict[aff[1]]
+                    partner_checks[other_player] = level_dict[aff[1]]
+                    break
+
             for aff in player.opponent_affinities:
                 if other_player.name == aff[0]:
-                    cost += 1 * level_dict[aff[1]]
+                    try:
+                        partner_cost = partner_checks[other_player]
+                    except KeyError:
+                        partner_cost = 0
+                    if partner_cost < level_dict[aff[1]]:
+                        cost += level_dict[aff[1]] - partner_cost
+                    break
 
     return cost
 
