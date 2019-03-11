@@ -81,8 +81,8 @@ class Player:
         self.keep_off = False
         # If True, player will always be selected in automatic games
         self.keep_on = False
-        # If True, player is in manual game, and goes above Keep_On
-        self.manual_game = False
+        # # If True, player is in manual game, and goes above Keep_On
+        # self.manual_game = False
 
         self.paid_tonight = True
 
@@ -661,6 +661,15 @@ def generate_new_game():
 
 
     elif profile == 2:
+
+        # Ensure don't pick manual games
+        for court in courts:
+            if court.manual:
+                for player in court.spaces:
+                    if player:
+                        player.keep_on = False
+                        player.keep_off = True
+
 
         trials = enumerate_b.scoring_vars["Trials", enumerate_b.profile]
 
@@ -1280,8 +1289,8 @@ try:
         if not hasattr(player, 'consecutive_games_on'):
             player.consecutive_games_on = 0
             print("Add consec!")
-        if not hasattr(player, 'manual_game'):
-            player.manual_game = False
+        # if not hasattr(player, 'manual_game'):
+        #     player.manual_game = False
 
 
         if not hasattr(player, 'hunger'):
@@ -1386,3 +1395,12 @@ old_aff = False
 #for player in every_player:
 #    player.desert = 0
 stop_generation = False
+
+### random trial stuff
+# from pprint import pprint
+#
+# for player in every_player:
+#     print(player.name)
+#     for opp in player.opp_histories.keys():
+#         if player.opp_histories[opp] >1:
+#             print(opp.name, player.opp_histories[opp])

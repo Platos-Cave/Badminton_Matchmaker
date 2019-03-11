@@ -23,6 +23,7 @@ class Application(tk.Tk):
 
         # A (probably unPythonic) way of randomly loading the bench
         self.test_mode = False
+        self.init_test_players = 10
 
         self.title("Badminton Matchmaker")
 
@@ -187,9 +188,8 @@ class Application(tk.Tk):
         for i in range(15):
             self.columnconfigure(i, weight=1)
 
-
         if self.test_mode:
-            self.start_in_test_mode(11)
+            self.start_in_test_mode(self.init_test_players)
 
 
         # If program crashed or exited otherwise normally, reload all data
@@ -398,6 +398,7 @@ class Application(tk.Tk):
                                               "empty the courts?")
         if are_you_sure:
             b_scorer.empty_courts()
+            self.unchanged_board = False
             self.update_board()
 
 
@@ -651,13 +652,20 @@ class Application(tk.Tk):
         person to do it manually"""
         # print("Generating!")
 
+        # To stop it from generating if manual game players confuses it
+        manuals = 0
+        for court in b_scorer.courts:
+            if court.manual:
+                manuals += len([p for p in court.spaces if p])
+
 
         if b_scorer.court_count == 0:
             tk.messagebox.showerror(
                 "Error", "You can't generate games with zero automatic courts!")
 
 
-        elif len(b_scorer.all_current_players) < 4*(b_scorer.court_count):
+        elif len(b_scorer.all_current_players) - manuals <\
+                4*(b_scorer.court_count):
             tk.messagebox.showerror(
                 "Error", "There are fewer players available than spaces"
                          " on courts! This program can't handle that.")
@@ -680,7 +688,7 @@ class Application(tk.Tk):
         """Call b_scorer's confirm_game() function, update and autosave"""
 
         if self.generator:
-            tk.messagebox.showerror("Error", "You can't confirm while"
+            tk.messagebox.showerror("Error", "You can't confirm while "
                                              "generating a board!")
             return
 
@@ -895,8 +903,8 @@ class Application(tk.Tk):
         players_available = [player for player in b_scorer.all_current_players
                              if not player.keep_off]
 
-        if not player.keep_off and len(players_available) <= 4*len(
-                b_scorer.courts):
+        if not player.keep_off and len(players_available) <= 4*(
+                b_scorer.court_count):
             tk.messagebox.showerror("Error", "Keeping this player off would "
                                              "leave you with too few "
                                              "players!", parent= self)
@@ -917,7 +925,7 @@ class Application(tk.Tk):
         # Ensure there aren't too many players on
         players_kept_on = [player for player in b_scorer.all_current_players
                              if player.keep_on]
-        if len(players_kept_on) >= len(b_scorer.courts)*4:
+        if len(players_kept_on) >= b_scorer.court_count*4:
             tk.messagebox.showerror("Error", "You can't keep on more players "
                                              "than there are spaces on the "
                                              "court!", parent= self)
@@ -930,7 +938,7 @@ class Application(tk.Tk):
             player = b_scorer.courts[court_number].spaces[index]
 
         # toggle on/off
-        if player.keep_on is True:
+        if player.keep_on:
             player.keep_on = False
         else:
             player.keep_on = True
@@ -1122,7 +1130,7 @@ class PlayerStats(tk.Toplevel):
         self.games_on_number = ttk.Label(self, text="0",
                                         font=self.label_font)
 
-        self.desert_label = ttk.Label(self, text = "Player Desert")
+        self.desert_label = ttk.Label(self, text = "Game Deservedness")
         self.desert_display = ttk.Label(self, text="0",
                                         font=self.label_font)
 
@@ -2155,9 +2163,10 @@ class Timer(tk.Frame):
         else:
             self.timer_on = False
             self.pause_button.config(state = 'disabled')
-            # Make beeps
-            self.alarm = Alarm()
-            self.alarm.start()
+            # Make beeps, if not in test mode
+            if not self.controller.test_mode:
+                self.alarm = Alarm()
+                self.alarm.start()
             # Enable button
             self.controller.config_buttons()
 

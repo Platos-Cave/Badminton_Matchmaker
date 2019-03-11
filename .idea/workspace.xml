@@ -4,16 +4,16 @@
     <option name="SPLITTER_PROPORTION" value="0.5007622" />
   </component>
   <component name="BookmarkManager">
-    <bookmark url="file://$PROJECT_DIR$/b_scorer.py" line="706" mnemonic="3" />
+    <bookmark url="file://$PROJECT_DIR$/b_scorer.py" line="715" mnemonic="3" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="12b4690e-7fa1-496f-b4cf-baaf01e9f6e0" name="Default" comment="commit smart shuffle. greedy solve still in progress.">
-      <change afterPath="$PROJECT_DIR$/factorial.py" afterDir="false" />
+    <list default="true" id="12b4690e-7fa1-496f-b4cf-baaf01e9f6e0" name="Default" comment="committing to master like a dummy">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/b_scorer.py" beforeDir="false" afterPath="$PROJECT_DIR$/b_scorer.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/badminton_session_data.obj" beforeDir="false" afterPath="$PROJECT_DIR$/badminton_session_data.obj" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/enumerate_b.py" beforeDir="false" afterPath="$PROJECT_DIR$/enumerate_b.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/every_player_pi_2.obj" beforeDir="false" afterPath="$PROJECT_DIR$/every_player_pi_2.obj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/factorial.py" beforeDir="false" afterPath="$PROJECT_DIR$/factorial.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tk_bscorer.py" beforeDir="false" afterPath="$PROJECT_DIR$/tk_bscorer.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -26,8 +26,8 @@
     <session id="-151827430">
       <usages-collector id="statistics.lifecycle.project">
         <counts>
-          <entry key="project.closed" value="58" />
-          <entry key="project.open.time.0" value="3" />
+          <entry key="project.closed" value="60" />
+          <entry key="project.open.time.0" value="5" />
           <entry key="project.open.time.1" value="4" />
           <entry key="project.open.time.11" value="2" />
           <entry key="project.open.time.3" value="3" />
@@ -36,41 +36,42 @@
           <entry key="project.open.time.6" value="19" />
           <entry key="project.open.time.7" value="3" />
           <entry key="project.open.time.8" value="1" />
-          <entry key="project.opened" value="64" />
+          <entry key="project.opened" value="66" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
           <entry key="Python Console" value="149" />
           <entry key="dummy" value="19" />
-          <entry key="py" value="60086" />
+          <entry key="py" value="60907" />
           <entry key="spec" value="204" />
-          <entry key="txt" value="205" />
+          <entry key="txt" value="248" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="PLAIN_TEXT" value="428" />
-          <entry key="Python" value="60235" />
+          <entry key="PLAIN_TEXT" value="471" />
+          <entry key="Python" value="61056" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
         <counts>
           <entry key="csv" value="16" />
-          <entry key="py" value="70" />
+          <entry key="py" value="71" />
           <entry key="spec" value="2" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.open">
         <counts>
           <entry key="PLAIN_TEXT" value="18" />
-          <entry key="Python" value="69" />
+          <entry key="Python" value="70" />
           <entry key="Scratch" value="1" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.vcs.git.usages">
         <counts>
           <entry key="git.branch.checkout.local" value="9" />
+          <entry key="git.branch.compare" value="2" />
           <entry key="git.branch.create.new" value="13" />
         </counts>
       </usages-collector>
@@ -81,8 +82,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/b_scorer.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="83">
-              <caret line="951" column="26" selection-start-line="951" selection-start-column="26" selection-end-line="951" selection-end-column="26" />
+            <state relative-caret-position="180">
+              <caret line="84" column="22" selection-start-line="84" selection-start-column="15" selection-end-line="84" selection-end-column="22" />
               <folding>
                 <element signature="e#120#133#0" expanded="true" />
               </folding>
@@ -94,10 +95,7 @@
         <entry file="file://$PROJECT_DIR$/factorial.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="85">
-              <caret line="5" column="39" selection-start-line="5" selection-start-column="39" selection-end-line="5" selection-end-column="39" />
-              <folding>
-                <marker date="1551857172919" expanded="true" signature="50:136" ph="..." />
-              </folding>
+              <caret line="5" column="17" selection-start-line="5" selection-start-column="17" selection-end-line="5" selection-end-column="17" />
             </state>
           </provider>
         </entry>
@@ -105,8 +103,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/tk_bscorer.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="204">
-              <caret line="24" column="30" selection-start-line="24" selection-start-column="30" selection-end-line="24" selection-end-column="30" />
+            <state relative-caret-position="214">
+              <caret line="658" column="22" lean-forward="true" selection-start-line="658" selection-start-column="22" selection-end-line="658" selection-end-column="22" />
               <folding>
                 <element signature="e#108#128#0" expanded="true" />
               </folding>
@@ -117,7 +115,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/b_sessions.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="2414">
+            <state relative-caret-position="539">
               <caret line="144" selection-start-line="144" selection-end-line="144" />
               <folding>
                 <element signature="e#144#154#0" expanded="true" />
@@ -129,8 +127,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/enumerate_b.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="333">
-              <caret line="525" column="50" selection-start-line="525" selection-start-column="50" selection-end-line="525" selection-end-column="50" />
+            <state relative-caret-position="539">
+              <caret line="485" column="47" selection-start-line="485" selection-start-column="47" selection-end-line="485" selection-end-column="47" />
               <folding>
                 <element signature="e#1557#1573#0" expanded="true" />
               </folding>
@@ -149,36 +147,36 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>autosave(s</find>
-      <find>timer_go</find>
-      <find>board_data</find>
-      <find>timer_count</find>
-      <find>lateness pen</find>
-      <find>test_mode</find>
-      <find>test_mode =</find>
-      <find>time_str.set</find>
-      <find>self.count</find>
-      <find>ses</find>
-      <find>today_</find>
-      <find>print_current</find>
-      <find>shuffle_combo</find>
-      <find>bench_</find>
-      <find>colour</find>
-      <find>colour_dict</find>
-      <find>colour_sorter</find>
-      <find>penalty_games</find>
-      <find>penalty</find>
-      <find>late_penalty</find>
-      <find>late_penalty_ent</find>
-      <find>partne</find>
       <find>tesT_</find>
-      <find>display</find>
       <find>abort</find>
       <find>12</find>
       <find>test_mo</find>
-      <find>manual</find>
       <find>court_2</find>
       <find>court.manual</find>
+      <find>keep_off</find>
+      <find>manual_g</find>
+      <find>manual</find>
+      <find>== 2</find>
+      <find>display</find>
+      <find>test_mode</find>
+      <find>games_</find>
+      <find>consecut</find>
+      <find>old_</find>
+      <find>enumerate_b.</find>
+      <find>old_conse</find>
+      <find>unchanged</find>
+      <find>unchanged_</find>
+      <find>empty_court</find>
+      <find>games_on</find>
+      <find>player.manual</find>
+      <find>player.manual_game</find>
+      <find>self.manual_game</find>
+      <find>2.</find>
+      <find>Suzie</find>
+      <find>alarm</find>
+      <find>desert</find>
+      <find>there are</find>
+      <find>manual_</find>
     </findStrings>
     <replaceStrings>
       <replace>0</replace>
@@ -217,18 +215,16 @@
         <option value="$PROJECT_DIR$/comb_test.py" />
         <option value="$PROJECT_DIR$/simulation_sandbox.py" />
         <option value="$PROJECT_DIR$/b_sessions.py" />
-        <option value="$PROJECT_DIR$/factorial.py" />
         <option value="$PROJECT_DIR$/enumerate_b.py" />
+        <option value="$PROJECT_DIR$/factorial.py" />
         <option value="$PROJECT_DIR$/b_scorer.py" />
         <option value="$PROJECT_DIR$/tk_bscorer.py" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="320" />
-    <option name="y" value="261" />
-    <option name="width" value="1190" />
-    <option name="height" value="912" />
+    <option name="width" value="1936" />
+    <option name="height" value="1056" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectView">
@@ -548,7 +544,14 @@
       <option name="project" value="LOCAL" />
       <updated>1550980208343</updated>
     </task>
-    <option name="localTasksCounter" value="18" />
+    <task id="LOCAL-00018" summary="committing to master like a dummy">
+      <created>1551997831637</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1551997831638</updated>
+    </task>
+    <option name="localTasksCounter" value="19" />
     <servers />
   </component>
   <component name="TodoView">
@@ -564,7 +567,7 @@
     <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" weight="0.06691254" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.06691254" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
@@ -658,7 +661,8 @@
     <MESSAGE value="smart shuffle update" />
     <MESSAGE value="greedy solve init" />
     <MESSAGE value="commit smart shuffle. greedy solve still in progress." />
-    <option name="LAST_COMMIT_MESSAGE" value="commit smart shuffle. greedy solve still in progress." />
+    <MESSAGE value="committing to master like a dummy" />
+    <option name="LAST_COMMIT_MESSAGE" value="committing to master like a dummy" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -675,8 +679,13 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/tk_bscorer.py</url>
-          <line>2303</line>
+          <line>2312</line>
           <option name="timeStamp" value="8" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/b_scorer.py</url>
+          <line>171</line>
+          <option name="timeStamp" value="9" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
@@ -845,9 +854,36 @@
     <entry file="file://$PROJECT_DIR$/ .csv">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
+    <entry file="file://$PROJECT_DIR$/factorial.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="85">
+          <caret line="5" column="17" selection-start-line="5" selection-start-column="17" selection-end-line="5" selection-end-column="17" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/b_scorer.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="180">
+          <caret line="84" column="22" selection-start-line="84" selection-start-column="15" selection-end-line="84" selection-end-column="22" />
+          <folding>
+            <element signature="e#120#133#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/enumerate_b.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="539">
+          <caret line="485" column="47" selection-start-line="485" selection-start-column="47" selection-end-line="485" selection-end-column="47" />
+          <folding>
+            <element signature="e#1557#1573#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/b_sessions.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2414">
+        <state relative-caret-position="539">
           <caret line="144" selection-start-line="144" selection-end-line="144" />
           <folding>
             <element signature="e#144#154#0" expanded="true" />
@@ -855,40 +891,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/enumerate_b.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="333">
-          <caret line="525" column="50" selection-start-line="525" selection-start-column="50" selection-end-line="525" selection-end-column="50" />
-          <folding>
-            <element signature="e#1557#1573#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/factorial.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="85">
-          <caret line="5" column="39" selection-start-line="5" selection-start-column="39" selection-end-line="5" selection-end-column="39" />
-          <folding>
-            <marker date="1551857172919" expanded="true" signature="50:136" ph="..." />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/b_scorer.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="83">
-          <caret line="951" column="26" selection-start-line="951" selection-start-column="26" selection-end-line="951" selection-end-column="26" />
-          <folding>
-            <element signature="e#120#133#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/tk_bscorer.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="204">
-          <caret line="24" column="30" selection-start-line="24" selection-start-column="30" selection-end-line="24" selection-end-column="30" />
+        <state relative-caret-position="214">
+          <caret line="658" column="22" lean-forward="true" selection-start-line="658" selection-start-column="22" selection-end-line="658" selection-end-column="22" />
           <folding>
             <element signature="e#108#128#0" expanded="true" />
           </folding>

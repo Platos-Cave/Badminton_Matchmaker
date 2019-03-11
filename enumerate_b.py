@@ -483,7 +483,7 @@ def find_best_game(players, courts, benched = [], scored=False, log=False):
 
     # Get a bonus for having players with an affinity be on or be off together
     bench_score = (bench_cost(benched))*(0.5*scoring_vars[('Affinity',profile)])
-    courts_score = (bench_cost(players)) * (0.4 * scoring_vars[('Affinity',
+    courts_score = (bench_cost(players)) * (0.3 * scoring_vars[('Affinity',
                                                            profile)])
 
 
@@ -935,6 +935,7 @@ def score_court_2(court, trial_players, explain = False):
             player.desert))
         # games with players on more times in a row -> higher cost
         # assumption that stronger players = fitter = less tired?
+        # some kind of log is better?
         score += ((15-player.ability)/2)*(
                 player.consecutive_games_on**1.5)
         # fraction ?
