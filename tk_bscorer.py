@@ -21,9 +21,10 @@ class Application(tk.Tk):
     def __init__(self):
         tk.Tk.__init__(self)
 
+
         # A (probably unPythonic) way of randomly loading the bench
         self.test_mode = False
-        self.init_test_players = 10
+        self.init_test_players = 15
 
         self.title("Badminton Matchmaker")
 
@@ -266,6 +267,7 @@ class Application(tk.Tk):
         # avoid having to reset timer. Should cancel timer entirely
 
     def add_players_by_arrival(self, max):
+        random.shuffle(b_scorer.absent_players)
         for player in b_scorer.absent_players:
             try:
                 if random.random() < pp.arrival_probs[player.name]:
@@ -424,7 +426,7 @@ class Application(tk.Tk):
         self.bench_popup_menus[player].add_command(command=lambda: self.view_player_stats(None, None, player),
                                                    label="View Player Profile")
         self.bench_popup_menus[player].add_command(command=lambda: self.remove_player_entirely(None, None, player),
-                                                   label="Remove From Night")
+                                                   label="Remove From Session")
         self.bench_popup_menus[player].add_command(command=lambda: self.keep_player_off(None, None, player),
                                                    label="Keep Player Off Next Round")
         self.bench_popup_menus[player].add_command(
@@ -1011,7 +1013,7 @@ class CourtFrame(tk.Frame):
             self.popup_menus[i].add_command(command=lambda
                 index=i: controller.remove_player_entirely(self.court_number,
                                                            index),
-                                            label="Remove From Night")
+                                            label="Remove From Session")
             self.popup_menus[i].add_command(command=lambda
                 index=i: controller.keep_player_off(self.court_number, index))
             self.popup_menus[i].add_command(command=lambda
@@ -1065,6 +1067,7 @@ class PlayerStats(tk.Toplevel):
         self.name_label = ttk.Label(self, text="Name")
         self.sex_label = ttk.Label(self, text="Sex")
         self.ability_label = ttk.Label(self, text="Ability (1-10)")
+        self.fitness_label = ttk.Label(self, text = "Fitness (1-3)")
         self.membership_label = ttk.Label(self, text = "Membership Status")
         self.owed_label =  ttk.Label(self, text = "Money Owed ($)")
         self.partner_aff_label = ttk.Label(self, text="Partner Affinities")
@@ -1104,6 +1107,9 @@ class PlayerStats(tk.Toplevel):
         self.ability_combobox = ttk.Combobox(self, width=8,
                                              values=[i for i in range(1, 11)],
                                              state='readonly')
+        self.fitness_combobox = ttk.Combobox(self, width=8,
+                                             values=[i for i in range(1, 4)],
+                                             state='readonly')
         self.membership_cbox = ttk.Combobox(self, width=8,
                                              values=["Casual", "Member (no "
                                                     "feathers)", "Member ("
@@ -1131,9 +1137,10 @@ class PlayerStats(tk.Toplevel):
                                         font=self.label_font)
 
         self.desert_label = ttk.Label(self, text = "Game Deservedness")
-        self.desert_display = ttk.Label(self, text="0",
-                                        font=self.label_font)
+        self.desert_display = ttk.Entry(self, width=5)
 
+        self.hunger_label = ttk.Label(self, text="Hunger")
+        self.hunger_value = ttk.Entry(self, width=5)
 
         self.player_notes_label = ttk.Label(self, text="Player Notes")
         self.player_notes = tk.Text(self, height=2, width=15, wrap=tk.WORD)
@@ -1143,6 +1150,7 @@ class PlayerStats(tk.Toplevel):
         
         self.sex_combobox.current(0)
         self.ability_combobox.current(4)
+        self.fitness_combobox.current(1)
         self.membership_cbox.current(0)
         self.owed_entry.insert(0, 0)
         self.partner_aff_level_box.current(1)
@@ -1167,6 +1175,7 @@ class PlayerStats(tk.Toplevel):
                 self.sex_combobox.current(2)
 
             self.ability_combobox.current(self.player.ability - 1)
+            self.fitness_combobox.current(self.player.fitness - 1)
 
             # Isn't very extensible
             if self.player.membership == "Casual":
@@ -1212,8 +1221,16 @@ class PlayerStats(tk.Toplevel):
             # self.late_penalty_entry.insert(0,
             #                                round(self.player.penalty_games,
             #                                      2))
+            self.desert_display.insert(0,
+                                           round(self.player.desert,
+                                                 2))
+            self.hunger_value.insert(0,
+                                           round(self.player.hunger,
+                                                 2))
             # self.games_total_number.config(
             #     text=round(self.player.adjusted_games, 2))
+
+
 
             self.games_off_number.config(text=self.player.time_since_last)
             self.games_on_number.config(text=self.player.consecutive_games_on)
@@ -1229,17 +1246,11 @@ class PlayerStats(tk.Toplevel):
             self.played_against_label = ttk.Label(self, text = "N/A",
                                                   font=self.label_font)
 
-            self.hunger_label = ttk.Label(self, text = "Hunger")
-            self.hunger_value = ttk.Label(self, text = round(
-                                            self.player.hunger,2))
-
             self.game_number_config()
             self.game_number_combo.bind("<<ComboboxSelected>>",
                                         lambda
                                             event: self.update_game_display())
 
-            self.desert_display = ttk.Label(self, text=round(player.desert,
-                                                               2))
 
         self.name_label.grid(column=0, row=1)
         self.name_entry.grid(column=1, row=1, columnspan=3, sticky='ew')
@@ -1247,11 +1258,13 @@ class PlayerStats(tk.Toplevel):
         self.sex_combobox.grid(column=1, row=2, columnspan=3, sticky='ew')
         self.ability_label.grid(column=0, row=3)
         self.ability_combobox.grid(column=1, row=3, columnspan=3, sticky='ew')
-        self.membership_label.grid(column=0, row = 4)
-        self.membership_cbox.grid(column=1, row = 4, columnspan=3, sticky='ew')
-        self.owed_label.grid(column = 0, row = 5)
-        self.owed_entry.grid(column = 1, row = 5)
-        self.pay_owed_button.grid(column = 2, row = 5)
+        self.fitness_label.grid(column=0, row=4)
+        self.fitness_combobox.grid(column=1, row=4, columnspan=3, sticky='ew')
+        self.membership_label.grid(column=0, row = 5)
+        self.membership_cbox.grid(column=1, row = 5, columnspan=3, sticky='ew')
+        self.owed_label.grid(column = 0, row = 6)
+        self.owed_entry.grid(column = 1, row = 6)
+        self.pay_owed_button.grid(column = 2, row = 6)
         self.partner_aff_label.grid(column=0, row=7)
         self.partner_aff_box.grid(column=1, row=7, columnspan=2, sticky='ew')
         self.partner_aff_level_box.grid(column=3, row=7, sticky='ew')
@@ -1527,6 +1540,7 @@ class PlayerStats(tk.Toplevel):
 
         sex = self.sex_combobox.get()
         ability = int(self.ability_combobox.get())
+        fitness = int(self.fitness_combobox.get())
         membership =  self.membership_cbox.get()
         notes = self.player_notes.get("1.0", "end-1c")
 
@@ -1563,15 +1577,23 @@ class PlayerStats(tk.Toplevel):
                     # print(player.opponent_affinities)
         else:
             # if player is existing, update their stats
-            # try:
-            #     # issue: rounds the lateness penalty when people get stats
-            #     # updated, which may cause random bias
-            #     late_penalty = float(self.late_penalty_entry.get())
-            # except ValueError:
-            #     tk.messagebox.showerror("Error", "Please enter a valid "
-            #                                      "lateness penalty",
-            #                                       parent = self)
-            #     return
+            try:
+                desert = float(self.desert_display.get())
+            except ValueError:
+                tk.messagebox.showerror("Error", "Please enter a valid "
+                                                 "deservedness.",
+                                                  parent = self)
+                return
+
+            try:
+                hunger = float(self.hunger_value.get())
+            except ValueError:
+                tk.messagebox.showerror("Error", "Please enter a valid "
+                                                 "hunger value.",
+                                                  parent = self)
+                return
+
+
 
 
             # if the player's name is changed, update all the affinities
@@ -1600,6 +1622,7 @@ class PlayerStats(tk.Toplevel):
             self.player.name = name
             self.player.sex = sex
             self.player.ability = ability
+            self.player.fitness = fitness
             self.player.player_notes = notes
             self.player.membership = membership
 
@@ -1619,7 +1642,8 @@ class PlayerStats(tk.Toplevel):
             self.player.money_owed = owed
 
 
-            # self.player.penalty_games = late_penalty
+            self.player.desert = desert
+            self.player.hunger = hunger
             # self.player.adjusted_games = self.player.total_games +
             # late_penalty
 
