@@ -6,6 +6,7 @@ import csv
 import time
 #import pandas as pd
 from datetime import datetime, timedelta
+
 import player_probs as pp
 
 
@@ -46,16 +47,39 @@ def initialise():
     #     #print(f"Now {len(b_scorer.all_current_players)}!")
     #print(len(b_scorer.all_current_players))
 
+def initialise_2(max):
+    while len(b_scorer.all_current_players) < max:
+        add_players_by_arrival(max)
+
+
+def add_players_by_arrival(max):
+    random.shuffle(b_scorer.absent_players)
+    for player in b_scorer.absent_players:
+        try:
+            if random.random() < pp.arrival_probs[player.name]:
+                b_scorer.add_player(player)
+        except KeyError:
+            pass
+        if len(b_scorer.all_current_players) >=max:
+            break
+
+
 def simulate():
 
-    b_scorer.generate_new_game()
+    cost = b_scorer.generate_new_game()
+    #every_cost.append(cost)
     b_scorer.confirm_game()
     b_scorer.update_desert()
+    return cost
 
 def simulate_session(trials):
-    initialise()
+   #initialise()
+    initialise_2(18)
+
+    costs = []
     for i in range(trials):
-        simulate()
+        cost = simulate()
+        costs.append(cost)
 
     every_session.append(b_scorer.today_session)
         # need to make this easier
@@ -71,6 +95,10 @@ def simulate_session(trials):
     b_scorer.total_rounds = 0
 
     b_scorer.save_and_quit(pickling=False)
+
+    return costs
+
+
 
 # How often is a game balanced?
 def balance_test():
@@ -109,7 +137,7 @@ def individual_player_test():
 
 def export_game_data():
 
-    game_file = open('{}.csv'.format("Smart Shuffle 2nd"), 'w', newline='')
+    game_file = open('{}.csv'.format("Smart Shuffle 10"), 'w', newline='')
 
     with game_file:
         writer = csv.writer(game_file)
@@ -133,6 +161,7 @@ def export_game_data():
                                                  "NONE", 0])
 
 every_session = []
+every_cost = []
 
 print("Started!")
 t1 = time.time()
@@ -140,15 +169,31 @@ t1 = time.time()
 for player in b_scorer.every_player:
     player.desert = 0
 
-trials = 1000
+trials = 100
 for i in range(trials):
     print(f'{i*(100/trials)}% finished!')
     if i%2 == 0:
-        simulate_session(10)
+        cost = simulate_session(10)
     else:
-        simulate_session(9)
+        cost = simulate_session(9)
+    #print(cost)
+    every_cost.append(cost)
+    # total = sum(every_cost[-1])
+    # len = len(every_cost[-1])
+    # print(total / len)
+    #print(sum(every_cost[-1]))/len(every_cost[-1])
 
-b_scorer.print_desert()
+    #print(sum(every_cost[-1])
+    #(len(every_cost[-1]))
+all_costs = []
+for cost in every_cost:
+    all_costs.append((sum(cost)/len(cost)))
+    print(sum(cost)/len(cost))
+print(f'Average cost: {sum(all_costs)/len(all_costs)}')
+
+
+#b_scorer.print_desert()
+#print(sum(every_cost[])/len(every_cost))
 
 #for player in b_scorer.every_player:
 #    print((player.court_2_attr / 0.3))
@@ -156,7 +201,7 @@ b_scorer.print_desert()
 export_game_data()
 
 t2 = time.time()
-print(f'Took {t2-t1}!')
+print(f'Took {round(t2-t1)} seconds!')
 
 
 

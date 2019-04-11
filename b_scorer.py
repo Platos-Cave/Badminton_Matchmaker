@@ -19,6 +19,7 @@ class Player:
         self.name = name
         self.sex = sex
         self.ability = ability  # An integer from 1-10 (1 being weakest)
+        self.fitness = 2 #Default fitness level
 
         # self.first_night = True
 
@@ -63,7 +64,6 @@ class Player:
         # extra game
         self.desert = 1
         self.old_desert = 1
-
 
         self.hunger = 0
         self.old_hunger = 0
@@ -161,19 +161,23 @@ class Player:
         self.mean_game_abs = (self.mean_game_abs + last_game_ab)/2
         self.hunger = self.ability - self.mean_game_abs
 
-    def undo_game(self):
-        self.total_games -= 1
-        self.adjusted_games -= 1
+    def undo_game(self, on_court):
+
         self.time_since_last = self.old_tsl
         self.consecutive_games_on = self.old_consecutive_games_on
-        del self.played_with[-1]
-        del self.played_against[-1]
-        self.hunger = self.old_hunger
         self.desert = self.old_desert
-        self.mean_game_abs = self.old_mean_game_abs
-        self.partner_histories = self.old_partner_histories
-        self.opp_histories = self.old_opp_histories
-        self.court_2_attr = self.old_court_2_attr
+
+        if on_court:
+            self.total_games -= 1
+            self.adjusted_games -= 1
+            self.hunger = self.old_hunger
+            self.mean_game_abs = self.old_mean_game_abs
+            self.partner_histories = self.old_partner_histories
+            self.opp_histories = self.old_opp_histories
+            self.court_2_attr = self.old_court_2_attr
+
+            del self.played_against[-1]
+            del self.played_with[-1]
 
 
         # if self.name == "David":
@@ -746,6 +750,12 @@ def generate_new_game():
 
     place_on_courts(best_game)
     return True
+    #return lowest_score #if simulated
+
+
+
+
+
 
 def place_on_courts(best_game):
     for court in courts:
@@ -994,12 +1004,11 @@ def undo_confirm():
     for court in courts:
         for player in court.spaces:
             if player:
-                player.undo_game()
+                player.undo_game(on_court=True)
 
     # should be part of the undo game method
     for player in bench:
-        player.time_since_last -= 1
-        player.desert = player.old_desert
+        player.undo_game(on_court=False)
         #player.partner_histories = player.old_partner_histories
         #player.opp_histories = player.old_opp_histories
 
@@ -1173,8 +1182,8 @@ def save_and_quit(pickling=True):
         player.keep_off = False
         player.keep_on = False
         player.mean_game_abs = player.ability
-        player.hunger *= 0.3
-        player.old_hunger *= 0.3
+        player.hunger = 0
+        player.old_hunger = 0
         player.court_2_attr *= 0.3
         player.old_court_2_attr *= 0.3
         player.desert -= av_deserts
@@ -1329,6 +1338,10 @@ try:
             player.court_2_attr = 0
         if not hasattr(player, 'old_court_2_attr'):
             player.old_court_2_attr = 0
+
+        if not hasattr(player, 'fitness'):
+            player.fitness = 2
+
 
         # Grandfather in new affinities
         temp_partners = []

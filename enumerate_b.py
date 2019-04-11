@@ -345,6 +345,13 @@ def score_court(court, trial_players, explain = False):
                     # print(f'(Henry score with partner is {adjusted_score}')
                     print(f'(Henry new score with opponent is {new_score}')
             #score += adjusted_score
+
+            # Simple fitness hack. Might want more, so it's less complex
+
+            if (player.fitness == 1) and (o_player.fitness == 1):
+                score += 10 # basically guaranteeing they're not together
+
+
             score += new_score
 
             for aff in player.partner_affinities:
@@ -475,8 +482,27 @@ def find_best_game(players, courts, benched = [], scored=False, log=False):
 
         # games with players on more times in a row -> higher cost
         # assumption that stronger players = fitter = less tired?
-        tolerance_score += ((15-player.ability)/2)*(
-                player.consecutive_games_on**1.5)
+
+        # rudimetary fitness. todo: turn into nice equation
+
+        # should multiplier be different? it's not apparent it should be
+
+        if player.fitness == 1:
+            mult = 5
+            exp = 2
+        elif player.fitness == 3:
+            mult = 5
+            exp = 1.25
+        else:
+            mult = 5
+            exp  = 1.5
+
+        tolerance_score += mult*(
+                player.consecutive_games_on**exp)
+
+        #Keep "hungry" players on
+        tolerance_score -= mult*player.hunger
+
         # fraction ?
 
     lowest_score += tolerance_score
@@ -915,173 +941,178 @@ def best_score_2(combo, trial_players):
     # best_combos[combo] = three_combos[index]
 
 
-def score_court_2(court, trial_players, explain = False):
-    ''' Returns the "score" of a game, where "trial_players" is a list of
-     player objects and "court" is a pair of tuples, representing indices
-     of those players'''
-    global score_num
-    score_num +=1
-
-    score = 0
-    # Create the court using the indices from "court" on "trial_players"
-    # Unpacked for easier referencing
-    new_court = [trial_players[court[0][0]], trial_players[court[0][1]],
-                 trial_players[court[1][0]], trial_players[court[1][1]]]
-
-    for player in new_court:
-        # games with more deserving players -> lower cost
-        # tricky to come up with. Convoluted way of keeping sign.
-        score -= 10 * ((abs(player.desert) ** 1.5) * sign(
-            player.desert))
-        # games with players on more times in a row -> higher cost
-        # assumption that stronger players = fitter = less tired?
-        # some kind of log is better?
-        score += ((15-player.ability)/2)*(
-                player.consecutive_games_on**1.5)
-        # fraction ?
-
-        #hackish ways of people players on/off. prefer alternative
-
-        if player.keep_on:
-            score -= 10**10
-        elif player.keep_off:
-            score += 10**10
-        else:
-            pass
-           #score -= (1000*player.time_since_last)
-
-    abilities = [player.ability for player in new_court]
-    # The imbalance between team abilities. High imbalance = highly penalised
-    score += scoring_vars[('Balance', profile)] * 5 * ((
-                sum(abilities[0:2]) - sum(abilities[2:4])) ** 2)
-    # It is generally better to not have strong and weak players in the same
-    #  game even if balanced, so this formula penalises that.
-    # Removing for now
-    score += scoring_vars[('Ability_Seg', profile)] * (
-                (max(abilities) - min(abilities)) ** 1.5)
-
-    #NEW: "Hungry" weighting
-    average_ability = sum(abilities)/4
-    for player in new_court:
-        score += scoring_vars[('Ability Alternation', profile)] * \
-                 player.hunger * (player.ability - average_ability)
-
-
-
-    # # We then want to penalise playing the same people over and over.
-    #
-    # # How much the discount rate for each round is for the purposes of mixing
-    # # i.e. there's a larger penalty for playing someone you played in the
-    # # previous round than for someone you played three games ago
-    discount_rate = 0.1
-    #
-    # # For each player, see how many times they've played with their partner
-    # # and their opponents. Larger penalty for playing someone in the same
-    # # position (i.e. played against someone twice in a row, vs played with them
-    # # and then against them)
-    # # Also: if player has affinity for another player, subtract the affinity
-    # # score from the total score.
-    # # (This seems all very nested and duplicative)
-    for player in new_court:
-        if player is not None:
-            if player in new_court[0:2]:
-                partner = [i for i in new_court[0:2] if i is not player if
-                           i is not None]
-                opponents = [i for i in new_court[2:4] if i is not player if
-                             i is not None]
-            else:
-                partner = [i for i in new_court[2:4] if i is not player if
-                           i is not None]
-                opponents = [i for i in new_court[0:2] if i is not player if
-                             i is not None]
-
-        for o_player in opponents:
-            # count = 1
-            # base_score = 0
-            # for i, game in enumerate(player.played_against):
-            #     if o_player in game:
-            #         base_score += scoring_vars[('Mixing', profile)] * 2 * (
-            #         (1 / (1 + discount_rate) ** (player.total_games - i - 1)))
-            #         count += 0.2
-            # for i, game in enumerate(player.played_with):
-            #     if o_player in game:
-            #         base_score += scoring_vars[('Mixing', profile)] * (
-            #                     1 / (1 + discount_rate) ** (
-            #                          player.total_games - i - 1))
-            #         count += 0.1
-            # #"Count" is a means of pseudo-exponentiation - i.e. we want it
-            # #to be proportionally worse to play someone three times in a row
-            # # than twice in a row
-            # adjusted_score = base_score * (count)
-
-            new_score = scoring_vars[('Mixing',
-                                      profile)]*player.opp_histories[
-                o_player]
-
-
-            if explain:
-                if player.name == "Henry":
-                    # print(f'(Henry score with opponent is {adjusted_score}')
-                    print(f'(Henry new score with opponent is {new_score}')
-
-            #score += adjusted_score
-            score += new_score
-            # Subtract affinity variable from score
-            for aff in player.opponent_affinities:
-                if aff[0] == o_player.name:
-                    aff_multiplier = level_dict[aff[1]]
-                    score -= aff_multiplier*(scoring_vars[('Affinity',
-                                                           profile)])
-                    break
-
-        for o_player in partner:  # there's only 1 partner, so loop seems
-             # silly?
-        #     count = 1
-        #     base_score = 0
-        #     for i, game in enumerate(player.played_against):
-        #         if o_player in game:
-        #             base_score += scoring_vars[('Mixing', profile)] * (
-        #                         1 / (1 + discount_rate) ** (
-        #                             player.total_games - i - 1))
-        #             count += 0.1
-        #     for i, game in enumerate(player.played_with):
-        #         if o_player in game:
-        #             base_score += scoring_vars[('Mixing', profile)] * 3 * (
-        #             (1 / (1 + discount_rate) ** (player.total_games - i - 1)))
-        #             count += 0.2
-        #
-        #     adjusted_score = base_score * (count)
-
-            new_score = scoring_vars[('Mixing',
-                                      profile)]*player.partner_histories[
-                o_player]
-
-            if explain:
-                if player.name == "Henry":
-                    # print(f'(Henry score with partner is {adjusted_score}')
-                    print(f'(Henry new score with opponent is {new_score}')
-            #score += adjusted_score
-            score += new_score
-
-            for aff in player.partner_affinities:
-                if aff[0] == o_player.name:
-                    aff_multiplier = level_dict[aff[1]]
-                    score -= aff_multiplier*(scoring_vars[('Affinity',
-                                                           profile)])
-                    break
-
-    # Female mini-affinity:
-    no_women = len([p for p in new_court if p.sex == "Female" if p])
-    women_score = scoring_vars[('Female Affinity', profile)] * (no_women*(
-            no_women - 1))
-    score -= women_score
-
-    if explain:
-        print("There are {} women in this game, subtracting {} from the game "
-              "score".format(no_women, women_score))
-        print(score)
-
-    return score
+# def score_court_2(court, trial_players, explain = False):
+#     ''' Returns the "score" of a game, where "trial_players" is a list of
+#      player objects and "court" is a pair of tuples, representing indices
+#      of those players'''
+#     global score_num
+#     score_num +=1
+#
+#     score = 0
+#     # Create the court using the indices from "court" on "trial_players"
+#     # Unpacked for easier referencing
+#     new_court = [trial_players[court[0][0]], trial_players[court[0][1]],
+#                  trial_players[court[1][0]], trial_players[court[1][1]]]
+#
+#     for player in new_court:
+#         # games with more deserving players -> lower cost
+#         # tricky to come up with. Convoluted way of keeping sign.
+#         score -= 10 * ((abs(player.desert) ** 1.5) * sign(
+#             player.desert))
+#         # games with players on more times in a row -> higher cost
+#         # assumption that stronger players = fitter = less tired?
+#         # some kind of log is better?
+#         score += ((15-player.ability)/2)*(
+#                 player.consecutive_games_on**1.5)
+#         # fraction ?
+#
+#         #hackish ways of people players on/off. prefer alternative
+#
+#         if player.keep_on:
+#             score -= 10**10
+#         elif player.keep_off:
+#             score += 10**10
+#         else:
+#             pass
+#            #score -= (1000*player.time_since_last)
+#
+#     abilities = [player.ability for player in new_court]
+#     # The imbalance between team abilities. High imbalance = highly penalised
+#     score += scoring_vars[('Balance', profile)] * 5 * ((
+#                 sum(abilities[0:2]) - sum(abilities[2:4])) ** 2)
+#     # It is generally better to not have strong and weak players in the same
+#     #  game even if balanced, so this formula penalises that.
+#     # Removing for now
+#     score += scoring_vars[('Ability_Seg', profile)] * (
+#                 (max(abilities) - min(abilities)) ** 1.5)
+#
+#     #NEW: "Hungry" weighting
+#     average_ability = sum(abilities)/4
+#     for player in new_court:
+#         score += scoring_vars[('Ability Alternation', profile)] * \
+#                  player.hunger * (player.ability - average_ability)
+#
+#
+#
+#     # # We then want to penalise playing the same people over and over.
+#     #
+#     # # How much the discount rate for each round is for the purposes of mixing
+#     # # i.e. there's a larger penalty for playing someone you played in the
+#     # # previous round than for someone you played three games ago
+#     discount_rate = 0.1
+#     #
+#     # # For each player, see how many times they've played with their partner
+#     # # and their opponents. Larger penalty for playing someone in the same
+#     # # position (i.e. played against someone twice in a row, vs played with them
+#     # # and then against them)
+#     # # Also: if player has affinity for another player, subtract the affinity
+#     # # score from the total score.
+#     # # (This seems all very nested and duplicative)
+#     for player in new_court:
+#         if player is not None:
+#             if player in new_court[0:2]:
+#                 partner = [i for i in new_court[0:2] if i is not player if
+#                            i is not None]
+#                 opponents = [i for i in new_court[2:4] if i is not player if
+#                              i is not None]
+#             else:
+#                 partner = [i for i in new_court[2:4] if i is not player if
+#                            i is not None]
+#                 opponents = [i for i in new_court[0:2] if i is not player if
+#                              i is not None]
+#
+#         for o_player in opponents:
+#             # count = 1
+#             # base_score = 0
+#             # for i, game in enumerate(player.played_against):
+#             #     if o_player in game:
+#             #         base_score += scoring_vars[('Mixing', profile)] * 2 * (
+#             #         (1 / (1 + discount_rate) ** (player.total_games - i - 1)))
+#             #         count += 0.2
+#             # for i, game in enumerate(player.played_with):
+#             #     if o_player in game:
+#             #         base_score += scoring_vars[('Mixing', profile)] * (
+#             #                     1 / (1 + discount_rate) ** (
+#             #                          player.total_games - i - 1))
+#             #         count += 0.1
+#             # #"Count" is a means of pseudo-exponentiation - i.e. we want it
+#             # #to be proportionally worse to play someone three times in a row
+#             # # than twice in a row
+#             # adjusted_score = base_score * (count)
+#
+#             new_score = scoring_vars[('Mixing',
+#                                       profile)]*player.opp_histories[
+#                 o_player]
+#
+#
+#             if explain:
+#                 if player.name == "Henry":
+#                     # print(f'(Henry score with opponent is {adjusted_score}')
+#                     print(f'(Henry new score with opponent is {new_score}')
+#
+#             #score += adjusted_score
+#             score += new_score
+#             # Subtract affinity variable from score
+#             for aff in player.opponent_affinities:
+#                 if aff[0] == o_player.name:
+#                     aff_multiplier = level_dict[aff[1]]
+#                     score -= aff_multiplier*(scoring_vars[('Affinity',
+#                                                            profile)])
+#                     break
+#
+#         for o_player in partner:  # there's only 1 partner, so loop seems
+#              # silly?
+#         #     count = 1
+#         #     base_score = 0
+#         #     for i, game in enumerate(player.played_against):
+#         #         if o_player in game:
+#         #             base_score += scoring_vars[('Mixing', profile)] * (
+#         #                         1 / (1 + discount_rate) ** (
+#         #                             player.total_games - i - 1))
+#         #             count += 0.1
+#         #     for i, game in enumerate(player.played_with):
+#         #         if o_player in game:
+#         #             base_score += scoring_vars[('Mixing', profile)] * 3 * (
+#         #             (1 / (1 + discount_rate) ** (player.total_games - i - 1)))
+#         #             count += 0.2
+#         #
+#         #     adjusted_score = base_score * (count)
+#
+#             #if (player.fitness == 1 and o_player.fitness == 1):
+#
+#
+#             new_score = scoring_vars[('Mixing',
+#                                       profile)]*player.partner_histories[
+#                 o_player]
+#
+#             if explain:
+#                 if player.name == "Henry":
+#                     # print(f'(Henry score with partner is {adjusted_score}')
+#                     print(f'(Henry new score with opponent is {new_score}')
+#
+#
+#             #score += adjusted_score
+#             score += new_score
+#
+#             for aff in player.partner_affinities:
+#                 if aff[0] == o_player.name:
+#                     aff_multiplier = level_dict[aff[1]]
+#                     score -= aff_multiplier*(scoring_vars[('Affinity',
+#                                                            profile)])
+#                     break
+#
+#     # Female mini-affinity:
+#     no_women = len([p for p in new_court if p.sex == "Female" if p])
+#     women_score = scoring_vars[('Female Affinity', profile)] * (no_women*(
+#             no_women - 1))
+#     score -= women_score
+#
+#     if explain:
+#         print("There are {} women in this game, subtracting {} from the game "
+#               "score".format(no_women, women_score))
+#         print(score)
+#
+#     return score
 
 
 

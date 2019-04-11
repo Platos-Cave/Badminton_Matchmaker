@@ -4,7 +4,7 @@
     <option name="SPLITTER_PROPORTION" value="0.5007622" />
   </component>
   <component name="BookmarkManager">
-    <bookmark url="file://$PROJECT_DIR$/b_scorer.py" line="715" mnemonic="3" />
+    <bookmark url="file://$PROJECT_DIR$/b_scorer.py" line="719" mnemonic="3" />
   </component>
   <component name="ChangeListManager">
     <list default="true" id="12b4690e-7fa1-496f-b4cf-baaf01e9f6e0" name="Default" comment="committing to master like a dummy">
@@ -14,6 +14,7 @@
       <change beforePath="$PROJECT_DIR$/enumerate_b.py" beforeDir="false" afterPath="$PROJECT_DIR$/enumerate_b.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/every_player_pi_2.obj" beforeDir="false" afterPath="$PROJECT_DIR$/every_player_pi_2.obj" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/factorial.py" beforeDir="false" afterPath="$PROJECT_DIR$/factorial.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/simulation_sandbox.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulation_sandbox.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tk_bscorer.py" beforeDir="false" afterPath="$PROJECT_DIR$/tk_bscorer.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -26,45 +27,46 @@
     <session id="-151827430">
       <usages-collector id="statistics.lifecycle.project">
         <counts>
-          <entry key="project.closed" value="60" />
-          <entry key="project.open.time.0" value="5" />
-          <entry key="project.open.time.1" value="4" />
+          <entry key="project.closed" value="65" />
+          <entry key="project.open.time.0" value="8" />
+          <entry key="project.open.time.1" value="6" />
           <entry key="project.open.time.11" value="2" />
-          <entry key="project.open.time.3" value="3" />
+          <entry key="project.open.time.17" value="1" />
+          <entry key="project.open.time.3" value="4" />
           <entry key="project.open.time.4" value="12" />
           <entry key="project.open.time.5" value="17" />
           <entry key="project.open.time.6" value="19" />
           <entry key="project.open.time.7" value="3" />
-          <entry key="project.open.time.8" value="1" />
-          <entry key="project.opened" value="66" />
+          <entry key="project.open.time.8" value="2" />
+          <entry key="project.opened" value="74" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
-          <entry key="Python Console" value="149" />
+          <entry key="Python Console" value="206" />
           <entry key="dummy" value="19" />
-          <entry key="py" value="60907" />
+          <entry key="py" value="64029" />
           <entry key="spec" value="204" />
-          <entry key="txt" value="248" />
+          <entry key="txt" value="262" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="PLAIN_TEXT" value="471" />
-          <entry key="Python" value="61056" />
+          <entry key="PLAIN_TEXT" value="485" />
+          <entry key="Python" value="64235" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
         <counts>
           <entry key="csv" value="16" />
-          <entry key="py" value="71" />
+          <entry key="py" value="77" />
           <entry key="spec" value="2" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.open">
         <counts>
           <entry key="PLAIN_TEXT" value="18" />
-          <entry key="Python" value="70" />
+          <entry key="Python" value="76" />
           <entry key="Scratch" value="1" />
         </counts>
       </usages-collector>
@@ -72,7 +74,7 @@
         <counts>
           <entry key="git.branch.checkout.local" value="9" />
           <entry key="git.branch.compare" value="2" />
-          <entry key="git.branch.create.new" value="13" />
+          <entry key="git.branch.create.new" value="14" />
         </counts>
       </usages-collector>
     </session>
@@ -82,8 +84,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/b_scorer.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="180">
-              <caret line="84" column="22" selection-start-line="84" selection-start-column="15" selection-end-line="84" selection-end-column="22" />
+            <state relative-caret-position="3043">
+              <caret line="179" column="36" selection-start-line="179" selection-start-column="36" selection-end-line="179" selection-end-column="36" />
               <folding>
                 <element signature="e#120#133#0" expanded="true" />
               </folding>
@@ -91,20 +93,11 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/factorial.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="85">
-              <caret line="5" column="17" selection-start-line="5" selection-start-column="17" selection-end-line="5" selection-end-column="17" />
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/tk_bscorer.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="214">
-              <caret line="658" column="22" lean-forward="true" selection-start-line="658" selection-start-column="22" selection-end-line="658" selection-end-column="22" />
+            <state relative-caret-position="425">
+              <caret line="25" column="30" selection-start-line="25" selection-start-column="30" selection-end-line="25" selection-end-column="30" />
               <folding>
                 <element signature="e#108#128#0" expanded="true" />
               </folding>
@@ -113,9 +106,31 @@
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/simulation_sandbox.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="2363">
+              <caret line="139" column="54" selection-start-line="139" selection-start-column="54" selection-end-line="139" selection-end-column="54" />
+              <folding>
+                <element signature="e#0#15#0" expanded="true" />
+                <marker date="1554071413417" expanded="true" signature="1662:1667" ph="..." />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/factorial.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="119">
+              <caret line="7" selection-start-line="7" selection-end-line="7" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/b_sessions.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="539">
+            <state relative-caret-position="2448">
               <caret line="144" selection-start-line="144" selection-end-line="144" />
               <folding>
                 <element signature="e#144#154#0" expanded="true" />
@@ -127,8 +142,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/enumerate_b.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="539">
-              <caret line="485" column="47" selection-start-line="485" selection-start-column="47" selection-end-line="485" selection-end-column="47" />
+            <state relative-caret-position="8653">
+              <caret line="509" column="53" selection-start-line="509" selection-start-column="45" selection-end-line="509" selection-end-column="53" />
               <folding>
                 <element signature="e#1557#1573#0" expanded="true" />
               </folding>
@@ -147,36 +162,36 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>tesT_</find>
-      <find>abort</find>
-      <find>12</find>
-      <find>test_mo</find>
-      <find>court_2</find>
-      <find>court.manual</find>
-      <find>keep_off</find>
-      <find>manual_g</find>
-      <find>manual</find>
-      <find>== 2</find>
       <find>display</find>
       <find>test_mode</find>
-      <find>games_</find>
-      <find>consecut</find>
-      <find>old_</find>
-      <find>enumerate_b.</find>
-      <find>old_conse</find>
-      <find>unchanged</find>
-      <find>unchanged_</find>
-      <find>empty_court</find>
-      <find>games_on</find>
-      <find>player.manual</find>
-      <find>player.manual_game</find>
-      <find>self.manual_game</find>
-      <find>2.</find>
-      <find>Suzie</find>
-      <find>alarm</find>
+      <find>lowest_score</find>
+      <find>ability =</find>
+      <find>ability_combo</find>
+      <find>Ability</find>
+      <find>partner</find>
+      <find>fitness_</find>
+      <find>fitnes</find>
+      <find>lateness</find>
+      <find>dese</find>
+      <find>late_pen</find>
+      <find>desert_di</find>
+      <find>desert =</find>
       <find>desert</find>
-      <find>there are</find>
-      <find>manual_</find>
+      <find>fitness</find>
+      <find>reca</find>
+      <find>colour</find>
+      <find>smart</find>
+      <find>desert_d</find>
+      <find>court_2</find>
+      <find>hunger</find>
+      <find>if player.nam</find>
+      <find>remove from</find>
+      <find>defaultdict</find>
+      <find>all_curr</find>
+      <find>bell</find>
+      <find>undo_game</find>
+      <find>female</find>
+      <find>affinity</find>
     </findStrings>
     <replaceStrings>
       <replace>0</replace>
@@ -186,7 +201,7 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="smart_shuffle" />
+        <entry key="$PROJECT_DIR$" value="master" />
       </map>
     </option>
   </component>
@@ -213,16 +228,16 @@
         <option value="$PROJECT_DIR$/quick_lateness_test.py" />
         <option value="$PROJECT_DIR$/player_probs.py" />
         <option value="$PROJECT_DIR$/comb_test.py" />
-        <option value="$PROJECT_DIR$/simulation_sandbox.py" />
         <option value="$PROJECT_DIR$/b_sessions.py" />
-        <option value="$PROJECT_DIR$/enumerate_b.py" />
+        <option value="$PROJECT_DIR$/simulation_sandbox.py" />
         <option value="$PROJECT_DIR$/factorial.py" />
+        <option value="$PROJECT_DIR$/enumerate_b.py" />
         <option value="$PROJECT_DIR$/b_scorer.py" />
         <option value="$PROJECT_DIR$/tk_bscorer.py" />
       </list>
     </option>
   </component>
-  <component name="ProjectFrameBounds" extendedState="6">
+  <component name="ProjectFrameBounds">
     <option name="width" value="1936" />
     <option name="height" value="1056" />
   </component>
@@ -232,6 +247,7 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -243,7 +259,6 @@
           <select />
         </subPane>
       </pane>
-      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -407,8 +422,8 @@
     <recent_temporary>
       <list>
         <item itemvalue="Python.tk_bscorer" />
-        <item itemvalue="Python.factorial" />
         <item itemvalue="Python.simulation_sandbox" />
+        <item itemvalue="Python.factorial" />
         <item itemvalue="Python.comb_test" />
         <item itemvalue="Python.quick_lateness_test" />
       </list>
@@ -551,7 +566,14 @@
       <option name="project" value="LOCAL" />
       <updated>1551997831638</updated>
     </task>
-    <option name="localTasksCounter" value="19" />
+    <task id="LOCAL-00019" summary="committing fitness change">
+      <created>1554350489112</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
+      <option name="project" value="LOCAL" />
+      <updated>1554350489112</updated>
+    </task>
+    <option name="localTasksCounter" value="20" />
     <servers />
   </component>
   <component name="TodoView">
@@ -564,25 +586,25 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
+    <frame x="0" y="0" width="1936" height="1056" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.06691254" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.12539515" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" sideWeight="0.49947312" weight="0.3286334" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" sideWeight="0.43677557" visible="true" weight="0.3264642" />
-      <window_info anchor="bottom" id="Debug" order="3" sideWeight="0.49525815" weight="0.39804772" />
+      <window_info active="true" anchor="bottom" id="Run" order="2" sideWeight="0.43045312" visible="true" weight="0.23210412" />
+      <window_info anchor="bottom" id="Debug" order="3" sideWeight="0.49367756" weight="0.39804772" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" sideWeight="0.49894625" weight="0.3286334" />
       <window_info anchor="bottom" id="Version Control" order="7" sideWeight="0.49789253" weight="0.3275488" />
       <window_info anchor="bottom" id="Terminal" order="8" />
       <window_info anchor="bottom" id="Inspection Results" order="9" weight="0.24094488" />
-      <window_info anchor="bottom" id="Event Log" order="10" sideWeight="0.56322443" side_tool="true" weight="0.3264642" />
+      <window_info anchor="bottom" id="Event Log" order="10" sideWeight="0.5695469" side_tool="true" visible="true" weight="0.23210412" />
       <window_info anchor="bottom" id="Messages" order="11" />
-      <window_info anchor="bottom" id="Python Console" order="12" sideWeight="0.49947312" weight="0.19305857" />
+      <window_info anchor="bottom" id="Python Console" order="12" sideWeight="0.49894625" weight="0.19305857" />
       <window_info anchor="right" id="Commander" order="0" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
@@ -662,7 +684,9 @@
     <MESSAGE value="greedy solve init" />
     <MESSAGE value="commit smart shuffle. greedy solve still in progress." />
     <MESSAGE value="committing to master like a dummy" />
-    <option name="LAST_COMMIT_MESSAGE" value="committing to master like a dummy" />
+    <MESSAGE value="commit history start" />
+    <MESSAGE value="committing fitness change" />
+    <option name="LAST_COMMIT_MESSAGE" value="committing fitness change" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -679,12 +703,12 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/tk_bscorer.py</url>
-          <line>2312</line>
+          <line>2336</line>
           <option name="timeStamp" value="8" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/b_scorer.py</url>
-          <line>171</line>
+          <line>172</line>
           <option name="timeStamp" value="9" />
         </line-breakpoint>
       </breakpoints>
@@ -837,13 +861,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/simulation_sandbox.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="340">
-          <caret line="142" column="13" selection-start-line="142" selection-start-column="13" selection-end-line="142" selection-end-column="13" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/Smart Shuffle First.csv">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="714">
@@ -854,36 +871,38 @@
     <entry file="file://$PROJECT_DIR$/ .csv">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
-    <entry file="file://$PROJECT_DIR$/factorial.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="85">
-          <caret line="5" column="17" selection-start-line="5" selection-start-column="17" selection-end-line="5" selection-end-column="17" />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$PROJECT_DIR$/pandas_history.py" />
     <entry file="file://$PROJECT_DIR$/b_scorer.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="180">
-          <caret line="84" column="22" selection-start-line="84" selection-start-column="15" selection-end-line="84" selection-end-column="22" />
+        <state relative-caret-position="3043">
+          <caret line="179" column="36" selection-start-line="179" selection-start-column="36" selection-end-line="179" selection-end-column="36" />
           <folding>
             <element signature="e#120#133#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/enumerate_b.py">
+    <entry file="file://$PROJECT_DIR$/simulation_sandbox.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="539">
-          <caret line="485" column="47" selection-start-line="485" selection-start-column="47" selection-end-line="485" selection-end-column="47" />
+        <state relative-caret-position="2363">
+          <caret line="139" column="54" selection-start-line="139" selection-start-column="54" selection-end-line="139" selection-end-column="54" />
           <folding>
-            <element signature="e#1557#1573#0" expanded="true" />
+            <element signature="e#0#15#0" expanded="true" />
+            <marker date="1554071413417" expanded="true" signature="1662:1667" ph="..." />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/factorial.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="119">
+          <caret line="7" selection-start-line="7" selection-end-line="7" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/b_sessions.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="539">
+        <state relative-caret-position="2448">
           <caret line="144" selection-start-line="144" selection-end-line="144" />
           <folding>
             <element signature="e#144#154#0" expanded="true" />
@@ -891,10 +910,20 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/enumerate_b.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="8653">
+          <caret line="509" column="53" selection-start-line="509" selection-start-column="45" selection-end-line="509" selection-end-column="53" />
+          <folding>
+            <element signature="e#1557#1573#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/tk_bscorer.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="214">
-          <caret line="658" column="22" lean-forward="true" selection-start-line="658" selection-start-column="22" selection-end-line="658" selection-end-column="22" />
+        <state relative-caret-position="425">
+          <caret line="25" column="30" selection-start-line="25" selection-start-column="30" selection-end-line="25" selection-end-column="30" />
           <folding>
             <element signature="e#108#128#0" expanded="true" />
           </folding>
