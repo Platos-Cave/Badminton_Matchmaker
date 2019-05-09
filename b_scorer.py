@@ -13,6 +13,8 @@ from statistics import mean
 from collections import defaultdict
 from itertools import combinations
 
+#import json
+
 class Player:
     def __init__(self, name, sex, ability, partner_affinities=[],
                  opponent_affinities=[], membership = "Casual"):

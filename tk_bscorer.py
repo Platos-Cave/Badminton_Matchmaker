@@ -24,7 +24,7 @@ class Application(tk.Tk):
 
         # A (probably unPythonic) way of randomly loading the bench
         self.test_mode = False
-        self.init_test_players = 18
+        self.init_test_players = 12
 
         self.title("Badminton Matchmaker")
 
@@ -1835,6 +1835,185 @@ class GameStats(tk.Toplevel):
         self.shuffle_combo.current(b_scorer.enumerate_b.scoring_vars[(
             'Shuffle', profile)])
 
+class Timer(tk.Frame):
+    """A frame for each of the courts to be placed in"""
+
+    def __init__(self, controller):
+        tk.Frame.__init__(self, controller, background=bg_colour)
+
+        self.controller = controller
+
+        self.timer_on = False
+        self.timer_paused = False
+        self.timer_count = 0
+        self.duration = 60*13 #13 minutes default
+        self.seconds_left = self.duration
+        self.time_str = StringVar()
+        self.time_str.set("{:02d}:{:02d}".format(*divmod(self.seconds_left,
+                                                         60)))
+
+
+        self.timer_label = ttk.Label(self, textvariable=self.time_str,
+                                     font=('helvetica', 30), relief='raised')
+        self.plus_one_button = ttk.Button(self, text="+1 min", command=
+                                                         self.plus_one)
+        self.minus_one_button = ttk.Button(self, text="-1 min", command=
+                                                         self.minus_one)
+        self.reset_button = ttk.Button(self, text="Reset", command=lambda:
+                                                    self.reset_timer(
+                                                        override=False))
+        self.pause_button = ttk.Button(self, text="Pause", state="disabled",
+                                       command= self.pause)
+        self.bell_button = ttk.Button(self, text = "Ring Bell",
+                                      command = self.ring_bell)
+
+        self.timer_label.grid(column=0, row=0, sticky='nsew', rowspan = 3)
+        self.plus_one_button.grid(column= 1, row = 0,  sticky='nsew')
+        self.minus_one_button.grid(column= 2, row= 0,  sticky='nsew')
+        self.reset_button.grid(column=1, row=1, sticky='nsew')
+        self.pause_button.grid(column=2, row=1, sticky='nsew')
+        self.bell_button.grid(column = 3, row = 0, sticky = 'nsew', rowspan = 3)
+
+
+    def timer_go(self):
+
+        self.timer_on = True
+        self.pause_button.config(text="Pause", state='normal')
+
+        if self.timer_count <= self.duration:  # - self.write_timer_count
+
+            self.seconds_left = self.duration - self.timer_count  # -
+            # self.write_timer_count
+
+            self.countdown = "{:02d}:{:02d}".format(
+                *divmod(self.seconds_left, 60))
+        else:
+            self.timer_on = False
+            self.pause_button.config(state = 'disabled')
+            # Make beeps, if not in test mode
+            if not self.controller.test_mode:
+                self.alarm = Alarm()
+                self.alarm.start()
+            # Enable button
+            self.controller.config_buttons()
+
+
+        self.time_str.set(self.countdown)
+        self.update()
+
+        if self.timer_on:
+            self.timer_count += 1
+            self.go = self.after(1000, lambda: self.timer_go())
+
+
+    def update_timer(self):
+        self.seconds_left = self.duration - self.timer_count
+        self.countdown = "{:02d}:{:02d}".format(
+            *divmod(self.seconds_left, 60))
+        self.time_str.set(self.countdown)
+        self.update()
+
+    def pause(self):
+        # if paused, unpause
+        if self.timer_paused:
+            self.timer_paused = False
+            self.timer_on = True
+            self.pause_button.config(text="Pause")
+            self.go = self.after(1000, lambda: self.timer_go())
+        # if unpaused, pause
+        elif not self.timer_paused:
+            # when reset, allows this to restart it. Feels dirty
+            # if not self.timer_on:
+            #     self.timer_paused = True
+            #     self.pause()
+            # else:
+            self.timer_paused = True
+            self.pause_button.config(text="Resume")
+            # Stop the timer
+            try:
+                self.after_cancel(self.go)
+            except AttributeError:
+                pass
+
+    # Add or reduce by 1 min
+    def plus_one(self):
+        self.duration += 60
+        self.update_timer()
+
+    def minus_one(self):
+        # can't make timer negative
+        if self.seconds_left >= 60:
+            self.duration -= 60
+            self.update_timer()
+
+    def reset_timer(self, override = True, bell = False):
+        '''If timer on, verify first if called by button. If timer off,
+        stop beeping. In either
+        case, reset and update the timer.
+        Does too many things, should break up?'''
+
+        # when called from the bell ring button
+        if self.timer_on and bell:
+            sure = tk.messagebox.askokcancel('Are you sure?', 'Are you sure '
+                                                              'you want to '
+                                                              'end the round '
+                                                              'early?')
+            if not sure:
+                return True # silly
+
+        # if undo confirm
+        if self.reset_button['text'] == "Restart" and override:
+            self.reset_button.config(text="Reset", state='disabled')
+            return
+
+        # if called from button and not bell
+        if self.reset_button['text'] == "Restart" and not override and not bell:
+            self.timer_on = True
+            self.reset_button.config(text="Reset")
+            self.pause_button.config(text="Pause", state='normal')
+            self.go = self.after(1000, lambda: self.timer_go())
+            return
+
+        if self.timer_on and not override and not bell:
+            sure = tk.messagebox.askokcancel('Are you sure?', 'Are you sure '
+                                                              'you '
+                                                             'want to reset '
+                                                              'the timer?')
+            if sure:
+                self.reset_button.config(text="Restart")
+            else:
+                return True
+
+        elif not self.timer_on:
+            # Stop the alarm if it's on
+            try:
+                self.alarm.stop()
+            except AttributeError:
+                pass
+
+        try: # stop the timer's recursive call
+            self.after_cancel(self.go)
+        except AttributeError:
+            pass
+
+        self.simple_reset()
+
+    def simple_reset(self):
+        'Resetting the timer if the round is finished'
+
+        self.timer_on = False
+        self.timer_paused = False
+        self.pause_button.config(text = "Pause", state = "disabled")
+        self.timer_count = 0
+        self.update_timer()
+
+
+    def ring_bell(self):
+        if not self.reset_timer(override=False, bell = True):
+            self.bell = Bell()
+            self.bell.start()
+            self.controller.config_buttons()
+
 # todo: update using numpy or pandas
 class HistoryPopup(tk.Toplevel):
     def __init__(self, controller):
@@ -2132,178 +2311,7 @@ class CSVPopup(tk.Toplevel):
         self.destroy()
 
 # Probably won't be a toplevel in the end
-class Timer(tk.Frame):
-    """A frame for each of the courts to be placed in"""
 
-    def __init__(self, controller):
-        tk.Frame.__init__(self, controller, background=bg_colour)
-
-        self.controller = controller
-
-        self.timer_on = False
-        self.timer_paused = False
-        self.timer_count = 0
-        self.duration = 60*13 #12 minutes default
-        self.seconds_left = self.duration
-        self.time_str = StringVar()
-        self.time_str.set("{:02d}:{:02d}".format(*divmod(self.seconds_left,
-                                                         60)))
-
-
-        self.timer_label = ttk.Label(self, textvariable=self.time_str,
-                                     font=('helvetica', 30), relief='raised')
-        self.plus_one_button = ttk.Button(self, text="+1 min", command=
-                                                         self.plus_one)
-        self.minus_one_button = ttk.Button(self, text="-1 min", command=
-                                                         self.minus_one)
-        self.reset_button = ttk.Button(self, text="Reset", command=lambda:
-                                                    self.reset_timer(
-                                                        override=False))
-        self.pause_button = ttk.Button(self, text="Pause", state="disabled",
-                                       command= self.pause)
-        self.bell_button = ttk.Button(self, text = "Ring Bell",
-                                      command = self.ring_bell)
-
-        self.timer_label.grid(column=0, row=0, sticky='nsew', rowspan = 3)
-        self.plus_one_button.grid(column= 1, row = 0,  sticky='nsew')
-        self.minus_one_button.grid(column= 2, row= 0,  sticky='nsew')
-        self.reset_button.grid(column=1, row=1, sticky='nsew')
-        self.pause_button.grid(column=2, row=1, sticky='nsew')
-        self.bell_button.grid(column = 3, row = 0, sticky = 'nsew', rowspan = 3)
-
-
-    def timer_go(self):
-
-        self.timer_on = True
-        self.pause_button.config(text="Pause", state='normal')
-
-        if self.timer_count <= self.duration:  # - self.write_timer_count
-
-            self.seconds_left = self.duration - self.timer_count  # -
-            # self.write_timer_count
-
-            self.countdown = "{:02d}:{:02d}".format(
-                *divmod(self.seconds_left, 60))
-        else:
-            self.timer_on = False
-            self.pause_button.config(state = 'disabled')
-            # Make beeps, if not in test mode
-            if not self.controller.test_mode:
-                self.alarm = Alarm()
-                self.alarm.start()
-            # Enable button
-            self.controller.config_buttons()
-
-
-        self.time_str.set(self.countdown)
-        self.update()
-
-        if self.timer_on:
-            self.timer_count += 1
-            self.go = self.after(1000, lambda: self.timer_go())
-
-
-    def update_timer(self):
-        self.seconds_left = self.duration - self.timer_count
-        self.countdown = "{:02d}:{:02d}".format(
-            *divmod(self.seconds_left, 60))
-        self.time_str.set(self.countdown)
-        self.update()
-
-    def pause(self):
-        # if paused, unpause
-        if self.timer_paused:
-            self.timer_paused = False
-            self.timer_on = True
-            self.pause_button.config(text="Pause")
-            self.go = self.after(1000, lambda: self.timer_go())
-        # if unpaused, pause
-        elif not self.timer_paused:
-            # when reset, allows this to restart it. Feels dirty
-            # if not self.timer_on:
-            #     self.timer_paused = True
-            #     self.pause()
-            # else:
-            self.timer_paused = True
-            self.pause_button.config(text="Resume")
-            # Stop the timer
-            try:
-                self.after_cancel(self.go)
-            except AttributeError:
-                pass
-
-    # Add or reduce by 1 min
-    def plus_one(self):
-        self.duration += 60
-        self.update_timer()
-
-    def minus_one(self):
-        # can't make timer negative
-        if self.seconds_left >= 60:
-            self.duration -= 60
-            self.update_timer()
-
-    def reset_timer(self, override = True, bell = False):
-        '''If timer on, verify first if called by button. If timer off,
-        stop beeping. In either
-        case, reset and update the timer.
-        Does too many things, should break up?'''
-
-        # when called from the bell ring button
-        if self.timer_on and bell:
-            sure = tk.messagebox.askokcancel('Are you sure?', 'Are you sure '
-                                                              'you want to '
-                                                              'end the round '
-                                                              'early?')
-            if not sure:
-                return True # silly
-
-        # if undo confirm
-        if self.reset_button['text'] == "Restart" and override:
-            self.reset_button.config(text="Reset", state='disabled')
-            return
-
-        # if called from button and not bell
-        if self.reset_button['text'] == "Restart" and not override and not bell:
-            self.timer_on = True
-            self.reset_button.config(text="Reset")
-            self.pause_button.config(text="Pause", state='normal')
-            self.go = self.after(1000, lambda: self.timer_go())
-            return
-
-        if self.timer_on and not override and not bell:
-            sure = tk.messagebox.askokcancel('Are you sure?', 'Are you sure '
-                                                              'you '
-                                                             'want to reset '
-                                                              'the timer?')
-            if sure:
-                self.reset_button.config(text="Restart")
-            else:
-                return True
-
-        elif not self.timer_on:
-            # Stop the alarm if it's on
-            try:
-                self.alarm.stop()
-            except AttributeError:
-                pass
-
-        try: # stop the timer's recursive call
-            self.after_cancel(self.go)
-        except AttributeError:
-            pass
-
-        self.timer_on = False
-        self.timer_paused = False
-        self.pause_button.config(text = "Pause", state = "disabled")
-        self.timer_count = 0
-        self.update_timer()
-
-    def ring_bell(self):
-        if not self.reset_timer(override=False, bell = True):
-            self.bell = Bell()
-            self.bell.start()
-            self.controller.config_buttons()
 
 class Generate(Thread):
     def __init__(self):
@@ -2348,12 +2356,14 @@ class Alarm(Thread):
 
     def run(self):
         self._stop.clear()
-        for i in range(20):
+        for i in range(10):
             if not self._stop.is_set():
                 winsound.PlaySound('woop_alarm.wav', winsound.SND_FILENAME)
                 # winsound.PlaySound(self.resource_path('woop_alarm.wav'),
                 #                    winsound.SND_FILENAME)
             #time.sleep(1)
+        if not self._stop.is_set():
+            app.timer.simple_reset()
 
     def stop(self):
         self._stop.set()
