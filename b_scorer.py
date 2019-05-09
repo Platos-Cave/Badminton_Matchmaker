@@ -13,7 +13,8 @@ from statistics import mean
 from collections import defaultdict
 from itertools import combinations
 
-#import json
+###### PYCHARM TEST
+# SHOULD NOT BE IN MASTER
 
 class Player:
     def __init__(self, name, sex, ability, partner_affinities=[],
