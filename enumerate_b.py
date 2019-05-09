@@ -367,6 +367,12 @@ def score_court(court, trial_players, explain = False):
             no_women - 1))
     score -= women_score
 
+    # Don't put 4 new players together
+    no_newbies = len([p for p in new_court if p.first_night is True if p])
+    if no_newbies == 4:
+        score += 50
+
+
     if explain:
         print("There are {} women in this game, subtracting {} from the game "
               "score".format(no_women, women_score))

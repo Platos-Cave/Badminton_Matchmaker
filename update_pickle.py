@@ -1,7 +1,7 @@
 import pickle
 import pandas as pd
 
-pickle_in = open("every_player_pi_2 (1).obj","rb")
+pickle_in = open("every_player_pi_2.obj","rb")
 every_player = pickle.load(pickle_in)
 pickle_in.close()
 
@@ -29,7 +29,7 @@ for p in every_player:
 
 
 
-pickle_out = open('every_player_pi_2 (1).obj', 'wb')
+pickle_out = open('every_player_pi_2.obj', 'wb')
 pickle.dump(every_player, pickle_out)
 pickle_out.close()
 

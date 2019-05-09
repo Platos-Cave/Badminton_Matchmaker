@@ -13,8 +13,6 @@ from statistics import mean
 from collections import defaultdict
 from itertools import combinations
 
-###### PYCHARM TEST
-# SHOULD NOT BE IN MASTER
 
 class Player:
     def __init__(self, name, sex, ability, partner_affinities=[],
@@ -24,7 +22,7 @@ class Player:
         self.ability = ability  # An integer from 1-10 (1 being weakest)
         self.fitness = 2 #Default fitness level
 
-        # self.first_night = True
+        self.first_night = True
 
         # Other players this player likes to be partnered with/oppose
         # Newly updated to be (Player.name, Level) pairs, where Level is
@@ -1197,6 +1195,9 @@ def save_and_quit(pickling=True):
         for key in player.opp_histories.keys():
             player.opp_histories[key] *= 0.3
 
+        if player.first_night:
+            player.first_night = False
+
         # try: # new players get first_night added
         #     if player.first_night:
         #         player.desert = 0
@@ -1344,6 +1345,9 @@ try:
 
         if not hasattr(player, 'fitness'):
             player.fitness = 2
+
+        if not hasattr(player, 'first_night'):
+            player.first_night = False
 
 
         # Grandfather in new affinities
