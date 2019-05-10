@@ -7,8 +7,17 @@
     <bookmark url="file://$PROJECT_DIR$/b_scorer.py" line="719" mnemonic="3" />
   </component>
   <component name="ChangeListManager">
+<<<<<<< Updated upstream
     <list default="true" id="12b4690e-7fa1-496f-b4cf-baaf01e9f6e0" name="Default" comment="commit change to stop 4 new players being put together">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+=======
+    <list default="true" id="12b4690e-7fa1-496f-b4cf-baaf01e9f6e0" name="Default" comment="committing to master like a dummy">
+      <change beforePath="$PROJECT_DIR$/b_scorer.py" beforeDir="false" afterPath="$PROJECT_DIR$/b_scorer.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/badminton_session_data.obj" beforeDir="false" afterPath="$PROJECT_DIR$/badminton_session_data.obj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/enumerate_b.py" beforeDir="false" afterPath="$PROJECT_DIR$/enumerate_b.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/every_player_pi_2.obj" beforeDir="false" afterPath="$PROJECT_DIR$/every_player_pi_2.obj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/update_pickle.py" beforeDir="false" afterPath="$PROJECT_DIR$/update_pickle.py" afterDir="false" />
+>>>>>>> Stashed changes
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -74,11 +83,16 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/b_scorer.py">
           <provider selected="true" editor-type-id="text-editor">
+<<<<<<< Updated upstream
             <state relative-caret-position="148">
               <caret line="809" column="20" selection-start-line="809" selection-start-column="13" selection-end-line="809" selection-end-column="20" />
+=======
+            <state relative-caret-position="1445">
+              <caret line="85" column="34" lean-forward="true" selection-start-line="85" selection-start-column="34" selection-end-line="85" selection-end-column="34" />
+>>>>>>> Stashed changes
               <folding>
                 <element signature="e#120#133#0" expanded="true" />
               </folding>
@@ -86,6 +100,7 @@
           </provider>
         </entry>
       </file>
+<<<<<<< Updated upstream
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/enumerate_b.py">
           <provider selected="true" editor-type-id="text-editor">
@@ -98,6 +113,8 @@
           </provider>
         </entry>
       </file>
+=======
+>>>>>>> Stashed changes
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/update_pickle.py">
           <provider selected="true" editor-type-id="text-editor">
@@ -148,6 +165,21 @@
           </provider>
         </entry>
       </file>
+<<<<<<< Updated upstream
+=======
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/enumerate_b.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="659">
+              <caret line="523" selection-start-line="523" selection-end-line="523" />
+              <folding>
+                <element signature="e#1557#1573#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+>>>>>>> Stashed changes
     </leaf>
   </component>
   <component name="FileTemplateManagerImpl">
@@ -605,8 +637,13 @@
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
+<<<<<<< Updated upstream
       <window_info anchor="bottom" id="Find" order="1" sideWeight="0.49894625" weight="0.21366595" />
       <window_info active="true" anchor="bottom" id="Run" order="2" sideWeight="0.5263435" visible="true" weight="0.09978308" />
+=======
+      <window_info anchor="bottom" id="Find" order="1" sideWeight="0.49947312" weight="0.3286334" />
+      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.4272919" visible="true" weight="0.10737527" />
+>>>>>>> Stashed changes
       <window_info anchor="bottom" id="Debug" order="3" sideWeight="0.49367756" weight="0.39804772" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -614,7 +651,11 @@
       <window_info anchor="bottom" id="Version Control" order="7" sideWeight="0.49736565" weight="0.3275488" />
       <window_info anchor="bottom" id="Terminal" order="8" />
       <window_info anchor="bottom" id="Inspection Results" order="9" weight="0.24094488" />
+<<<<<<< Updated upstream
       <window_info anchor="bottom" id="Event Log" order="10" sideWeight="0.47365648" side_tool="true" weight="0.09978308" />
+=======
+      <window_info active="true" anchor="bottom" id="Event Log" order="10" sideWeight="0.57270813" side_tool="true" visible="true" weight="0.22885032" />
+>>>>>>> Stashed changes
       <window_info anchor="bottom" id="Messages" order="11" />
       <window_info anchor="bottom" id="Python Console" order="12" sideWeight="0.49894625" weight="0.40347072" />
       <window_info anchor="right" id="Commander" order="0" weight="0.4" />
@@ -896,8 +937,13 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/tk_bscorer.py">
       <provider selected="true" editor-type-id="text-editor">
+<<<<<<< Updated upstream
         <state relative-caret-position="27829">
           <caret line="1650" selection-start-line="1650" selection-end-line="1652" selection-end-column="24" />
+=======
+        <state relative-caret-position="1445">
+          <caret line="85" column="34" lean-forward="true" selection-start-line="85" selection-start-column="34" selection-end-line="85" selection-end-column="34" />
+>>>>>>> Stashed changes
           <folding>
             <element signature="e#108#128#0" expanded="true" />
           </folding>
@@ -929,8 +975,13 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/b_scorer.py">
       <provider selected="true" editor-type-id="text-editor">
+<<<<<<< Updated upstream
         <state relative-caret-position="148">
           <caret line="809" column="20" selection-start-line="809" selection-start-column="13" selection-end-line="809" selection-end-column="20" />
+=======
+        <state relative-caret-position="659">
+          <caret line="523" selection-start-line="523" selection-end-line="523" />
+>>>>>>> Stashed changes
           <folding>
             <element signature="e#120#133#0" expanded="true" />
           </folding>
@@ -939,18 +990,31 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/update_pickle.py">
       <provider selected="true" editor-type-id="text-editor">
+<<<<<<< Updated upstream
         <state relative-caret-position="493">
           <caret line="30" selection-start-line="30" selection-end-line="30" />
+=======
+        <state relative-caret-position="27829">
+          <caret line="1650" selection-start-line="1650" selection-end-line="1652" selection-end-column="24" />
+          <folding>
+            <element signature="e#108#128#0" expanded="true" />
+          </folding>
+>>>>>>> Stashed changes
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/enumerate_b.py">
       <provider selected="true" editor-type-id="text-editor">
+<<<<<<< Updated upstream
         <state relative-caret-position="250">
           <caret line="236" column="31" selection-start-line="236" selection-start-column="23" selection-end-line="236" selection-end-column="31" />
           <folding>
             <element signature="e#1557#1573#0" expanded="true" />
           </folding>
+=======
+        <state relative-caret-position="493">
+          <caret line="30" selection-start-line="30" selection-end-line="30" />
+>>>>>>> Stashed changes
         </state>
       </provider>
     </entry>
