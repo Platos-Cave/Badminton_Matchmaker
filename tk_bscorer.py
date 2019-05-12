@@ -23,7 +23,7 @@ class Application(tk.Tk):
 
 
         # A (probably unPythonic) way of randomly loading the bench
-        self.test_mode = False
+        self.test_mode = True
         self.init_test_players = 12
 
         self.title("Badminton Matchmaker")
@@ -108,9 +108,14 @@ class Application(tk.Tk):
         self.game_weighting_button = ttk.Button(self,
                                                 text="Change Automatic Rules",
                                                 command=self.edit_game_weightings)
+
         self.empty_courts_button = ttk.Button(self, text="Empty Courts",
 
                                               command=self.empty_courts)
+
+        self.results_button = ttk.Button(self,
+                                                text="Input Results",
+                                                command=self.edit_results)
 
         # This wouldn't align well, so did it manually:
         for i, court in enumerate(self.court_labels):
@@ -173,6 +178,8 @@ class Application(tk.Tk):
                                  padx=1, pady=1)
         self.undo_confirm_button.grid(column=14, row=16, sticky='nsew',
                                  padx=1, pady=1)
+        self.results_button.grid(column= 14, row = 15, sticky='nsew', padx=1,
+                                 pady=1)
         self.empty_courts_button.grid(column=13, row=17, sticky='nsew',
                                       padx=1, pady=1)
         self.game_weighting_button.grid(column=12, row=17, sticky='nsew',
@@ -965,6 +972,13 @@ class Application(tk.Tk):
         """Open up top-level widget where the weightings can be modified"""
         self.gamestats = GameStats(self)
 
+    def edit_results(self):
+        """Open up top-level widget to input results"""
+        session = b_scorer.today_session
+        self.results = ResultsInput(self, session)
+
+
+
     def refresh_combobox(self):
         """Refresh the combobox of absent players"""
 
@@ -1655,6 +1669,63 @@ class PlayerStats(tk.Toplevel):
         self.controller.update_board()
 
         self.destroy()
+
+class ResultsInput(tk.Toplevel):
+    def __init__(self, controller, session):
+
+        tk.Toplevel.__init__(self, controller)
+        self.controller = controller
+
+        self.title("Input Game Results")
+
+        no_labels = len(b_scorer.courts)
+
+        self.game_labels = [(ttk.Label(self, text=f"Court {i+1}")) for i in \
+         range(no_labels)]
+
+        self.score_boxes = [((ttk.Entry(self, width=2), ttk.Entry(self,
+                                                                  width=2))) for i in range(
+            no_labels)]
+
+        try:
+            courts = session.games[-1][:-1]
+        except IndexError:
+            courts = None
+
+
+        if courts:
+            # solving "NONE" problem
+            names = [[] for i in range(len(courts))]
+
+            for i, court in enumerate(courts):
+                for plyr in court:
+                    if plyr:
+                        names[i].append(plyr.name)
+                    else:
+                        names[1].append("NONE")
+
+
+            self.player_labels = [((ttk.Label(self, text=(f"{name[0]} and {name[1]}"))),
+        (ttk.Label(self, text=(f"{name[2]} and {name[3]}")))) for name in
+                                  names]
+        else:
+            self.none_label = ttk.Label(self, text = "No games found")
+
+        if courts:
+            for i, lab in enumerate(self.game_labels):
+                lab.grid(column = 0, row = i*3)
+
+            for i, box in enumerate(self.score_boxes):
+                box[0].grid(column = 1, row = (i*3)+1)
+                box[1].grid(column=1, row=(i*3)+2)
+
+            for i, plyr in enumerate(self.player_labels):
+                plyr[0].grid(column = 0, row = (i*3)+1)
+                plyr[1].grid(column= 0, row=(i*3)+2)
+        else:
+            self.none_label.grid(column = 0, row = 1)
+
+
 
 
 

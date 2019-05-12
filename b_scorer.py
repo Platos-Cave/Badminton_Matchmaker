@@ -13,8 +13,6 @@ from statistics import mean
 from collections import defaultdict
 from itertools import combinations
 
-#TEST FOR MERGING
-
 class Player:
     def __init__(self, name, sex, ability, partner_affinities=[],
                  opponent_affinities=[], membership = "Casual"):
@@ -849,6 +847,8 @@ def confirm_game():
 
     # adding bench
     today_session.games[-1].append(bench.copy())
+
+
 
     # Updating desert.
     update_desert()
