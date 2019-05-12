@@ -1688,7 +1688,7 @@ class ResultsInput(tk.Toplevel):
             no_labels)]
 
         try:
-            courts = session.games[-1][:-1]
+            courts = session.games[-1][:-2]
         except IndexError:
             courts = None
 
@@ -1708,10 +1708,10 @@ class ResultsInput(tk.Toplevel):
             self.player_labels = [((ttk.Label(self, text=(f"{name[0]} and {name[1]}"))),
         (ttk.Label(self, text=(f"{name[2]} and {name[3]}")))) for name in
                                   names]
-        else:
-            self.none_label = ttk.Label(self, text = "No games found")
 
-        if courts:
+            self.save_button = ttk.Button(self, text = "Save Results",
+                                         command=self.save_results)
+
             for i, lab in enumerate(self.game_labels):
                 lab.grid(column = 0, row = i*3)
 
@@ -1722,10 +1722,36 @@ class ResultsInput(tk.Toplevel):
             for i, plyr in enumerate(self.player_labels):
                 plyr[0].grid(column = 0, row = (i*3)+1)
                 plyr[1].grid(column= 0, row=(i*3)+2)
+
+
+            self.save_button.grid(column = 0, row = (3*len(courts) +3))
+
         else:
+            self.none_label = ttk.Label(self, text="No games found")
             self.none_label.grid(column = 0, row = 1)
 
+    def save_results(self):
+        '''Save results inputted if valid'''
+        results = []
+        #e.g
+        #results = [(21,17),(15,21),NONE]
 
+        for box in self.score_boxes:
+            if box[0].get() == '' and box[1].get() == '':
+                results.append(None)
+            else:
+                try:
+                    results.append((int(box[0].get()), int(box[1].get())))
+                except ValueError:
+                    error = tk.messagebox.showerror("Error",
+                                                "Please ensure all inputs are"
+                                                " numbers only.")
+                    return
+
+        #update results
+        print(b_scorer.today_session.games)
+        b_scorer.today_session.games[-1][-1] = results
+        print(b_scorer.today_session.games)
 
 
 

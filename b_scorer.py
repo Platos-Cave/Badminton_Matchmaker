@@ -848,6 +848,9 @@ def confirm_game():
     # adding bench
     today_session.games[-1].append(bench.copy())
 
+    # adding "results" section
+    today_session.games[-1].append([None for i in range(len(courts))])
+
 
 
     # Updating desert.
