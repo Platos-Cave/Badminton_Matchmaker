@@ -23,8 +23,8 @@ class Application(tk.Tk):
 
 
         # A (probably unPythonic) way of randomly loading the bench
-        self.test_mode = True
-        self.init_test_players = 12
+        self.test_mode = False
+        self.init_test_players = 10
 
         self.title("Badminton Matchmaker")
 
@@ -1086,6 +1086,7 @@ class PlayerStats(tk.Toplevel):
         self.owed_label =  ttk.Label(self, text = "Money Owed ($)")
         self.partner_aff_label = ttk.Label(self, text="Partner Affinities")
         self.opp_aff_label = ttk.Label(self, text="Opponent Affinities")
+        self.aff_newbie_label = ttk.Label(self, text = "Newbie Affinity")
         self.partner_aff_box = ttk.Combobox(self, width=8)
         self.partner_aff_level_box = ttk.Combobox(self, width=8, values=[
             "Low", "Medium", "High", "Maximum"], state='readonly')
@@ -1129,6 +1130,8 @@ class PlayerStats(tk.Toplevel):
                                                     "feathers)", "Member ("
                                                     "incl. feathers)"],
                                                 state='readonly')
+        self.aff_newbie_cbox = ttk.Combobox(self, width=6, values = ["False",
+                                                                     "True"], state='readonly')
         self.owed_entry = ttk.Entry(self, width = 11)
         self.pay_owed_button = ttk.Button(self, text = "Pay Off", command =
                                           self.pay_off)
@@ -1166,6 +1169,7 @@ class PlayerStats(tk.Toplevel):
         self.ability_combobox.current(4)
         self.fitness_combobox.current(1)
         self.membership_cbox.current(0)
+        self.aff_newbie_cbox.current(0)
         self.owed_entry.insert(0, 0)
         self.partner_aff_level_box.current(1)
         self.opp_aff_level_box.current(1)
@@ -1227,6 +1231,9 @@ class PlayerStats(tk.Toplevel):
 
             self.opp_aff_box.bind("<<ComboboxSelected>>",
                                       lambda event: self.switch_aff("opponent"))
+
+            if self.player.affinity_for_newbies:
+                self.aff_newbie_cbox.current(1)
 
             self.save_player_button.config(text="Save Player Stats")
 
@@ -1294,25 +1301,28 @@ class PlayerStats(tk.Toplevel):
 
         # Games played. Irrelevant for new players
         if not self.new:
-            self.games_played_label.grid(column=0, row=11)
-            self.games_played_number.grid(column=1, row=11)
+            self.aff_newbie_label.grid(column=0, row=11)
+            self.aff_newbie_cbox.grid(column=1, row=11, sticky='ew')
+
+            self.games_played_label.grid(column=0, row=12)
+            self.games_played_number.grid(column=1, row=12)
             # self.late_penalty_label.grid(column=0, row=12)
             # self.late_penalty_entry.grid(column=1, row=12)
             # self.games_total_label.grid(column=0, row=13)
             # self.games_total_number.grid(column=1, row=13)
-            self.games_off_label.grid(column=0, row=12)
-            self.games_off_number.grid(column=1, row=12)
-            self.games_on_label.grid(column=0, row=13)
-            self.games_on_number.grid(column=1, row=13)
-            self.desert_label.grid(column=0, row=14)
-            self.desert_display.grid(column=1, row=14)
-            self.hunger_label.grid(column=0, row=15)
-            self.hunger_value.grid(column=1, row=15)
-            self.game_history_label.grid(column=0, row=16)
-            self.game_number_combo.grid(column=1, row=16)
-            self.single_game_label.grid(column=0, row=17)
-            self.played_with_label.grid(column=1, row=17)
-            self.played_against_label.grid(column=1, row=18)
+            self.games_off_label.grid(column=0, row=13)
+            self.games_off_number.grid(column=1, row=13)
+            self.games_on_label.grid(column=0, row=14)
+            self.games_on_number.grid(column=1, row=14)
+            self.desert_label.grid(column=0, row=15)
+            self.desert_display.grid(column=1, row=15)
+            self.hunger_label.grid(column=0, row=16)
+            self.hunger_value.grid(column=1, row=16)
+            self.game_history_label.grid(column=0, row=17)
+            self.game_number_combo.grid(column=1, row=17)
+            self.single_game_label.grid(column=0, row=18)
+            self.played_with_label.grid(column=1, row=18)
+            self.played_against_label.grid(column=1, row=19)
 
 
         self.save_player_button.grid(column=1, row=21, columnspan=3)
@@ -1556,6 +1566,7 @@ class PlayerStats(tk.Toplevel):
         ability = int(self.ability_combobox.get())
         fitness = int(self.fitness_combobox.get())
         membership =  self.membership_cbox.get()
+        newbie_aff = bool(self.aff_newbie_cbox.get())
         notes = self.player_notes.get("1.0", "end-1c")
 
         #If the player is New:
@@ -1609,7 +1620,6 @@ class PlayerStats(tk.Toplevel):
 
 
 
-
             # if the player's name is changed, update all the affinities
 
             if self.player.name != name:
@@ -1639,6 +1649,12 @@ class PlayerStats(tk.Toplevel):
             self.player.fitness = fitness
             self.player.player_notes = notes
             self.player.membership = membership
+            self.player.affinity_for_newbies = newbie_aff
+
+            if newbie_aff is True:
+                print("Yes!")
+            else:
+                print(type(newbie_aff))
 
 
             # Not ideal place for this
@@ -1680,7 +1696,10 @@ class ResultsInput(tk.Toplevel):
 
         no_labels = len(b_scorer.courts)
 
-        self.game_labels = [(ttk.Label(self, text=f"Court {i+1}")) for i in \
+        font = ('Helvetica', 10, 'bold')
+
+        self.game_labels = [(ttk.Label(self, text=f"Court {i+1}", font=font))
+                            for i in \
          range(no_labels)]
 
         self.score_boxes = [((ttk.Entry(self, width=2), ttk.Entry(self,
@@ -1702,7 +1721,8 @@ class ResultsInput(tk.Toplevel):
                     if plyr:
                         names[i].append(plyr.name)
                     else:
-                        names[1].append("NONE")
+                        names[i].append("NONE")
+
 
 
             self.player_labels = [((ttk.Label(self, text=(f"{name[0]} and {name[1]}"))),
@@ -1741,7 +1761,18 @@ class ResultsInput(tk.Toplevel):
                 results.append(None)
             else:
                 try:
-                    results.append((int(box[0].get()), int(box[1].get())))
+                    scores= ((int(box[0].get()), int(box[1].get())))
+                    if scores[0] not in range(0,31) or scores[1] not in \
+                            range(0,31):
+                        error = tk.messagebox.showerror("Error", "Please "
+                                                                "ensure all "
+                                                                "scores are "
+                                                                "in the range"
+                                                                " 0-30.")
+                        return
+                    else:
+                        results.append(scores)
+
                 except ValueError:
                     error = tk.messagebox.showerror("Error",
                                                 "Please ensure all inputs are"
@@ -1749,9 +1780,16 @@ class ResultsInput(tk.Toplevel):
                     return
 
         #update results
-        print(b_scorer.today_session.games)
+
+        if any(b_scorer.today_session.games[-1][-1]):
+            # if you've already inputted results for this rounnd.
+            done_before = True
+        else:
+            done_before = False
+
         b_scorer.today_session.games[-1][-1] = results
-        print(b_scorer.today_session.games)
+
+        b_scorer.learn_new_abilities(done_before)
 
 
 

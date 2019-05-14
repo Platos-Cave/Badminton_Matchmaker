@@ -19,6 +19,8 @@ class Player:
         self.name = name
         self.sex = sex
         self.ability = ability  # An integer from 1-10 (1 being weakest)
+        self.new_ability = ability
+        self.ability_history = [ability]
         self.fitness = 2 #Default fitness level
 
         self.first_night = True
@@ -28,6 +30,8 @@ class Player:
         # (currently) Low/Medium/High
         self.partner_affinities = partner_affinities
         self.opponent_affinities = opponent_affinities
+
+        self.affinity_for_newbies = False
         # membership status: Member or Casual. Had trouble making
         # backwards-compatible with pickle
         self.membership = membership
@@ -1002,6 +1006,95 @@ def calculate_swap_TEST():
         swap_courts(courts[1], courts[val])
         # print(f"Swapped Court 2 with  Court {val+1}!")
 
+def learn_new_abilities(done_before):
+    '''From results, update each player's ability'''
+
+
+    last_round = today_session.games[-1]
+
+    for i, game in enumerate(last_round[:-2]):
+
+        score = last_round[-1][i]
+
+        names = []
+
+        for player in game:
+            if player is None:
+                names.append("NONE")
+            else:
+                names.append(player.name)
+
+        print(f'\n***Court {i+1}***\n')
+        print(f'{names[0]} and {names[1]} VS.')
+        print(f'{names[2]} and {names[3]}')
+        print('')
+
+        if score is None: # no score, no update
+            print("No results recorded \n")
+            for player in game:
+                if player:
+                # for purpose of checking done_before. Could get weird if you
+                #  do silly things like keep removing and adding
+                    player.ability_history.append(player.new_ability)
+            continue
+
+        margin = score[0] - score[1]
+
+        if done_before:
+            #doesn't work if some people's results are not inputted
+            abilities = [player.ability_history[-2] for player in game if
+                         player]
+        else:
+            abilities = [player.new_ability for player in game if player]
+
+        if len(abilities) == 4: #doubles
+            ability_diff = sum(abilities[0:2]) - sum(abilities[2:4])
+        else: #singles
+            ability_diff = abilities[0] - abilities[1]
+
+        ability_seg = max(abilities) - min(abilities)
+
+        print(f'Score: {score}')
+        print(f'Side 1 ability advantage: {round(ability_diff,2)}')
+        print(f'Span of abilities: {round(ability_seg,2)}')
+        print('')
+
+        for i, player in enumerate(game):
+            if player:
+                #Side 1 vs Side 2, have opposite margins/ability diff
+                if i>1:
+                    team_margin= -margin
+                    team_ability = -ability_diff
+                else:
+                    team_margin = margin
+                    team_ability = ability_diff
+
+                ability_change = (team_margin- 4*team_ability)/(20*(
+                        1+ability_seg))
+
+                if done_before:
+                    ability_to_update = player.ability_history[-2]
+                    player.new_ability = player.ability_history[-2] + ability_change
+                    del player.ability_history[-1]
+                else:
+                    ability_to_update = player.new_ability
+                    player.new_ability += ability_change
+
+                player.ability_history.append(player.new_ability)
+
+                round_atu = round(ability_to_update,2)
+                round_new_ab = round(player.new_ability, 2)
+                round_ac = round(ability_change, 2)
+                print(f'{player.name}\'s ability changes from {round_atu} to '
+                      f'{round_new_ab}, a change of {round_ac}')
+
+
+
+
+
+
+
+
 
 def undo_confirm():
 
@@ -1352,6 +1445,24 @@ try:
 
         if not hasattr(player, 'first_night'):
             player.first_night = False
+
+        if not hasattr(player, 'new_ability'):
+            player.new_ability = player.ability
+        # if hasattr(player, 'new_ability'): # TEMPORARY
+        #     player.new_ability = player.ability
+
+        if not hasattr(player, 'ability_history'):
+            player.ability_history = [player.ability]
+        #
+        # if hasattr(player, 'ability_history'): # TEMPORARY
+        #     player.ability_history = [player.ability]
+
+        if not hasattr(player, 'affinity_for_newbies'):
+            if player.name in ("Henry", "David"):
+                player.affinity_for_newbies = True
+            else:
+                player.affinity_for_newbies = False
+
 
 
         # Grandfather in new affinities

@@ -318,6 +318,13 @@ def score_court(court, trial_players, explain = False):
                                                            profile)])
                     break
 
+            # if first game with newbie and newbie aff, -20 points
+            if (player.affinity_for_newbies) and (o_player.first_night):
+                if player.partner_histories[o_player] >0:
+                    pass
+                else:
+                    score -= 20
+
         for o_player in partner:  # there's only 1 partner, so loop seems
              # silly?
         #     count = 1
@@ -361,6 +368,13 @@ def score_court(court, trial_players, explain = False):
                                                            profile)])
                     break
 
+            if (player.affinity_for_newbies) and (o_player.first_night):
+                if player.partner_histories[o_player] >0:
+                    pass
+                else:
+                    score -= 20
+
+
     # Female mini-affinity:
     no_women = len([p for p in new_court if p.sex == "Female" if p])
     women_score = scoring_vars[('Female Affinity', profile)] * (no_women*(
@@ -371,6 +385,8 @@ def score_court(court, trial_players, explain = False):
     no_newbies = len([p for p in new_court if p.first_night is True if p])
     if no_newbies == 4:
         score += 50
+
+
 
 
     if explain:
