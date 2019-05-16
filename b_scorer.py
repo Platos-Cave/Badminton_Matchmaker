@@ -1006,11 +1006,11 @@ def calculate_swap_TEST():
         swap_courts(courts[1], courts[val])
         # print(f"Swapped Court 2 with  Court {val+1}!")
 
-def learn_new_abilities(done_before):
+def learn_new_abilities(done_before, round_no):
     '''From results, update each player's ability'''
 
 
-    last_round = today_session.games[-1]
+    last_round = today_session.games[round_no]
 
     for i, game in enumerate(last_round[:-2]):
 

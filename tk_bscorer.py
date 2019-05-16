@@ -23,8 +23,8 @@ class Application(tk.Tk):
 
 
         # A (probably unPythonic) way of randomly loading the bench
-        self.test_mode = False
-        self.init_test_players = 10
+        self.test_mode = True
+        self.init_test_players = 12
 
         self.title("Badminton Matchmaker")
 
@@ -1566,7 +1566,7 @@ class PlayerStats(tk.Toplevel):
         ability = int(self.ability_combobox.get())
         fitness = int(self.fitness_combobox.get())
         membership =  self.membership_cbox.get()
-        newbie_aff = bool(self.aff_newbie_cbox.get())
+        newbie_aff = self.aff_newbie_cbox.get()
         notes = self.player_notes.get("1.0", "end-1c")
 
         #If the player is New:
@@ -1649,12 +1649,11 @@ class PlayerStats(tk.Toplevel):
             self.player.fitness = fitness
             self.player.player_notes = notes
             self.player.membership = membership
-            self.player.affinity_for_newbies = newbie_aff
 
-            if newbie_aff is True:
-                print("Yes!")
+            if newbie_aff == "True":
+                self.player.affinity_for_newbies = True
             else:
-                print(type(newbie_aff))
+                self.player.affinity_for_newbies = False
 
 
             # Not ideal place for this
@@ -1691,10 +1690,12 @@ class ResultsInput(tk.Toplevel):
 
         tk.Toplevel.__init__(self, controller)
         self.controller = controller
+        self.session = session
 
         self.title("Input Game Results")
 
         no_labels = len(b_scorer.courts)
+
 
         font = ('Helvetica', 10, 'bold')
 
@@ -1707,48 +1708,62 @@ class ResultsInput(tk.Toplevel):
             no_labels)]
 
         try:
-            courts = session.games[-1][:-2]
-        except IndexError:
-            courts = None
+            self.round = self.session.games[-1][:-2]
+        except IndexError: #no games played today
+            self.round = None
 
 
-        if courts:
+        if self.round:
+
+
+            self.round_combo = ttk.Combobox(self, values=[f"Round {i+1}" for i
+                                                          in range(len(
+                    self.session.games))], state="readonly")
+
+            self.round_combo.current(len(session.games) -1)
+            self.round_combo.bind("<<ComboboxSelected>>",
+                                    lambda event: self.switch_profile())
+
             # solving "NONE" problem
-            names = [[] for i in range(len(courts))]
+            self.names = [[] for i in range(len(self.round))]
 
-            for i, court in enumerate(courts):
+            for i, court in enumerate(self.round):
                 for plyr in court:
                     if plyr:
-                        names[i].append(plyr.name)
+                        self.names[i].append(plyr.name)
                     else:
-                        names[i].append("NONE")
+                        self.names[i].append("NONE")
 
 
 
             self.player_labels = [((ttk.Label(self, text=(f"{name[0]} and {name[1]}"))),
         (ttk.Label(self, text=(f"{name[2]} and {name[3]}")))) for name in
-                                  names]
+                                  self.names]
 
             self.save_button = ttk.Button(self, text = "Save Results",
                                          command=self.save_results)
 
+            self.round_combo.grid(column = 0, row =0)
+
             for i, lab in enumerate(self.game_labels):
-                lab.grid(column = 0, row = i*3)
+                lab.grid(column = 0, row = 1+ i*3)
 
             for i, box in enumerate(self.score_boxes):
-                box[0].grid(column = 1, row = (i*3)+1)
-                box[1].grid(column=1, row=(i*3)+2)
+                box[0].grid(column = 1, row = (i*3)+2)
+                box[1].grid(column=1, row=(i*3)+3)
 
             for i, plyr in enumerate(self.player_labels):
-                plyr[0].grid(column = 0, row = (i*3)+1)
-                plyr[1].grid(column= 0, row=(i*3)+2)
+                plyr[0].grid(column = 0, row = (i*3)+2)
+                plyr[1].grid(column= 0, row=(i*3)+3)
 
 
-            self.save_button.grid(column = 0, row = (3*len(courts) +3))
+            self.save_button.grid(column = 0, row = (3*len(self.round) +3))
+
 
         else:
             self.none_label = ttk.Label(self, text="No games found")
             self.none_label.grid(column = 0, row = 1)
+
 
     def save_results(self):
         '''Save results inputted if valid'''
@@ -1780,16 +1795,65 @@ class ResultsInput(tk.Toplevel):
                     return
 
         #update results
+        round_no = int(self.round_combo.current())
 
-        if any(b_scorer.today_session.games[-1][-1]):
-            # if you've already inputted results for this rounnd.
+        if any(b_scorer.today_session.games[round_no][-1]):
+            # if you've already inputted results for this round.
             done_before = True
         else:
             done_before = False
 
-        b_scorer.today_session.games[-1][-1] = results
+        b_scorer.today_session.games[round_no][-1] = results
 
-        b_scorer.learn_new_abilities(done_before)
+        b_scorer.learn_new_abilities(done_before, round_no)
+
+    def switch_profile(self):
+        '''Switch to a different round'''
+
+        profile = int(self.round_combo.get()[-1]) -1
+        self.round = self.session.games[profile][:-2]
+        results = (self.session.games[profile][-1])
+
+        self.names = [[] for i in range(len(self.round))]
+
+        for i, court in enumerate(self.round):
+            for plyr in court:
+                if plyr:
+                    self.names[i].append(plyr.name)
+                else:
+                    self.names[i].append("NONE")
+
+        # config names to
+        for i, court in enumerate(self.player_labels):
+            court[0].config(text=(f"{self.names[i][0]} and {self.names[i][1]}"))
+            court[1].config(text=(f"{self.names[i][2]} and {self.names[i][3]}"))
+
+        for i, court in enumerate(self.score_boxes):
+            for j, box in enumerate(court):
+               #print(box)
+                box.delete(0, "end")
+                if results[i]: # if there was a recorded result
+                    box.insert(0, results[i][j])
+
+
+
+
+
+
+
+        # self.player_labels = [
+        #     ((ttk.Label(self, text=(f"{name[0]} and {name[1]}"))),
+        #      (ttk.Label(self, text=(f"{name[2]} and {name[3]}")))) for name in
+        #     self.names]
+
+
+
+
+
+
+
+
+
 
 
 
