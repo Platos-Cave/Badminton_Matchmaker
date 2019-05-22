@@ -23,8 +23,9 @@ class Application(tk.Tk):
 
 
         # A (probably unPythonic) way of randomly loading the bench
-        self.test_mode = True
-        self.init_test_players = 12
+        self.test_mode = False
+        self.init_test_players = 11
+
 
         self.title("Badminton Matchmaker")
 
@@ -1121,9 +1122,10 @@ class PlayerStats(tk.Toplevel):
         self.sex_combobox = ttk.Combobox(self, width=8,
                                          values=["Male", "Female", "Other"],
                                          state='readonly')
-        self.ability_combobox = ttk.Combobox(self, width=8,
-                                             values=[i for i in range(1, 11)],
-                                             state='readonly')
+        # self.ability_combobox = ttk.Combobox(self, width=8,
+        #                                      values=[i for i in range(1, 11)],
+        #                                      state='readonly')
+        self.new_ability_entry = ttk.Entry(self, width = 4)
         self.fitness_combobox = ttk.Combobox(self, width=8,
                                              values=[i for i in range(1, 4)],
                                              state='readonly')
@@ -1168,13 +1170,15 @@ class PlayerStats(tk.Toplevel):
                                              command=self.save_player)
         
         self.sex_combobox.current(0)
-        self.ability_combobox.current(4)
+        #self.ability_combobox.current(4)
+        self.new_ability_entry.insert(0, 5.00)
         self.fitness_combobox.current(1)
         self.membership_cbox.current(0)
         self.aff_newbie_cbox.current(0)
         self.owed_entry.insert(0, 0)
         self.partner_aff_level_box.current(1)
         self.opp_aff_level_box.current(1)
+
 
         # So new players can get affs saved when their objects don't exist yet
         # Should move
@@ -1194,8 +1198,12 @@ class PlayerStats(tk.Toplevel):
             else:
                 self.sex_combobox.current(2)
 
-            self.ability_combobox.current(self.player.ability - 1)
+            #self.ability_combobox.current(self.player.ability - 1)
             self.fitness_combobox.current(self.player.fitness - 1)
+
+            self.new_ability_entry.delete(0, "end")
+            self.new_ability_entry.insert(0, round(player.ability,2))
+
 
             # Isn't very extensible
             if self.player.membership == "Casual":
@@ -1280,7 +1288,8 @@ class PlayerStats(tk.Toplevel):
         self.sex_label.grid(column=0, row=2)
         self.sex_combobox.grid(column=1, row=2, columnspan=3, sticky='ew')
         self.ability_label.grid(column=0, row=3)
-        self.ability_combobox.grid(column=1, row=3, columnspan=3, sticky='ew')
+        #self.ability_combobox.grid(column=1, row=3, columnspan=3, sticky='ew')
+        self.new_ability_entry.grid(column=1, row=3, columnspan=3, sticky='ew')
         self.fitness_label.grid(column=0, row=4)
         self.fitness_combobox.grid(column=1, row=4, columnspan=3, sticky='ew')
         self.membership_label.grid(column=0, row = 5)
@@ -1565,11 +1574,19 @@ class PlayerStats(tk.Toplevel):
             return
 
         sex = self.sex_combobox.get()
-        ability = int(self.ability_combobox.get())
+        #ability = int(self.ability_combobox.get())
         fitness = int(self.fitness_combobox.get())
         membership =  self.membership_cbox.get()
         newbie_aff = self.aff_newbie_cbox.get()
         notes = self.player_notes.get("1.0", "end-1c")
+
+        try:
+            ability = float(self.new_ability_entry.get())
+        except ValueError:
+            tk.messagebox.showerror("Error", "Please enter a valid "
+                                             "ability.",
+                                    parent=self)
+            return
 
         #If the player is New:
         #Create the player, add them to "every player" and "absent players"
