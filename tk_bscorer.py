@@ -677,7 +677,9 @@ class Application(tk.Tk):
                 4*(b_scorer.court_count):
             tk.messagebox.showerror(
                 "Error", "There are fewer players available than spaces"
-                         " on courts! This program can't handle that.")
+                         " on courts! Try making a manual game by "
+                         "right-clicking on one of the courts' titles, "
+                         "then make a singles game or leave it empty.")
         else:
 
             self.generator = Generate()
@@ -1688,10 +1690,11 @@ class PlayerStats(tk.Toplevel):
 class ResultsInput(tk.Toplevel):
     def __init__(self, controller, session):
 
-        tk.Toplevel.__init__(self, controller)
+        tk.Toplevel.__init__(self, controller
+                             )
+        self.attributes('-topmost', 'true')
         self.controller = controller
-        self.session = session
-
+        self.session = session # pass in current games
         self.title("Input Game Results")
 
         no_labels = len(b_scorer.courts)
@@ -1756,6 +1759,14 @@ class ResultsInput(tk.Toplevel):
                 plyr[0].grid(column = 0, row = (i*3)+2)
                 plyr[1].grid(column= 0, row=(i*3)+3)
 
+            results = self.session.games[-1][-1]
+
+            for i, court in enumerate(self.score_boxes):
+                for j, box in enumerate(court):
+                    # print(box)
+                    box.delete(0, "end")
+                    if results[i]:  # if there was a recorded result
+                        box.insert(0, results[i][j])
 
             self.save_button.grid(column = 0, row = (3*len(self.round) +3))
 
@@ -1806,6 +1817,11 @@ class ResultsInput(tk.Toplevel):
         b_scorer.today_session.games[round_no][-1] = results
 
         b_scorer.learn_new_abilities(done_before, round_no)
+
+        saved = tk.messagebox.askyesno("Success", "Successfully saved! "
+                                                  "Close window?")
+        if saved:
+            self.destroy()
 
     def switch_profile(self):
         '''Switch to a different round'''
