@@ -13,6 +13,9 @@ from statistics import mean
 from collections import defaultdict
 from itertools import combinations
 
+#easily togglable test-mode with players with randomly created abilities
+fake_players = False
+
 class Player:
     def __init__(self, name, sex, ability, partner_affinities=[],
                  opponent_affinities=[], membership = "Casual"):
@@ -867,6 +870,22 @@ def confirm_game():
     #todo - trialing court_2_attr
     update_court_2_attr(courts[1].spaces)
 
+def get_game_stats(court):
+    '''Get information about a generated game'''
+    abilities = [player.ability for player in court.spaces if player]
+
+    if len(abilities) == 4:  # doubles
+        ability_diff = abs(sum(abilities[0:2]) - sum(abilities[2:4]))
+    else:  # singles
+        ability_diff = abs(abilities[0] - abilities[1])
+
+    ability_seg = abs(max(abilities) - min(abilities))
+
+    return ability_diff, ability_seg
+
+
+
+
 
 # should be able to make more concise, lots of duplication
 def update_pvp():
@@ -1122,10 +1141,6 @@ def learn_new_abilities(done_before, round_no):
 
 
 
-
-
-
-
 def undo_confirm():
 
 
@@ -1343,6 +1358,10 @@ def save_and_quit(pickling=True):
 
     all_sessions.append(today_session)
 
+    global fake_players
+    if fake_players:
+        pickling = False
+
     if pickling:
 
         session_data = open('badminton_session_data.obj', 'wb')
@@ -1419,6 +1438,8 @@ Isaac = Player("Isaac", "Male", 9, opponent_affinities=["Ian"])
 
 """If you have saved players, pickle them in. Otherwise, use the default 
 players"""
+
+
 
 try:
     pickle_in = open("every_player_pi_2.obj","rb")
@@ -1569,3 +1590,30 @@ stop_generation = False
 #     for opp in player.opp_histories.keys():
 #         if player.opp_histories[opp] >1:
 #             print(opp.name, player.opp_histories[opp])
+
+#fake_players = False
+
+def init_fake_players(num):
+    every_player = []
+
+    for i in range(num):
+        ability = 10 * random.random()
+        name = str(round(ability, 2))
+        new_player = Player(name, "Male", ability)
+        every_player.append(new_player)
+
+    all_current_players = []
+    # player not in all_current_players would duplicate it
+    absent_players = [player for player in every_player if player.name not in
+                      [player.name for player in all_current_players]]
+
+    # Bench starts full
+    bench = all_current_players[:]
+
+if fake_players:
+    init_fake_players(18)
+
+
+
+
+

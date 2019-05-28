@@ -24,7 +24,7 @@ class Application(tk.Tk):
 
         # A (probably unPythonic) way of randomly loading the bench
         self.test_mode = False
-        self.init_test_players = 11
+        self.init_test_players = 12
 
 
         self.title("Badminton Matchmaker")
@@ -250,9 +250,20 @@ class Application(tk.Tk):
         self.update_board()
 
     def start_in_test_mode(self, max):
+
+        # print("Start session, before init")
+        # print(len(b_scorer.every_player))
+        # print(len(b_scorer.absent_players))
+        # print(len(b_scorer.bench))
+
         self.timer.duration = 0
         while len(b_scorer.all_current_players) < max:
             self.add_players_by_arrival(max)
+
+        # print("Start session, before init")
+        # print(len(b_scorer.every_player))
+        # print(len(b_scorer.absent_players))
+        # print(len(b_scorer.bench))
 
         # for player in b_scorer.every_player[0:32]:
         #     b_scorer.add_player(player)
@@ -1707,8 +1718,10 @@ class PlayerStats(tk.Toplevel):
 class ResultsInput(tk.Toplevel):
     def __init__(self, controller, session):
 
-        tk.Toplevel.__init__(self, controller
-                             )
+        tk.Toplevel.__init__(self, controller)
+
+        self.wm_geometry('180x240-0-0')
+
         self.attributes('-topmost', 'true')
         self.controller = controller
         self.session = session # pass in current games

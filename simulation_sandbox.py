@@ -4,6 +4,7 @@ import random
 import datetime
 import csv
 import time
+import numpy as np
 
 # import pandas as pd
 from datetime import datetime, timedelta
@@ -56,6 +57,11 @@ def initialise_2(max):
     while len(b_scorer.all_current_players) < max:
         add_players_by_arrival(max)
 
+def initialise_3(num):
+    b_scorer.init_fake_players(num)
+    for player in b_scorer.every_player:
+        b_scorer.add_player(player)
+
 
 def add_players_by_arrival(max):
     random.shuffle(b_scorer.absent_players)
@@ -68,10 +74,19 @@ def add_players_by_arrival(max):
         if len(b_scorer.all_current_players) >= max:
             break
 
+def get_ability_stats(game):
+    diff, seg = b_scorer.get_game_stats(game)
+    ability_diffs.append(diff)
+    ability_segs.append(seg)
+
 
 def simulate():
 
     cost = b_scorer.generate_new_game()
+
+    for game in b_scorer.courts:
+        get_ability_stats(game)
+
     # every_cost.append(cost)
     b_scorer.confirm_game()
     b_scorer.update_desert()
@@ -79,13 +94,23 @@ def simulate():
 
 
 def simulate_session(trials):
-    # initialise()
-    initialise_2(18)
+    # print("Start session, before init")
+    # print(len(b_scorer.every_player))
+    # print(len(b_scorer.absent_players))
+    # print(len(b_scorer.bench))
+    initialise_3(12)
+    #initialise_3()
+    # print("Start session, after init")
+    # print(len(b_scorer.every_player))
+    # print(len(b_scorer.absent_players))
+    # print(len(b_scorer.bench))
+
 
     costs = []
     for i in range(trials):
         cost = simulate()
         costs.append(cost)
+
 
     every_session.append(b_scorer.today_session)
     # need to make this easier
@@ -94,13 +119,21 @@ def simulate_session(trials):
     start_time = datetime.now().time()
     b_scorer.today_session = b_sessions.Session(date, start_time)
     b_scorer.empty_courts()
-    b_scorer.every_player = b_scorer.bench + b_scorer.absent_players
-    b_scorer.absent_players = b_scorer.every_player
-    b_scorer.bench = []
-    b_scorer.all_current_players = []
     b_scorer.total_rounds = 0
 
+    b_scorer.all_current_players = []
+    # player not in all_current_players would duplicate it
+    b_scorer.absent_players = [player for player in b_scorer.every_player]
+    b_scorer.bench = b_scorer.all_current_players[:]
+
+
     b_scorer.save_and_quit(pickling=False)
+
+    #
+    # print("End of session")
+    # print(len(b_scorer.every_player))
+    # print(len(b_scorer.absent_players))
+    # print(len(b_scorer.bench))
 
     return costs
 
@@ -177,6 +210,8 @@ def export_game_data():
 
 every_session = []
 every_cost = []
+ability_diffs = []
+ability_segs = []
 
 print("Started!")
 t1 = time.time()
@@ -201,10 +236,25 @@ for i in range(trials):
     # print(sum(every_cost[-1])
     # (len(every_cost[-1]))
 all_costs = []
-for cost in every_cost:
-    all_costs.append((sum(cost) / len(cost)))
-    print(sum(cost) / len(cost))
-print(f"Average cost: {sum(all_costs)/len(all_costs)}")
+# for cost in every_cost:
+#     all_costs.append((sum(cost) / len(cost)))
+#     print(sum(cost) / len(cost))
+# print(f"Average cost: {sum(all_costs)/len(all_costs)}")
+
+print(f'Ability diffs: {ability_diffs}')
+print(f'Ability segs: {ability_segs}')
+
+
+print(f'Mean of ability diffs: {sum(ability_diffs)/len(ability_diffs)}')
+a = np.array(ability_diffs)
+print(f'95th percentile of ability diffs: {np.percentile(a,95)}')
+print(f'Max of ability diffs: {max(ability_diffs)}')
+print('')
+
+print(f'Mean of ability segs: {sum(ability_segs)/len(ability_segs)}')
+b =np.array(ability_segs)
+print(f'95th percentile of ability segs: {np.percentile(b,95)}')
+print(f'Max of ability segs: {max(ability_segs)}')
 
 
 # b_scorer.print_desert()
@@ -213,7 +263,7 @@ print(f"Average cost: {sum(all_costs)/len(all_costs)}")
 # for player in b_scorer.every_player:
 #    print((player.court_2_attr / 0.3))
 
-export_game_data()
+#export_game_data()
 
 t2 = time.time()
 print(f"Took {round(t2-t1)} seconds!")
