@@ -318,8 +318,6 @@ def get_ability(player):
 
 
 
-
-
 def select_players(shuffle_version, selectable, no_courts = 3):
     """ Starting with a blank list (trial_players), append players to this list
     until there are 12.
@@ -671,7 +669,7 @@ def generate_new_game():
                                          courts=court_count)
 
 
-    elif profile == 2:
+    elif profile == 2: # Smart Shuffle
 
         # Ensure don't pick manual games
         for court in courts:
@@ -798,6 +796,9 @@ def place_on_courts(best_game):
 
     calculate_swap_TEST()
 
+    # for player in bench:
+    #     print(player.desert)
+    # print('')
 
 
 def print_game(game):
@@ -1052,8 +1053,12 @@ def learn_new_abilities(done_before, round_no):
 
         if len(abilities) == 4: #doubles
             ability_diff = sum(abilities[0:2]) - sum(abilities[2:4])
-        else: #singles
+        elif len(abilities) == 2: #singles
             ability_diff = abilities[0] - abilities[1]
+        else: # empty game
+            print(f'\n***Court {i+1}***\n EMPTY \n')
+            continue # go to next game
+
 
         ability_seg = max(abilities) - min(abilities)
 
@@ -1142,7 +1147,6 @@ def learn_new_abilities(done_before, round_no):
 
 
 def undo_confirm():
-
 
     for court in courts:
         for player in court.spaces:
@@ -1497,8 +1501,8 @@ try:
         if not hasattr(player, 'first_night'):
             player.first_night = False
 
-        if hasattr(player, 'new_ability'):
-            player.ability = player.new_ability
+        # if hasattr(player, 'new_ability'):
+        #     player.ability = player.new_ability
         # if hasattr(player, 'new_ability'): # TEMPORARY
         #     player.new_ability = player.ability
 

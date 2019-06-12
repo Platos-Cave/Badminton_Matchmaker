@@ -24,7 +24,7 @@ class Application(tk.Tk):
 
         # A (probably unPythonic) way of randomly loading the bench
         self.test_mode = False
-        self.init_test_players = 12
+        self.init_test_players = 18
 
 
         self.title("Badminton Matchmaker")
@@ -38,6 +38,7 @@ class Application(tk.Tk):
         self.bench_popup_menus = {}
         self.court_menus = {}
         self.space_menus = {}
+        self.colour_dict = {}
 
         # START MENU COMMENTED OUT
         # start_menu = Menu(self)
@@ -115,7 +116,8 @@ class Application(tk.Tk):
                                               command=self.empty_courts)
 
         self.results_button = ttk.Button(self,
-                                                text="Input Results",
+                                                text="Input and\nView "
+                                                     "Results",
                                                 command=self.edit_results)
 
         # This wouldn't align well, so did it manually:
@@ -204,6 +206,7 @@ class Application(tk.Tk):
         # If program crashed or exited otherwise normally, reload all data
         try:
             pickle_in = open("board_data.obj", "rb")
+            #board_data = {}
             board_data = pickle.load(pickle_in)
         except FileNotFoundError:
             board_data = {}
@@ -219,10 +222,11 @@ class Application(tk.Tk):
             b_scorer.today_session = board_data["today_session"]
             self.colour_dict = board_data["colour_dict"]
             self.timer.timer_on = board_data["timer_status"]
-           # self.timer.timer_count = board_data["timer_count"]
+            #self.timer.timer_paused = board_data["timer_paused"]
+            self.timer.timer_count = board_data["timer_count"]
            #
-           #  if self.timer.timer_on:
-           #      self.timer.timer_go()
+            if self.timer.timer_on and not self.timer.timer_paused:
+                self.timer.timer_go()
 
             self.confirm_button.configure(state= str(board_data[
                                                           "confirm_state"]))
@@ -366,6 +370,7 @@ class Application(tk.Tk):
         board_data["today_session"] = b_scorer.today_session
         board_data["colour_dict"] = self.colour_dict
         board_data["timer_status"] = self.timer.timer_on
+        #board_data["timer_paused"] = self.timer.timer_paused
         board_data["timer_count"] = self.timer.timer_count
 
 
@@ -382,6 +387,30 @@ class Application(tk.Tk):
         every_pi = open('every_player_pi_2.obj', 'wb')
         pickle.dump(b_scorer.every_player, every_pi)
         every_pi.close()
+
+    # def autosave_timer_only(self):
+    #     '''Seemed excessive to save the whole state every second?'''
+    #     pickle_in = open('board_data.obj', 'wb')
+    #     t1 = time.time()
+    #
+    #     try:
+    #         pickle_in = open("board_data.obj", "rb")
+    #         board_data = pickle.load(pickle_in)
+    #     except FileNotFoundError:
+    #         board_data = {}
+    #
+    #     board_data["timer_status"] = self.timer.timer_on
+    #     board_data["timer_count"] = self.timer.timer_count
+    #
+    #     pickle.dump(board_data, pickle_in)
+    #     pickle_in.close()
+    #
+    #     t2 = time.time()
+    #     print(t2-t1)
+
+
+
+
 
     def confirm_quit(self):
 
@@ -2096,6 +2125,8 @@ class Timer(tk.Frame):
         self.time_str = StringVar()
         self.time_str.set("{:02d}:{:02d}".format(*divmod(self.seconds_left,
                                                          60)))
+        self.countdown = "{:02d}:{:02d}".format(
+            *divmod(self.seconds_left, 60))
 
 
         self.timer_label = ttk.Label(self, textvariable=self.time_str,
@@ -2109,7 +2140,7 @@ class Timer(tk.Frame):
                                                         override=False))
         self.pause_button = ttk.Button(self, text="Pause", state="disabled",
                                        command= self.pause)
-        self.bell_button = ttk.Button(self, text = "Ring Bell",
+        self.bell_button = ttk.Button(self, text = "Ring Bell and \n End Round",
                                       command = self.ring_bell)
 
         self.timer_label.grid(column=0, row=0, sticky='nsew', rowspan = 3)
@@ -2141,6 +2172,7 @@ class Timer(tk.Frame):
                 self.alarm.start()
             # Enable button
             self.controller.config_buttons()
+            self.controller.autosave()
 
 
         self.time_str.set(self.countdown)
@@ -2149,6 +2181,10 @@ class Timer(tk.Frame):
         if self.timer_on:
             self.timer_count += 1
             self.go = self.after(1000, lambda: self.timer_go())
+            # Will autosave every second? Just to get the timer's count.
+            # Although not causing performance issues, as a design practice it
+            # seems like it could cause problems in other areas.
+            self.controller.autosave()
 
 
     def update_timer(self):
@@ -2179,6 +2215,7 @@ class Timer(tk.Frame):
                 self.after_cancel(self.go)
             except AttributeError:
                 pass
+        self.controller.autosave()
 
     # Add or reduce by 1 min
     def plus_one(self):
@@ -2242,6 +2279,7 @@ class Timer(tk.Frame):
             pass
 
         self.simple_reset()
+        self.controller.autosave()
 
     def simple_reset(self):
         'Resetting the timer if the round is finished'
