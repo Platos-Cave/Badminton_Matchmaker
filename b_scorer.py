@@ -12,6 +12,7 @@ import time
 from statistics import mean
 from collections import defaultdict
 from itertools import combinations
+import new_smart_shuffle as nss
 
 #easily togglable test-mode with players with randomly created abilities
 fake_players = False
@@ -683,6 +684,9 @@ def generate_new_game():
         trials = enumerate_b.scoring_vars["Trials", enumerate_b.profile]
 
         greens, oranges, reds = smart_select(all_current_players, court_count)
+
+        #oranges = sorted(oranges, key=lambda x: x.desert, reverse=True)
+
         spaces = 4 * court_count
         no_oranges = spaces - len(greens)
         if no_oranges > 0:
@@ -691,7 +695,11 @@ def generate_new_game():
             orange_combos = list(combinations(oranges, no_oranges))
             # if too big, shuffle so the combos selected will be a random sample
             if len(orange_combos) > trials:
+                # if random.random() > 0.5:
+                #     print("Random!")
                 random.shuffle(orange_combos)
+                # else:
+                #     print("Sorted!")
 
         else:
             orange_combos = [()]
@@ -704,10 +712,17 @@ def generate_new_game():
 
         combo_count = 0
 
+        TEST_SELECTION = True
 
-        for combo in orange_combos:
+
+        for i, combo in enumerate(orange_combos):
             if stop_generation:
                 return False
+
+            # if TEST_SELECTION:
+            #     # Test combos with decreasing probabilities:
+            #     if random.random() >
+
 
             combo_count +=1
             if combo_count > trials:
@@ -1119,9 +1134,9 @@ def learn_new_abilities(done_before, round_no):
                 if player.first_night:
                     #quick and dirty way of making
                     # abilities adjust quicker for new players
-                    learning_variable = 10
-                else:
                     learning_variable = 20
+                else:
+                    learning_variable = 40
 
                 ability_change = (team_margin- 4*team_ability)/(learning_variable*(
                         1+ability_seg))

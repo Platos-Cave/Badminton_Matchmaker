@@ -2,6 +2,8 @@
 be smart about testing combos that have high desert'''
 
 def sort_by_deservedness(players):
-    sorted(players, key=player.desert)
+    return sorted(players, key=lambda x: x.desert, reverse=True)
+
+
 
 
