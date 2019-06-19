@@ -16,6 +16,7 @@ import datetime
 from datetime import datetime # huh?
 import player_probs as pp
 
+
 class Application(tk.Tk):
     """The main application"""
     def __init__(self):
@@ -23,7 +24,7 @@ class Application(tk.Tk):
 
 
         # A (probably unPythonic) way of randomly loading the bench
-        self.test_mode = False
+        self.test_mode = True
         self.init_test_players = 18
 
 

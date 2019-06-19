@@ -13,6 +13,8 @@ from statistics import mean
 from collections import defaultdict
 from itertools import combinations
 import new_smart_shuffle as nss
+import genetic
+
 
 #easily togglable test-mode with players with randomly created abilities
 fake_players = False
@@ -685,10 +687,76 @@ def generate_new_game():
 
         greens, oranges, reds = smart_select(all_current_players, court_count)
 
+
         #oranges = sorted(oranges, key=lambda x: x.desert, reverse=True)
 
         spaces = 4 * court_count
         no_oranges = spaces - len(greens)
+
+        ### TESTING GENETIC
+        counter = 0
+        generation = 0
+
+        comb_scores = {}
+        combs = genetic.initialise(oranges, no_oranges, no_candidates=5)
+
+        t_gen = time.time()
+
+        while counter < 100:
+            for comb in combs:
+                if frozenset(comb) in comb_scores.keys():
+                    continue
+                players = greens[:]
+                players.extend(comb)
+                #print([p.name for p in players])
+                benched = [p for p in all_current_players if p not in players]
+                cost = (enumerate_b.find_best_game(players, courts=
+                        court_count, benched=benched, scored=True))
+                comb_scores[frozenset(comb)] = cost[1]
+                counter += 1
+
+            #print("\nMutation Time!")
+            mutants = set()
+
+            for comb in combs:
+                #print([i.name for i in comb])
+                new = genetic.mutate(comb, oranges, 0.1)
+                if new:
+                    mutants.add(new)
+                    #print("Added mutant!")
+
+            for comb in mutants:
+                if comb in comb_scores.keys():
+                    continue
+                players = greens[:]
+                players.extend(comb)
+                #print([p.name for p in players])
+                benched = [p for p in all_current_players if p not in players]
+                cost = (enumerate_b.find_best_game(players, courts=
+                court_count, benched=benched, scored=True))
+                comb_scores[frozenset(comb)] = cost[1]
+                counter += 1
+
+                #print(len(comb_scores.keys()))
+                combs = sorted(comb_scores, key = comb_scores.get)[:5]
+                #print(combs)
+            generation += 1
+            #print(f"Generation {generation} over!")
+
+        print(f"Best score genetic: {comb_scores[combs[0]]}")
+        t_gen2 = time.time()
+        print(f"Took {t_gen2 -t_gen}")
+
+
+
+
+
+
+        #genetic.initialise_deserve(oranges, no_oranges, 5)
+
+
+        ###
+
         if no_oranges > 0:
             # adds time to convert to list, but not enough to worry about at
             # this level
@@ -744,7 +812,7 @@ def generate_new_game():
             bench_scores.append(total[3])
 
 
-        display = False
+        display = True
 
         index, lowest_score = min(enumerate(scores), key=operator.itemgetter(
             1))
@@ -759,6 +827,8 @@ def generate_new_game():
 
             print(f'Max score of {trials} games: {max(scores)}')
             print(f'Mean score of {trials} games: {mean(scores)}')
+            tenth_list = scores[:int(len(scores)/10)]
+            print(f'Best score of 1/10th of these games: {min(tenth_list)}')
             print(f'Score of this game: {lowest_score} (Tolerance: {tolerance_scores[index]})'
                   f'(Bench score: {bench_scores[index]})')
             print(f'Took {t2-t1} seconds')
