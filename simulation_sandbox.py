@@ -5,6 +5,7 @@ import datetime
 import csv
 import time
 import numpy as np
+import pickle
 
 # import pandas as pd
 from datetime import datetime, timedelta
@@ -98,7 +99,7 @@ def simulate_session(trials):
     # print(len(b_scorer.every_player))
     # print(len(b_scorer.absent_players))
     # print(len(b_scorer.bench))
-    initialise_3(12)
+    initialise_2(18)
     #initialise_3()
     # print("Start session, after init")
     # print(len(b_scorer.every_player))
@@ -222,10 +223,10 @@ for player in b_scorer.every_player:
 trials = 100
 for i in range(trials):
     print(f"{i*(100/trials)}% finished!")
-    if i % 2 == 0:
-        cost = simulate_session(10)
-    else:
-        cost = simulate_session(9)
+    # if i % 2 == 0:
+    cost = simulate_session(10)
+    # else:
+    #     cost = simulate_session(9)
     # print(cost)
     every_cost.append(cost)
     # total = sum(every_cost[-1])
@@ -235,7 +236,13 @@ for i in range(trials):
 
     # print(sum(every_cost[-1])
     # (len(every_cost[-1]))
-all_costs = []
+#all_costs = []
+\
+# for cost in every_cost:
+#     for a in cost:
+#         print(a)
+
+
 # for cost in every_cost:
 #     all_costs.append((sum(cost) / len(cost)))
 #     print(sum(cost) / len(cost))
@@ -267,3 +274,14 @@ print(f'Max of ability segs: {max(ability_segs)}')
 
 t2 = time.time()
 print(f"Took {round(t2-t1)} seconds!")
+
+# print(every_cost)
+cost_pickle = open('cost_pickle.obj', 'wb')
+pickle.dump(every_cost, cost_pickle)
+cost_pickle.close()
+
+print("Pickled!")
+
+# pickle_in = open("cost_pickle.obj","rb")
+# c = pickle.load(pickle_in)
+# print(c)

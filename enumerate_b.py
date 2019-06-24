@@ -551,7 +551,7 @@ def find_best_game(players, courts, benched = [], scored=False, log=False):
     if not scored:
         return best_players
     if scored: # for finding more
-        return (best_players, lowest_score, tolerance_score, bench_score)
+        return (best_players, lowest_score, tolerance_score, bench_score, courts_score)
 
 def bench_cost(benched):
     # O(n**2), can do better? Not too important for these levels of n

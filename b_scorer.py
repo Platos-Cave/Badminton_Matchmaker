@@ -697,57 +697,55 @@ def generate_new_game():
         counter = 0
         generation = 0
 
-        comb_scores = {}
-        combs = genetic.initialise(oranges, no_oranges, no_candidates=5)
-
-        t_gen = time.time()
-
-        while counter < 100:
-            for comb in combs:
-                if frozenset(comb) in comb_scores.keys():
-                    continue
-                players = greens[:]
-                players.extend(comb)
-                #print([p.name for p in players])
-                benched = [p for p in all_current_players if p not in players]
-                cost = (enumerate_b.find_best_game(players, courts=
-                        court_count, benched=benched, scored=True))
-                comb_scores[frozenset(comb)] = cost[1]
-                counter += 1
-
-            #print("\nMutation Time!")
-            mutants = set()
-
-            for comb in combs:
-                #print([i.name for i in comb])
-                new = genetic.mutate(comb, oranges, 0.1)
-                if new:
-                    mutants.add(new)
-                    #print("Added mutant!")
-
-            for comb in mutants:
-                if comb in comb_scores.keys():
-                    continue
-                players = greens[:]
-                players.extend(comb)
-                #print([p.name for p in players])
-                benched = [p for p in all_current_players if p not in players]
-                cost = (enumerate_b.find_best_game(players, courts=
-                court_count, benched=benched, scored=True))
-                comb_scores[frozenset(comb)] = cost[1]
-                counter += 1
-
-                #print(len(comb_scores.keys()))
-                combs = sorted(comb_scores, key = comb_scores.get)[:5]
-                #print(combs)
-            generation += 1
-            #print(f"Generation {generation} over!")
-
-        print(f"Best score genetic: {comb_scores[combs[0]]}")
-        t_gen2 = time.time()
-        print(f"Took {t_gen2 -t_gen}")
-
-
+        # comb_scores = {}
+        # combs = genetic.initialise(oranges, no_oranges, no_candidates=5)
+        #
+        # t_gen = time.time()
+        #
+        # while counter < 100:
+        #     for comb in combs:
+        #         if frozenset(comb) in comb_scores.keys():
+        #             continue
+        #         players = greens[:]
+        #         players.extend(comb)
+        #         #print([p.name for p in players])
+        #         benched = [p for p in all_current_players if p not in players]
+        #         cost = (enumerate_b.find_best_game(players, courts=
+        #                 court_count, benched=benched, scored=True))
+        #         comb_scores[frozenset(comb)] = cost[1]
+        #         counter += 1
+        #
+        #     #print("\nMutation Time!")
+        #     mutants = set()
+        #
+        #     for comb in combs:
+        #         #print([i.name for i in comb])
+        #         new = genetic.mutate(comb, oranges, 0.1)
+        #         if new:
+        #             mutants.add(new)
+        #             #print("Added mutant!")
+        #
+        #     for comb in mutants:
+        #         if comb in comb_scores.keys():
+        #             continue
+        #         players = greens[:]
+        #         players.extend(comb)
+        #         #print([p.name for p in players])
+        #         benched = [p for p in all_current_players if p not in players]
+        #         cost = (enumerate_b.find_best_game(players, courts=
+        #         court_count, benched=benched, scored=True))
+        #         comb_scores[frozenset(comb)] = cost[1]
+        #         counter += 1
+        #
+        #         #print(len(comb_scores.keys()))
+        #         combs = sorted(comb_scores, key = comb_scores.get)[:5]
+        #         #print(combs)
+        #     generation += 1
+        #     #print(f"Generation {generation} over!")
+        #
+        # print(f"Best score genetic: {comb_scores[combs[0]]}")
+        # t_gen2 = time.time()
+        # print(f"Took {t_gen2 -t_gen}")
 
 
 
@@ -776,6 +774,7 @@ def generate_new_game():
         scores = []
         tolerance_scores = []
         bench_scores = []
+        court_scores = []
         t1 = time.time()
 
         combo_count = 0
@@ -810,9 +809,10 @@ def generate_new_game():
             scores.append(total[1])
             tolerance_scores.append(total[2])
             bench_scores.append(total[3])
+            court_scores.append(total[4])
 
 
-        display = True
+        display = False
 
         index, lowest_score = min(enumerate(scores), key=operator.itemgetter(
             1))
@@ -839,8 +839,10 @@ def generate_new_game():
         best_game = (enumerate_b.find_best_game(players, courts = court_count))
 
     place_on_courts(best_game)
-    return True
-    #return lowest_score #if simulated
+    #return True
+    return  greens, oranges, reds, games, scores, tolerance_scores, \
+            bench_scores, court_scores#if
+        # simulated
 
 
 

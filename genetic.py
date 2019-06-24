@@ -37,10 +37,11 @@ def initialise(oranges, no_oranges, no_candidates):
     #oranges = ([p.name for p in oranges])
    #print(no_oranges)
 
-    if len(oranges)<13:
-        orange_list = list(combinations(oranges,no_oranges))
-    else:
-        return []
+    # if len(oranges)<13:
+    orange_list = list(combinations(oranges,no_oranges))
+
+      # else:
+    #     return []
 
     candidates = []
 
@@ -93,6 +94,16 @@ def initialise_deserve(oranges, no_oranges, no_candidates):
     for c in candidates:
         print([p.desert for p in c])
 
+def simple_mutate(candidate, oranges):
+    '''Guaranteed switch exactly one player from bench'''
+    remaining = set(oranges).difference(set(candidate))
+
+    candidate = set(candidate)
+
+    candidate.remove(random.sample(candidate,1)[0])
+    candidate.add(random.sample(remaining, 1)[0])
+
+    return frozenset(candidate)
 
 def mutate(candidate, oranges, mutationRate):
 
