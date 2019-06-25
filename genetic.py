@@ -4,8 +4,8 @@ import random
 from itertools import combinations
 from numpy import sign
 
-def sort_by_deservedness(players):
-    return sorted(players, key=lambda x: x.desert, reverse=True)
+def sort_by_deservedness(players, num):
+    return set((sorted(players, key=lambda x: x.desert, reverse=True)[:num]))
 
 def desert_score(players):
     tolerance_score = 0
@@ -33,6 +33,7 @@ def desert_score(players):
 
     return tolerance_score
 
+
 def initialise(oranges, no_oranges, no_candidates):
     #oranges = ([p.name for p in oranges])
    #print(no_oranges)
@@ -57,6 +58,9 @@ def initialise(oranges, no_oranges, no_candidates):
 
     #print(candidates)
     return candidates
+
+# def initialise_2(oranges, no_oranges):
+
 
 def initialise_deserve(oranges, no_oranges, no_candidates):
     '''Create initial candidates, sorted by most deserving'''
@@ -108,17 +112,24 @@ def simple_mutate(candidate, oranges):
 def mutate(candidate, oranges, mutationRate):
 
     remaining = set(oranges).difference(set(candidate))
+
+    if len(remaining) == 0:
+        return False
+
     new_candidate = set()
     mutated = False
     for player in candidate:
-        if random.random() < mutationRate:
-            added_player = random.sample(remaining,1)[0]
-            remaining.remove(added_player)
-            new_candidate.add(added_player)
-            mutated = True
+        if len(remaining) > 0: # can't swap if all remaining swapped
+            if random.random() < mutationRate:
+                added_player = random.sample(remaining,1)[0]
+                remaining.remove(added_player)
+                new_candidate.add(added_player)
+                mutated = True
+            else:
+                new_candidate.add(player)
         else:
             new_candidate.add(player)
-            #print("Not mutated!")
+
     if mutated:
         return frozenset(new_candidate)
     else:

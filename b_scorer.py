@@ -14,7 +14,7 @@ from collections import defaultdict
 from itertools import combinations
 import new_smart_shuffle as nss
 import genetic
-
+import combo_gen
 
 #easily togglable test-mode with players with randomly created abilities
 fake_players = False
@@ -633,6 +633,9 @@ def view_bench():
                                                                     player.time_since_last,
                                                                     player.adjusted_games))
 
+def sort_by_deservedness(players, num):
+    return set((sorted(players, key=lambda x: x.desert, reverse=True)[:num]))
+
 # Make work for multiple versions
 def generate_new_game():
 
@@ -659,6 +662,101 @@ def generate_new_game():
 
     elif profile == 3:
 
+        for court in courts:
+            if court.manual:
+                for player in court.spaces:
+                    if player:
+                        player.keep_on = False
+                        player.keep_off = True
+
+        trials = enumerate_b.scoring_vars["Trials", enumerate_b.profile]
+
+        greens, oranges, reds = smart_select(all_current_players, court_count)
+
+        # oranges = sorted(oranges, key=lambda x: x.desert, reverse=True)
+
+        spaces = 4 * court_count
+        no_oranges = spaces - len(greens)
+
+        orange_combos = list(combinations(oranges, no_oranges))
+
+        if len(orange_combos) <  trials:
+            #print("Revert to exhaustive!")
+            best_game = iterate_over_combos(greens,oranges,reds,trials, orange_combos)
+            if not best_game:
+                return False
+        else:
+
+            ### TESTING GENETIC
+            counter = 0
+            generation = 0
+
+            comb_scores = {} #for a combo of oranges: the score
+            comb_games = {} #for a combo of oranges: the game
+
+            combs = genetic.initialise(oranges, no_oranges, no_candidates=1)
+
+            # print("combs", combs)
+            # print(len(combs[0]))
+
+            #combs = [(sort_by_deservedness(oranges,no_oranges))]
+            # print(combs2==combs)
+            # print("combs2", combs2)
+            # print(len(combs[0]))
+
+            t_gen = time.time()
+
+            while counter < trials:
+                for comb in combs:
+                    if frozenset(comb) in comb_scores.keys():
+                        continue
+                    players = greens[:]
+                    players.extend(comb)
+                    #print([p.name for p in players])
+                    benched = [p for p in all_current_players if p not in players]
+                    cost = (enumerate_b.find_best_game(players, courts=
+                            court_count, benched=benched, scored=True))
+                    comb_scores[frozenset(comb)] = cost[1]
+                    counter += 1
+
+                #print("\nMutation Time!")
+                mutants = set()
+
+                for comb in combs:
+                    #print([i.name for i in comb])
+                    new = genetic.mutate(comb, oranges, 0.01)
+                    if new:
+                        mutants.add(new)
+                        #print("Added mutant!")
+
+                for comb in mutants:
+                    if comb in comb_scores.keys():
+                        continue
+                    players = greens[:]
+                    players.extend(comb)
+                    #print([p.name for p in players])
+                    benched = [p for p in all_current_players if p not in players]
+                    cost = (enumerate_b.find_best_game(players, courts=
+                    court_count, benched=benched, scored=True))
+                    comb_scores[frozenset(comb)] = cost[1]
+                    comb_games[frozenset(comb)] = cost[0]
+                    counter += 1
+
+                    #print(len(comb_scores.keys()))
+                    combs = sorted(comb_scores, key = comb_scores.get)[:1]
+                    #print(combs)
+                generation += 1
+                #print(f"Generation {generation} over!")
+
+            # print(f"Best score genetic: {comb_scores[combs[0]]}")
+            t_gen2 = time.time()
+            # print(f"Took {t_gen2 -t_gen}")
+
+            best_game = comb_games[combs[0]]
+            # print(best_game)
+
+
+
         # #for i in range(10):
         # best_game = enumerate_b.find_best_exhaustive(all_current_players,
         #                                                  0, 0)
@@ -668,8 +766,8 @@ def generate_new_game():
         # #print("FINISHED")
         # place_on_courts(best_game)
         # return
-        best_game = enumerate_b.smart_shuffle_trial(all_current_players,
-                                         courts=court_count)
+        # best_game = enumerate_b.smart_shuffle_trial(all_current_players,
+        #                                  courts=court_count)
 
 
     elif profile == 2: # Smart Shuffle
@@ -687,73 +785,10 @@ def generate_new_game():
 
         greens, oranges, reds = smart_select(all_current_players, court_count)
 
-
         #oranges = sorted(oranges, key=lambda x: x.desert, reverse=True)
 
         spaces = 4 * court_count
         no_oranges = spaces - len(greens)
-
-        ### TESTING GENETIC
-        counter = 0
-        generation = 0
-
-        # comb_scores = {}
-        # combs = genetic.initialise(oranges, no_oranges, no_candidates=5)
-        #
-        # t_gen = time.time()
-        #
-        # while counter < 100:
-        #     for comb in combs:
-        #         if frozenset(comb) in comb_scores.keys():
-        #             continue
-        #         players = greens[:]
-        #         players.extend(comb)
-        #         #print([p.name for p in players])
-        #         benched = [p for p in all_current_players if p not in players]
-        #         cost = (enumerate_b.find_best_game(players, courts=
-        #                 court_count, benched=benched, scored=True))
-        #         comb_scores[frozenset(comb)] = cost[1]
-        #         counter += 1
-        #
-        #     #print("\nMutation Time!")
-        #     mutants = set()
-        #
-        #     for comb in combs:
-        #         #print([i.name for i in comb])
-        #         new = genetic.mutate(comb, oranges, 0.1)
-        #         if new:
-        #             mutants.add(new)
-        #             #print("Added mutant!")
-        #
-        #     for comb in mutants:
-        #         if comb in comb_scores.keys():
-        #             continue
-        #         players = greens[:]
-        #         players.extend(comb)
-        #         #print([p.name for p in players])
-        #         benched = [p for p in all_current_players if p not in players]
-        #         cost = (enumerate_b.find_best_game(players, courts=
-        #         court_count, benched=benched, scored=True))
-        #         comb_scores[frozenset(comb)] = cost[1]
-        #         counter += 1
-        #
-        #         #print(len(comb_scores.keys()))
-        #         combs = sorted(comb_scores, key = comb_scores.get)[:5]
-        #         #print(combs)
-        #     generation += 1
-        #     #print(f"Generation {generation} over!")
-        #
-        # print(f"Best score genetic: {comb_scores[combs[0]]}")
-        # t_gen2 = time.time()
-        # print(f"Took {t_gen2 -t_gen}")
-
-
-
-
-        #genetic.initialise_deserve(oranges, no_oranges, 5)
-
-
-        ###
 
         if no_oranges > 0:
             # adds time to convert to list, but not enough to worry about at
@@ -770,68 +805,66 @@ def generate_new_game():
         else:
             orange_combos = [()]
 
-        games = []
-        scores = []
-        tolerance_scores = []
-        bench_scores = []
-        court_scores = []
-        t1 = time.time()
+        best_game = iterate_over_combos(greens,oranges,reds, trials,
+                                      orange_combos)
+        if not best_game:
+            return False
 
-        combo_count = 0
-
-        TEST_SELECTION = True
-
-
-        for i, combo in enumerate(orange_combos):
-            if stop_generation:
-                return False
-
-            # if TEST_SELECTION:
-            #     # Test combos with decreasing probabilities:
-            #     if random.random() >
-
-
-            combo_count +=1
-            if combo_count > trials:
-                break
-
-            players = greens[:]
-            # print([p.name for p in combo])
-            for player in combo:
-                players.append(player)
-
-            #players = select_players("Smart", pickable, court_count)
-
-            benched = [p for p in all_current_players if p not in players]
-            total = (enumerate_b.find_best_game(players, courts =
-                    court_count, benched = benched, scored = True))
-            games.append(total[0])
-            scores.append(total[1])
-            tolerance_scores.append(total[2])
-            bench_scores.append(total[3])
-            court_scores.append(total[4])
-
-
-        display = False
-
-        index, lowest_score = min(enumerate(scores), key=operator.itemgetter(
-            1))
-        best_game = games[index]
-
-        t2 = time.time()
-
-        if display:
-            #print_game(best_game[0])
-            # print('')
-            #print_game(best_game_2[0])
-
-            print(f'Max score of {trials} games: {max(scores)}')
-            print(f'Mean score of {trials} games: {mean(scores)}')
-            tenth_list = scores[:int(len(scores)/10)]
-            print(f'Best score of 1/10th of these games: {min(tenth_list)}')
-            print(f'Score of this game: {lowest_score} (Tolerance: {tolerance_scores[index]})'
-                  f'(Bench score: {bench_scores[index]})')
-            print(f'Took {t2-t1} seconds')
+        # games = []
+        # scores = []
+        # tolerance_scores = []
+        # bench_scores = []
+        # court_scores = []
+        # t1 = time.time()
+        #
+        # combo_count = 0
+        #
+        #
+        # for i, combo in enumerate(orange_combos):
+        #     if stop_generation:
+        #         return False
+        #
+        #     combo_count +=1
+        #     if combo_count > trials:
+        #         break
+        #
+        #     players = greens[:]
+        #     # print([p.name for p in combo])
+        #     for player in combo:
+        #         players.append(player)
+        #
+        #     #players = select_players("Smart", pickable, court_count)
+        #
+        #     benched = [p for p in all_current_players if p not in players]
+        #     total = (enumerate_b.find_best_game(players, courts =
+        #             court_count, benched = benched, scored = True))
+        #     games.append(total[0])
+        #     scores.append(total[1])
+        #     tolerance_scores.append(total[2])
+        #     bench_scores.append(total[3])
+        #     court_scores.append(total[4])
+        #
+        #
+        # display = False
+        #
+        # index, lowest_score = min(enumerate(scores), key=operator.itemgetter(
+        #     1))
+        # best_game = games[index]
+        #
+        # t2 = time.time()
+        #
+        # if display:
+        #     #print_game(best_game[0])
+        #     # print('')
+        #     #print_game(best_game_2[0])
+        #
+        #     print(f'Max score of {trials} games: {max(scores)}')
+        #     print(f'Mean score of {trials} games: {mean(scores)}')
+        #     tenth_list = scores[:int(len(scores)/10)]
+        #     print(f'Best score of 1/10th of these games: {min(tenth_list)}')
+        #     print(f'Score of this game: {lowest_score} (Tolerance: {tolerance_scores[index]})'
+        #           f'(Bench score: {bench_scores[index]})')
+        #     print(f'Took {t2-t1} seconds')
 
 
 
@@ -839,14 +872,69 @@ def generate_new_game():
         best_game = (enumerate_b.find_best_game(players, courts = court_count))
 
     place_on_courts(best_game)
-    #return True
-    return  greens, oranges, reds, games, scores, tolerance_scores, \
-            bench_scores, court_scores#if
+    return True
+    #return  greens, oranges, reds, games, scores, tolerance_scores, \
+    #        bench_scores, court_scores#if
         # simulated
 
+def iterate_over_combos(greens, oranges, reds, trials, orange_combos):
+    '''Go over each'''
+    games = []
+    scores = []
+    tolerance_scores = []
+    bench_scores = []
+    court_scores = []
+    t1 = time.time()
 
+    combo_count = 0
 
+    for i, combo in enumerate(orange_combos):
+        if stop_generation:
+            return False
 
+        combo_count += 1
+        if combo_count > trials:
+            break
+
+        players = greens[:]
+        # print([p.name for p in combo])
+        for player in combo:
+            players.append(player)
+
+        # players = select_players("Smart", pickable, court_count)
+
+        benched = [p for p in all_current_players if p not in players]
+        total = (enumerate_b.find_best_game(players, courts=
+        court_count, benched=benched, scored=True))
+        games.append(total[0])
+        scores.append(total[1])
+        tolerance_scores.append(total[2])
+        bench_scores.append(total[3])
+        court_scores.append(total[4])
+
+    display = False
+
+    index, lowest_score = min(enumerate(scores), key=operator.itemgetter(
+        1))
+    best_game = games[index]
+
+    t2 = time.time()
+
+    if display:
+        # print_game(best_game[0])
+        # print('')
+        # print_game(best_game_2[0])
+
+        print(f'Max score of {trials} games: {max(scores)}')
+        print(f'Mean score of {trials} games: {mean(scores)}')
+        tenth_list = scores[:int(len(scores) / 10)]
+        print(f'Best score of 1/10th of these games: {min(tenth_list)}')
+        print(
+            f'Score of this game: {lowest_score} (Tolerance: {tolerance_scores[index]})'
+            f'(Bench score: {bench_scores[index]})')
+        print(f'Took {t2-t1} seconds')
+
+    return best_game
 
 
 def place_on_courts(best_game):
@@ -881,7 +969,7 @@ def place_on_courts(best_game):
     # print(scores)
     enumerate_b.score_num = 0
 
-    calculate_swap_TEST()
+    calculate_swap_TEST() #todo change name of this: what it does is swap
 
     # for player in bench:
     #     print(player.desert)
