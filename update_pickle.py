@@ -7,25 +7,30 @@ pickle_in.close()
 
 fbc = pd.read_csv("FBC 2019.csv")
 
-for player in every_player:
+def update_membership():
+    for player in every_player:
 
-    player.money_owed = 0
-
-    if player.name not in fbc['Name on program'].values:
-        player.membership = "Casual"
-    else:
-        player_entry = fbc.loc[fbc['Name on program'] == player.name]
-        if player_entry['Membership type'].str.contains("Feathers "
-                                                        "included").any():
-            player.membership = "Member (incl. feathers)"
-        elif player_entry['Membership type'].str.contains("No feathers").any():
-            player.membership = "Member (no feathers)"
+        if player.name not in fbc['Name on program'].values:
+            player.membership = "Casual"
         else:
-            print(player.name)
-            print("Error in membership!")
+            player_entry = fbc.loc[fbc['Name on program'] == player.name]
+            if player_entry['Membership type'].str.contains("Feathers "
+                                                            "included").any():
+                player.membership = "Member (incl. feathers)"
+            elif player_entry['Membership type'].str.contains("No feathers").any():
+                player.membership = "Member (no feathers)"
+            else:
+                print(player.name)
+                print("Error in membership!")
 
-for p in every_player:
-    print(f'{p.name}, {p.membership}, {p.money_owed}')
+    for p in every_player:
+        print(f'{p.name}, {p.membership}, {p.money_owed}')
+
+def update_names_and_emails():
+    for player in every_player:
+        pass
+
+
 
 
 

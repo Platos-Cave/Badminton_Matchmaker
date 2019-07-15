@@ -4,7 +4,7 @@ import time
 class Candidate:
     '''Representing a combination of players, to be tested'''
     def __init__(self, population=[], no_courts=3, attrs=(set(), set(),set()),
-                mutation=False, mutationRate = 0.1, players_on_court = []):
+                mutation=False, mutationRate = 0.01, players_on_court = []):
 
         self.courts, self.orange_bench, self.red_bench = attrs
         self.population = population
@@ -31,7 +31,6 @@ class Candidate:
         self.red_bench = set(self.reds)
         random.shuffle(poc)
         self.players_on_court = poc[:]
-
 
         for _ in range(self.no_courts):
             new_court = frozenset(frozenset(poc.pop() for i in range(2)) for
@@ -92,7 +91,7 @@ class Candidate:
         if mutated:
 
             #players on court, to pass to mutant
-            poc = self.all_swappable[:12]
+            poc = self.all_swappable[:(4*self.no_courts)]
             #print(poc)
 
             final = list(reversed(self.all_swappable))
@@ -105,7 +104,7 @@ class Candidate:
             for remainer in final:
                 self.new_orange_bench.add(remainer)
 
-            return Candidate(self.population, no_courts=3, attrs=(
+            return Candidate(self.population, no_courts=self.no_courts, attrs=(
                 self.new_courts, self.new_orange_bench,
                 self.red_bench), mutation=True, players_on_court = poc)
 
@@ -130,59 +129,103 @@ class Candidate:
             self.tried = True
             return self.fitness
 
+def gen_population(court_num=3):
+    population = [[10*random.random() for _ in range(court_num*2)],
+                  [10*random.random() for _ in range(court_num*4)],
+                  [10*random.random() for _ in range(court_num)]]
+    return population
 
-population = [[10*random.random() for _ in range(6)],[10*random.random() for
-                                                      _ in
-                                                      range(12)],
-              [10 *random.random() for _ in range(4)]]
-# print(population)
-# print(len(population[0]))
-#Bob = Candidate(population, 3)
-# Jim = Candidate(population, 3)
-# Jim.get_fitness()
-candidates = [Candidate(population, 3) for i in range(20)]
 
-t1 = time.time()
+def run_ga(population, court_num=3, cands=20, mutRate=0.01, max_time=2):
 
-generations = 10000
-trials = 0
+    # population = [[10*random.random() for _ in range(court_num*2)],
+    #               [10*random.random() for _ in range(court_num*4)],
+    #               [10*random.random() for _ in range(court_num)]]
+    # print(population)
+    # print(len(population[0]))
+    #Bob = Candidate(population, 3)
+    # Jim = Candidate(population, 3)
+    # Jim.get_fitness()
 
-while trials < generations:
-    trials += 1
+    candidates = [Candidate(population, no_courts=court_num,
+                            mutationRate=mutRate) for i in range(cands)]
 
-    mod = 10 ** (len(str(trials)) - 1)  # want to print only 1 sf nums
+    t1 = time.time()
 
-    # mut_rate = starting_mut / mod
+    generations = 100000
+    trials = 0
 
-    if (trials%(mod) == 0):
-        print(f'\nGeneration {trials}')
-        for cand in candidates[:3]:
-             print(cand.fitness, [round(c,2) for c in \
-                     cand.players_on_court])
+    while trials < generations:
+        trials += 1
 
-# for i in range(1000):
-    mutants = []
-    for cand in candidates:
-        for i in range(1):
-            mutant = cand.generate_mutation()
-            if mutant:
-                mutants.append(mutant)
+        mod = 10 ** (len(str(trials)) - 1)  # want to print only 1 sf nums
 
-    new_candidates = candidates[:]
+        # mut_rate = starting_mut / mod
 
-    for mut in mutants:
-        if mut.get_fitness() not in [cand.get_fitness() for cand in candidates]:
-            new_candidates.append(mut)
+        # if (trials%(mod) == 0):
+        #     print(f'\nGeneration {trials}')
+        #     for cand in candidates[:3]:
+        #          print(cand.fitness, [round(c,2) for c in \
+        #                  cand.players_on_court])
 
-    candidates = sorted(new_candidates, key=lambda x: x.get_fitness(),
-                        reverse=True)[:20]
-    #print([cand.fitness for cand in candidates])
-t2 = time.time()
+    # for i in range(1000):
+        mutants = []
+        for cand in candidates:
+            for i in range(1):
+                mutant = cand.generate_mutation()
+                if mutant:
+                    mutants.append(mutant)
 
-print('\nDone!')
-print(candidates[0].players_on_court)
-print(candidates[0].fitness)
-print(f'Took {t2-t1}')
+        new_candidates = candidates[:]
+
+        for mut in mutants:
+            if mut.get_fitness() not in [cand.get_fitness() for cand in candidates]:
+                new_candidates.append(mut)
+
+        candidates = sorted(new_candidates, key=lambda x: x.get_fitness(),
+                            reverse=True)[:cands]
+
+        if (time.time() - t1) > max_time:
+            # print(f"Finished at trial {trials}")
+            break
+
+        #print([cand.fitness for cand in candidates])
+    t2 = time.time()
+
+    # print('\nDone!')
+    # print(candidates[0].players_on_court)
+    # print(candidates[0].fitness)
+    # print(f'Took {t2-t1}')
+    return candidates[0].fitness
+
+
+def run_experiment(experiments=10, trials=10 0):
+    fitnesses = []
+
+    single_pop = [gen_population(court_num=4) for i in range(trials)]
+
+    for i in range(experiments):
+        this_fitness = 0
+        # max_time_ = (i+1)/10
+        max_time_ = 2
+        mutRate_ = (i+1)/100
+        for j in range(trials):
+            this_fitness += run_ga(court_num=4, max_time = max_time_,
+                                   population=single_pop[i], cands=10,
+                                   mutRate=mutRate_)
+
+        fitness = this_fitness / trials
+
+        print(f"Fitness over {mutRate_} mutRate: {fitness}")
+        fitnesses.append(fitness)
+
+    print(fitnesses)
+
+run_experiment()
+
+
+
+
 
 
 

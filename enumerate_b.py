@@ -235,14 +235,18 @@ def score_court(court, trial_players, explain = False):
     ###########################
 
     abilities = [player.ability for player in new_court]
+
+    segregation = max(abilities) - min(abilities)
+    score += scoring_vars[('Ability_Seg', profile)] * (segregation ** 1.5)
+
     # The imbalance between team abilities. High imbalance = highly penalised
-    score += scoring_vars[('Balance', profile)] * 5 * ((
-                sum(abilities[0:2]) - sum(abilities[2:4])) ** 2)
+    imbalance = (sum(abilities[0:2]) - sum(abilities[2:4]))
+    # new: more segregated games care less about imbalance
+    seg_change = 1 + segregation/5
+    score += scoring_vars[('Balance', profile)] * 6 * ((imbalance **
+                                                        2)/seg_change)
     # It is generally better to not have strong and weak players in the same
     #  game even if balanced, so this formula penalises that.
-    # Removing for now
-    score += scoring_vars[('Ability_Seg', profile)] * (
-                (max(abilities) - min(abilities)) ** 1.5)
 
     #NEW: "Hungry" weighting
     average_ability = sum(abilities)/4
@@ -356,7 +360,7 @@ def score_court(court, trial_players, explain = False):
             # Simple fitness hack. Might want more, so it's less complex
 
             if (player.fitness == 1) and (o_player.fitness == 1):
-                score += 10 # basically guaranteeing they're not together
+                score += 20 # basically guaranteeing they're not together
 
 
             score += new_score
@@ -377,14 +381,21 @@ def score_court(court, trial_players, explain = False):
 
     # Female mini-affinity:
     no_women = len([p for p in new_court if p.sex == "Female" if p])
-    women_score = scoring_vars[('Female Affinity', profile)] * (no_women*(
-            no_women - 1))
+
+    # should be a simple formula, like 2**(x-1)
+    if no_women<2:
+        women_score = 0
+    else:
+        women_score = 2**(no_women - 1)  # (2 women->2, 3->4, 4-> 8)
+
+    women_score = scoring_vars[('Female Affinity', profile)] * women_score
+                  #old (no_women*(no_women - 1))
     score -= women_score
 
     # Don't put 4 new players together
-    no_newbies = len([p for p in new_court if p.first_night is True if p])
-    if no_newbies == 4:
-        score += 50
+    # no_newbies = len([p for p in new_court if p.first_night is True if p])
+    # if no_newbies == 4:
+    #     score += 50
 
 
 

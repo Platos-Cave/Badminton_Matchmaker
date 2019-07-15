@@ -14,7 +14,7 @@ from collections import defaultdict
 from itertools import combinations
 import new_smart_shuffle as nss
 import genetic
-import combo_gen
+from math import log
 
 #easily togglable test-mode with players with randomly created abilities
 fake_players = False
@@ -27,6 +27,11 @@ class Player:
         self.ability = ability  # An integer from 1-10 (1 being weakest)
         self.ability_history = [ability]
         self.fitness = 2 #Default fitness level
+
+        # personal info
+        self.surname = ""
+        self.mobile_no = ""
+        self.email_address = ""
 
         self.first_night = True
 
@@ -634,7 +639,7 @@ def view_bench():
                                                                     player.adjusted_games))
 
 def sort_by_deservedness(players, num):
-    return set((sorted(players, key=lambda x: x.desert, reverse=True)[:num]))
+    return sorted(players, key=lambda x: x.desert, reverse=True)[:num]
 
 # Make work for multiple versions
 def generate_new_game():
@@ -694,12 +699,12 @@ def generate_new_game():
             comb_scores = {} #for a combo of oranges: the score
             comb_games = {} #for a combo of oranges: the game
 
-            combs = genetic.initialise(oranges, no_oranges, no_candidates=1)
+            #combs = genetic.initialise(oranges, no_oranges, no_candidates=1)
 
             # print("combs", combs)
             # print(len(combs[0]))
 
-            #combs = [(sort_by_deservedness(oranges,no_oranges))]
+            combs = [frozenset(sort_by_deservedness(oranges,no_oranges))]
             # print(combs2==combs)
             # print("combs2", combs2)
             # print(len(combs[0]))
@@ -717,6 +722,7 @@ def generate_new_game():
                     cost = (enumerate_b.find_best_game(players, courts=
                             court_count, benched=benched, scored=True))
                     comb_scores[frozenset(comb)] = cost[1]
+                    comb_games[frozenset(comb)] = cost[0]
                     counter += 1
 
                 #print("\nMutation Time!")
@@ -1290,16 +1296,35 @@ def learn_new_abilities(done_before, round_no):
                 else:
                     team_margin = margin
                     team_ability = ability_diff
+                #
+                # if player.first_night:
+                #     #quick and dirty way of making
+                #     # abilities adjust quicker for new players
+                #     learning_variable = 20
+                # else:
+                #     learning_variable = 40
+                len_ah = 1
+                for i, ab in enumerate(player.ability_history[1:]):
+                    if player.ability_history[i] != player.ability_history[
+                        i-1]: #i.e. not a
+                        # duplicate
+                        len_ah += 1
 
-                if player.first_night:
-                    #quick and dirty way of making
-                    # abilities adjust quicker for new players
-                    learning_variable = 20
-                else:
-                    learning_variable = 40
+                print(f'{player.name} had {len_ah} previous results!')
+
+                # the more results you input, the less your ability changes with
+                #  each new result. Formula based on simulation results
+                learning_variable = 12 + 10*(log(len_ah))
+
+
+                # ability change is your team's margin minus (plus) a handicap
+                # for an ability advantage, divided by the learning variable
+                # which increases as the ability seg of the game increases
+                # (so games between players of similar ability count more)
+                adj_ability_seg = (1/2*ability_seg) ** 1.5
 
                 ability_change = (team_margin- 4*team_ability)/(learning_variable*(
-                        1+ability_seg))
+                        1+adj_ability_seg))
 
                 if done_before:
                     ability_to_update = player.ability_history[-2]
@@ -1308,6 +1333,9 @@ def learn_new_abilities(done_before, round_no):
                 else:
                     ability_to_update = player.ability
                     player.ability += ability_change
+
+                    if player.ability < 0:
+                        player.ability = 0  # ability cannot go below 0
 
                 player.ability_history.append(player.ability)
 
@@ -1619,133 +1647,139 @@ Isaac = Player("Isaac", "Male", 9, opponent_affinities=["Ian"])
 players"""
 
 
+if not fake_players:
+    try:
+        pickle_in = open("every_player_pi_2.obj","rb")
+        every_player = pickle.load(pickle_in)
+        pickle_in.close()
 
-try:
-    pickle_in = open("every_player_pi_2.obj","rb")
-    every_player = pickle.load(pickle_in)
-    pickle_in.close()
-
-    for player in every_player:
-        if not hasattr(player, 'consecutive_games_on'):
-            player.consecutive_games_on = 0
-            print("Add consec!")
-        # if not hasattr(player, 'manual_game'):
-        #     player.manual_game = False
+        for player in every_player:
+            if not hasattr(player, 'consecutive_games_on'):
+                player.consecutive_games_on = 0
+                print("Add consec!")
+            # if not hasattr(player, 'manual_game'):
+            #     player.manual_game = False
 
 
-        if not hasattr(player, 'hunger'):
-            player.hunger = player.ability
-        if not hasattr(player, 'old_hunger'):
-            player.old_hunger = 0
-        if not hasattr(player, 'mean_game_abs'):
-            player.mean_game_abs = player.ability
+            if not hasattr(player, 'hunger'):
+                player.hunger = player.ability
+            if not hasattr(player, 'old_hunger'):
+                player.old_hunger = 0
+            if not hasattr(player, 'mean_game_abs'):
+                player.mean_game_abs = player.ability
 
-    # backwards compatibility code
+        # backwards compatibility code
 
-        if not hasattr(player, 'membership'):
+            if not hasattr(player, 'membership'):
+                player.membership = "Member (incl. feathers)"
+            else:
+                pass
+            if not hasattr(player, 'money_owed'):
+                player.money_owed = 0
+            if not hasattr(player, "paid_tonight"):
+                player.paid_tonight = True
+            if not hasattr(player, 'keep_on'):
+                player.keep_on = False
+
+            if not hasattr(player, 'desert'):
+                player.desert = 0
+            if not hasattr(player, 'old_desert'):
+                player.old_desert = 0
+
+            if not hasattr(player, 'partner_histories'):
+                player.partner_histories = defaultdict(float)
+                player.opp_histories = defaultdict(float)
+
+                player.old_partner_histories = defaultdict(float)
+                player.old_opp_histories = defaultdict(float)
+
+            if not hasattr(player, 'court_2_attr'):
+                player.court_2_attr = 0
+            if not hasattr(player, 'old_court_2_attr'):
+                player.old_court_2_attr = 0
+
+            if not hasattr(player, 'fitness'):
+                player.fitness = 2
+
+            if not hasattr(player, 'first_night'):
+                player.first_night = False
+
+            # if hasattr(player, 'new_ability'):
+            #     player.ability = player.new_ability
+            # if hasattr(player, 'new_ability'): # TEMPORARY
+            #     player.new_ability = player.ability
+
+            if not hasattr(player, 'ability_history'):
+                player.ability_history = [player.ability]
+            #
+            # if hasattr(player, 'ability_history'): # TEMPORARY
+            #     player.ability_history = [player.ability]
+
+            if not hasattr(player, 'affinity_for_newbies'):
+                if player.name in ("Henry", "David"):
+                    player.affinity_for_newbies = True
+                else:
+                    player.affinity_for_newbies = False
+
+            if not hasattr(player, 'surname'):
+                player.surname = ""
+                player.mobile_no = ""
+                player.email_address = ""
+
+            if len(player.ability_history) == 0:
+                player.ability_history = [player.ability]
+                print("Added hist!")
+
+            # Grandfather in new affinities
+            temp_partners = []
+            for name in player.partner_affinities:
+                if isinstance(name, tuple): # i.e. already updated
+                    temp_partners.append(name)
+                elif isinstance(name, str): # if string, add "Medium" level
+                    temp_partners.append((name, "Medium"))
+                else:
+                    print("Affinity Error!")
+            player.partner_affinities = temp_partners
+
+            temp_opps = []
+            for name in player.opponent_affinities:
+                if isinstance(name, tuple): # i.e. already updated
+                    temp_opps.append(name)
+                elif isinstance(name, str): # if string, add "Medium" level
+                    temp_opps.append((name, "Medium"))
+                else:
+                    print("Affinity Error!")
+            player.opponent_affinities = temp_opps
+
+
+
+    except FileNotFoundError:
+        every_player = [Aaron, Andrew, Amanda, Anna, Barry, Beth, Bill, Bob, Caleb,
+                    Calvin, Cindy, Charles, David, Derek, Denise, Doris, Edward,
+                    Elliot, Emma, Erin, Fiona, Felicity, Flynn, Fred, Gary,
+                    George, Georgina, Gordon, Hannah, Harry, Heather, Hunter,
+                    Ian, Igor, Indiana, Isaac]
+
+        for player in every_player:
             player.membership = "Member (incl. feathers)"
-        else:
-            pass
-        if not hasattr(player, 'money_owed'):
-            player.money_owed = 0
-        if not hasattr(player, "paid_tonight"):
-            player.paid_tonight = True
-        if not hasattr(player, 'keep_on'):
-            player.keep_on = False
-
-        if not hasattr(player, 'desert'):
-            player.desert = 0
-        if not hasattr(player, 'old_desert'):
-            player.old_desert = 0
-
-        if not hasattr(player, 'partner_histories'):
-            player.partner_histories = defaultdict(float)
-            player.opp_histories = defaultdict(float)
-
-            player.old_partner_histories = defaultdict(float)
-            player.old_opp_histories = defaultdict(float)
-
-        if not hasattr(player, 'court_2_attr'):
-            player.court_2_attr = 0
-        if not hasattr(player, 'old_court_2_attr'):
-            player.old_court_2_attr = 0
-
-        if not hasattr(player, 'fitness'):
-            player.fitness = 2
-
-        if not hasattr(player, 'first_night'):
-            player.first_night = False
-
-        # if hasattr(player, 'new_ability'):
-        #     player.ability = player.new_ability
-        # if hasattr(player, 'new_ability'): # TEMPORARY
-        #     player.new_ability = player.ability
-
-        if not hasattr(player, 'ability_history'):
-            player.ability_history = [player.ability]
-        #
-        # if hasattr(player, 'ability_history'): # TEMPORARY
-        #     player.ability_history = [player.ability]
-
-        if not hasattr(player, 'affinity_for_newbies'):
-            if player.name in ("Henry", "David"):
-                player.affinity_for_newbies = True
-            else:
-                player.affinity_for_newbies = False
 
 
-
-        # Grandfather in new affinities
-        temp_partners = []
-        for name in player.partner_affinities:
-            if isinstance(name, tuple): # i.e. already updated
-                temp_partners.append(name)
-            elif isinstance(name, str): # if string, add "Medium" level
-                temp_partners.append((name, "Medium"))
-            else:
-                print("Affinity Error!")
-        player.partner_affinities = temp_partners
-
-        temp_opps = []
-        for name in player.opponent_affinities:
-            if isinstance(name, tuple): # i.e. already updated
-                temp_opps.append(name)
-            elif isinstance(name, str): # if string, add "Medium" level
-                temp_opps.append((name, "Medium"))
-            else:
-                print("Affinity Error!")
-        player.opponent_affinities = temp_opps
+    """Ditto but for session data"""
+    try:
+        session_data = open('badminton_session_data.obj', 'rb')
+        all_sessions = pickle.load(session_data)
+        session_data.close()
+    except FileNotFoundError:
+        all_sessions = b_sessions.all_sessions
 
 
+    all_current_players = []
+    # player not in all_current_players would duplicate it
+    absent_players = [player for player in every_player if player.name not in
+                      [player.name for player in all_current_players]]
 
-except FileNotFoundError:
-    every_player = [Aaron, Andrew, Amanda, Anna, Barry, Beth, Bill, Bob, Caleb,
-                Calvin, Cindy, Charles, David, Derek, Denise, Doris, Edward,
-                Elliot, Emma, Erin, Fiona, Felicity, Flynn, Fred, Gary,
-                George, Georgina, Gordon, Hannah, Harry, Heather, Hunter,
-                Ian, Igor, Indiana, Isaac]
-
-    for player in every_player:
-        player.membership = "Member (incl. feathers)"
-
-
-"""Ditto but for session data"""
-try:
-    session_data = open('badminton_session_data.obj', 'rb')
-    all_sessions = pickle.load(session_data)
-    session_data.close()
-except FileNotFoundError:
-    all_sessions = b_sessions.all_sessions
-
-
-
-all_current_players = []
-# player not in all_current_players would duplicate it
-absent_players = [player for player in every_player if player.name not in
-                  [player.name for player in all_current_players]]
-
-# Bench starts full
-bench = all_current_players[:]
+    # Bench starts full
+    bench = all_current_players[:]
 
 # fee structure
 fee_structure = {("Casual", 1): 5, ("Casual", 3): 10,
@@ -1772,27 +1806,26 @@ stop_generation = False
 
 #fake_players = False
 
-def init_fake_players(num):
+# def init_fake_players(num):
+
+if fake_players:
     every_player = []
 
-    for i in range(num):
+    for i in range(18):
         ability = 10 * random.random()
         name = str(round(ability, 2))
         new_player = Player(name, "Male", ability)
         every_player.append(new_player)
 
     all_current_players = []
+    bench = []
     # player not in all_current_players would duplicate it
     absent_players = [player for player in every_player if player.name not in
                       [player.name for player in all_current_players]]
 
+    print(len(absent_players))
+
+
     # Bench starts full
-    bench = all_current_players[:]
-
-if fake_players:
-    init_fake_players(18)
-
-
-
 
 

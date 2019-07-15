@@ -25,7 +25,7 @@ class Application(tk.Tk):
 
         # A (probably unPythonic) way of randomly loading the bench
         self.test_mode = False
-        self.init_test_players = 15
+        self.init_test_players = 14
 
 
         self.title("Badminton Matchmaker")
@@ -203,13 +203,22 @@ class Application(tk.Tk):
         if self.test_mode:
             self.start_in_test_mode(self.init_test_players)
 
+        # if "fake players"
+        if b_scorer.fake_players:
+            for player in b_scorer.absent_players:
+                b_scorer.add_player(player)
+                self.add_bench_menus(player)
+                self.colour_dict = b_scorer.colour_sorter(
+                    b_scorer.all_current_players)
+
+
 
         # If program crashed or exited otherwise normally, reload all data
         try:
             pickle_in = open("board_data.obj", "rb")
             #board_data = {}
             board_data = pickle.load(pickle_in)
-        except FileNotFoundError:
+        except (FileNotFoundError, EOFError):
             board_data = {}
 
         try:
@@ -255,6 +264,7 @@ class Application(tk.Tk):
         self.update_board()
 
     def start_in_test_mode(self, max):
+
 
         # print("Start session, before init")
         # print(len(b_scorer.every_player))
@@ -414,6 +424,14 @@ class Application(tk.Tk):
 
 
     def confirm_quit(self):
+
+        if b_scorer.fake_players:
+            pickle_in = open('board_data.obj', 'wb')
+            self.board_data = {}
+            pickle.dump(self.board_data, pickle_in)
+            pickle_in.close()
+            self.destroy()
+            return
 
         if not self.test_mode:
             answer = tk.messagebox.askokcancel("Confirm Quit",
@@ -1122,7 +1140,10 @@ class PlayerStats(tk.Toplevel):
         # for distinguishing titles and labels
         self.label_font = ('Helvetica', 10, 'bold')
 
-        self.name_label = ttk.Label(self, text="Name")
+        self.name_label = ttk.Label(self, text="First Name")
+        self.surname_label = ttk.Label(self, text="Surname")
+        self.mobile_label = ttk.Label(self, text="Mobile No")
+        self.email_label = ttk.Label(self, text="Email Address")
         self.sex_label = ttk.Label(self, text="Sex")
         self.ability_label = ttk.Label(self, text="Ability (1-10)")
         self.fitness_label = ttk.Label(self, text = "Fitness (1-3)")
@@ -1160,6 +1181,16 @@ class PlayerStats(tk.Toplevel):
                                       self.del_affinity("opponent"))
 
         self.name_entry = ttk.Entry(self, width=11)
+        self.surname_entry = ttk.Entry(self, width=11)
+        self.mobile_entry = ttk.Entry(self,width=8)
+
+        self.email_entry = ttk.Entry(self, width=8)
+        self.view_details_button = ttk.Button(self, text="View with password",
+                                            command=lambda:
+                                            self.view_personal_details())
+        self.password_entry = ttk.Entry(self, width=3, show="*")
+
+
         self.sex_combobox = ttk.Combobox(self, width=8,
                                          values=["Male", "Female", "Other"],
                                          state='readonly')
@@ -1230,6 +1261,12 @@ class PlayerStats(tk.Toplevel):
 
         if not self.new:
             self.name_entry.insert(0, player.name)
+            self.surname_entry.insert(0, player.surname)
+
+            if self.player.mobile_no != "":
+                self.mobile_entry.insert(0, "[HIDDEN]")
+            if self.player.email_address != "":
+                self.email_entry.insert(0, "[HIDDEN]")
 
             # Should be able to do this more succinctly
             if self.player.sex == "Male":
@@ -1326,58 +1363,95 @@ class PlayerStats(tk.Toplevel):
 
         self.name_label.grid(column=0, row=1)
         self.name_entry.grid(column=1, row=1, columnspan=3, sticky='ew')
-        self.sex_label.grid(column=0, row=2)
-        self.sex_combobox.grid(column=1, row=2, columnspan=3, sticky='ew')
-        self.ability_label.grid(column=0, row=3)
+
+        self.surname_label.grid(column=0, row=2)
+        self.surname_entry.grid(column=1, row=2, columnspan=3, sticky='ew')
+
+        self.email_label.grid(column=0, row=3)
+        self.email_entry.grid(column=1, row=3, columnspan=3, sticky='ew')
+        #self.view_email_button.grid(column=3, row=3)
+
+        self.mobile_label.grid(column=0, row=4)
+        self.mobile_entry.grid(column=1, row=4, columnspan=3, sticky='ew')
+
+
+        self.sex_label.grid(column=0, row=5)
+        self.sex_combobox.grid(column=1, row=5, columnspan=3, sticky='ew')
+        self.ability_label.grid(column=0, row=6)
         #self.ability_combobox.grid(column=1, row=3, columnspan=3, sticky='ew')
-        self.new_ability_entry.grid(column=1, row=3, columnspan=3, sticky='ew')
-        self.fitness_label.grid(column=0, row=4)
-        self.fitness_combobox.grid(column=1, row=4, columnspan=3, sticky='ew')
-        self.membership_label.grid(column=0, row = 5)
-        self.membership_cbox.grid(column=1, row = 5, columnspan=3, sticky='ew')
-        self.owed_label.grid(column = 0, row = 6)
-        self.owed_entry.grid(column = 1, row = 6)
-        self.pay_owed_button.grid(column = 2, row = 6)
-        self.partner_aff_label.grid(column=0, row=7)
-        self.partner_aff_box.grid(column=1, row=7, columnspan=2, sticky='ew')
-        self.partner_aff_level_box.grid(column=3, row=7, sticky='ew')
-        self.new_partner_aff.grid(column=1, row=8, sticky='ew')
-        self.save_par_aff_butn.grid(column=2, row=8, sticky='ew')
-        self.del_partner_aff.grid(column=3, row=8, sticky='ew')
-        self.opp_aff_label.grid(column=0, row=9)
-        self.opp_aff_box.grid(column=1, row=9, columnspan=2, sticky='ew')
-        self.opp_aff_level_box.grid(column=3, row=9, sticky='ew')
-        self.new_opp_aff.grid(column=1, row=10, sticky='ew')
-        self.save_opp_aff_butn.grid(column=2, row=10, sticky='ew')
-        self.del_opp_aff.grid(column=3, row=10,  sticky='ew')
+        self.new_ability_entry.grid(column=1, row=6, columnspan=3, sticky='ew')
+        self.fitness_label.grid(column=0, row=7)
+        self.fitness_combobox.grid(column=1, row=7, columnspan=3, sticky='ew')
+        self.membership_label.grid(column=0, row = 8)
+        self.membership_cbox.grid(column=1, row = 8, columnspan=3, sticky='ew')
+        self.owed_label.grid(column = 0, row = 9)
+        self.owed_entry.grid(column = 1, row = 9)
+        self.pay_owed_button.grid(column = 2, row = 9)
+        self.partner_aff_label.grid(column=0, row=10)
+        self.partner_aff_box.grid(column=1, row=10, columnspan=2, sticky='ew')
+        self.partner_aff_level_box.grid(column=3, row=10, sticky='ew')
+        self.new_partner_aff.grid(column=1, row=11, sticky='ew')
+        self.save_par_aff_butn.grid(column=2, row=11, sticky='ew')
+        self.del_partner_aff.grid(column=3, row=11, sticky='ew')
+        self.opp_aff_label.grid(column=0, row=12)
+        self.opp_aff_box.grid(column=1, row=12, columnspan=2, sticky='ew')
+        self.opp_aff_level_box.grid(column=3, row=12, sticky='ew')
+        self.new_opp_aff.grid(column=1, row=13, sticky='ew')
+        self.save_opp_aff_butn.grid(column=2, row=13, sticky='ew')
+        self.del_opp_aff.grid(column=3, row=13,  sticky='ew')
 
         # Games played. Irrelevant for new players
         if not self.new:
-            self.aff_newbie_label.grid(column=0, row=11)
-            self.aff_newbie_cbox.grid(column=1, row=11, sticky='ew')
+            # self.email_entry.grid(column=1, row=3, columnspan=2, sticky='ew')
+            # # self.view_email_button.grid(column=3, row=
+            # self.mobile_entry.grid(column=1, row=4, columnspan=2, sticky='ew')
+            if (self.player.email_address != "") or (self.player.mobile_no
+                                                     !=""):
 
-            self.games_played_label.grid(column=0, row=12)
-            self.games_played_number.grid(column=1, row=12)
+                self.view_details_button.grid(column=3, row=3)
+                self.password_entry.grid(column=3, row=4, sticky='ew')
+
+            self.aff_newbie_label.grid(column=0, row=14)
+            self.aff_newbie_cbox.grid(column=1, row=14, sticky='ew')
+
+            self.games_played_label.grid(column=0, row=15)
+            self.games_played_number.grid(column=1, row=15)
             # self.late_penalty_label.grid(column=0, row=12)
             # self.late_penalty_entry.grid(column=1, row=12)
             # self.games_total_label.grid(column=0, row=13)
             # self.games_total_number.grid(column=1, row=13)
-            self.games_off_label.grid(column=0, row=13)
-            self.games_off_number.grid(column=1, row=13)
-            self.games_on_label.grid(column=0, row=14)
-            self.games_on_number.grid(column=1, row=14)
-            self.desert_label.grid(column=0, row=15)
-            self.desert_display.grid(column=1, row=15)
-            self.hunger_label.grid(column=0, row=16)
-            self.hunger_value.grid(column=1, row=16)
-            self.game_history_label.grid(column=0, row=17)
-            self.game_number_combo.grid(column=1, row=17)
-            self.single_game_label.grid(column=0, row=18)
-            self.played_with_label.grid(column=1, row=18)
-            self.played_against_label.grid(column=1, row=19)
+            self.games_off_label.grid(column=0, row=16)
+            self.games_off_number.grid(column=1, row=16)
+            self.games_on_label.grid(column=0, row=17)
+            self.games_on_number.grid(column=1, row=17)
+            self.desert_label.grid(column=0, row=18)
+            self.desert_display.grid(column=1, row=18)
+            self.hunger_label.grid(column=0, row=19)
+            self.hunger_value.grid(column=1, row=19)
+            self.game_history_label.grid(column=0, row=20)
+            self.game_number_combo.grid(column=1, row=20)
+            self.single_game_label.grid(column=0, row=21)
+            self.played_with_label.grid(column=1, row=21)
+            self.played_against_label.grid(column=1, row=22)
 
 
-        self.save_player_button.grid(column=1, row=21, columnspan=3)
+        self.save_player_button.grid(column=1, row=23, columnspan=3)
+
+    def view_personal_details(self):
+
+        if self.password_entry.get() == "python":
+            self.email_entry.delete(0, "end")
+            self.email_entry.insert(0, self.player.email_address)
+
+            self.mobile_entry.delete(0, "end")
+            self.mobile_entry.insert(0, self.player.mobile_no)
+        elif self.password_entry.get() == "":
+            tk.messagebox.showinfo("Please enter password", "Please enter the password into the entry box below.")
+        else:
+            tk.messagebox.showerror("Incorrect password",
+                                   "The password you entered was not "
+                                   "correct.")
+
 
     def game_number_config(self):
         if self.player.total_games == 0:
@@ -1589,6 +1663,17 @@ class PlayerStats(tk.Toplevel):
         create a new player and add them to bench"""
 
         name = self.name_entry.get()
+        surname = self.surname_entry.get()
+
+        if self.email_entry.get() != "[HIDDEN]":
+            email_address = self.email_entry.get()
+        else:
+            email_address = "unchanged"
+        if self.mobile_entry.get() != "[HIDDEN]":
+            mobile_no = self.mobile_entry.get()
+        else:
+            mobile_no = "unchanged"
+
         # Check if name is already taken, unless it's already this name
         if not self.new and self.player.name == name:
             pass
@@ -1636,6 +1721,9 @@ class PlayerStats(tk.Toplevel):
         if self.new:
 
             New_Player = b_scorer.Player(name, sex, ability)
+            New_Player.surname = surname
+            New_Player.email_address = email_address
+            New_Player.mobile_no = mobile_no
             New_Player.player_notes = notes
             New_Player.partner_affinities = self.partner_affs
             New_Player.opponent_affinities = self.opp_affs
@@ -1710,6 +1798,11 @@ class PlayerStats(tk.Toplevel):
             self.player.player_notes = notes
             self.player.membership = membership
 
+            if email_address != "unchanged":
+                self.player.email_address = email_address
+            if mobile_no != "unchanged":
+                self.player.mobile_no = mobile_no
+
             if newbie_aff == "True":
                 self.player.affinity_for_newbies = True
             else:
@@ -1744,6 +1837,12 @@ class PlayerStats(tk.Toplevel):
         self.controller.update_board()
 
         self.destroy()
+
+# class PasswordInput(tk.Toplevel):
+#     def __init__(self, controller):
+#         tk.Toplevel.__init__(self,controller):
+#
+
 
 class ResultsInput(tk.Toplevel):
     def __init__(self, controller, session):
