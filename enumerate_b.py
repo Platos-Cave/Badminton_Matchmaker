@@ -209,7 +209,7 @@ scores_dict = {}
 
 score_num = 0
 
-def score_court(court, trial_players, explain = False):
+def score_court(court, trial_players, unpack=True, explain = False):
     ''' Returns the "score" of a game, where "trial_players" is a list of
      player objects and "court" is a pair of tuples, representing indices
      of those players'''
@@ -219,8 +219,11 @@ def score_court(court, trial_players, explain = False):
     score = 0
     # Create the court using the indices from "court" on "trial_players"
     # Unpacked for easier referencing
-    new_court = [trial_players[court[0][0]], trial_players[court[0][1]],
+    if unpack:
+        new_court = [trial_players[court[0][0]], trial_players[court[0][1]],
                  trial_players[court[1][0]], trial_players[court[1][1]]]
+    else:
+        new_court = court
 
     #############################
     # for player in new_court:
@@ -499,47 +502,11 @@ def find_best_game(players, courts, benched = [], scored=False, log=False):
           (players[best_game[i][1][0]],
            players[best_game[i][1][1]])) for i in range(courts)]
 
-    # For "tolerance"
-    tolerance_score = 0
-
-    for player in players:
-        # games with more deserving players -> lower cost
-        # tricky to come up with. Convoluted way of keeping sign.
-        tolerance_score -= 10 * ((abs(player.desert) ** 1.5) * sign(
-            player.desert))
-        # if player.name == "Henry":
-        #     print(player.desert)
-        #     print(10 * ((abs(player.desert) ** 1.5) * sign(
-        #     player.desert)))
-
-
-        # games with players on more times in a row -> higher cost
-        # assumption that stronger players = fitter = less tired?
-
-        # rudimetary fitness. todo: turn into nice equation
-
-        # should multiplier be different? it's not apparent it should be
-
-        if player.fitness == 1:
-            mult = 5
-            exp = 2
-        elif player.fitness == 3:
-            mult = 5
-            exp = 1.25
-        else:
-            mult = 5
-            exp  = 1.5
-
-        tolerance_score += mult*(
-                player.consecutive_games_on**exp)
-
-        #Keep "hungry" players on
-        tolerance_score -= mult*player.hunger
 
         # fraction ?
 
+    tolerance_score = tolerance_cost(players)
     lowest_score += tolerance_score
-
     # Get a bonus for having players with an affinity be on or be off together
     bench_score = (bench_cost(benched))*(0.5*scoring_vars[('Affinity',profile)])
     courts_score = (bench_cost(players)) * (0.3 * scoring_vars[('Affinity',
@@ -563,6 +530,42 @@ def find_best_game(players, courts, benched = [], scored=False, log=False):
         return best_players
     if scored: # for finding more
         return (best_players, lowest_score, tolerance_score, bench_score, courts_score)
+
+def tolerance_cost(players):
+    tolerance_score = 0
+    for player in players:
+        # games with more deserving players -> lower cost
+        # tricky to come up with. Convoluted way of keeping sign.
+        tolerance_score -= 10 * ((abs(player.desert) ** 1.5) * sign(
+            player.desert))
+        # if player.name == "Henry":
+        #     print(player.desert)
+        #     print(10 * ((abs(player.desert) ** 1.5) * sign(
+        #     player.desert)))
+
+        # games with players on more times in a row -> higher cost
+        # assumption that stronger players = fitter = less tired?
+
+        # rudimetary fitness. todo: turn into nice equation
+
+        # should multiplier be different? it's not apparent it should be
+
+        if player.fitness == 1:
+            mult = 5
+            exp = 2
+        elif player.fitness == 3:
+            mult = 5
+            exp = 1.25
+        else:
+            mult = 5
+            exp = 1.5
+
+        tolerance_score += mult * (
+                player.consecutive_games_on ** exp)
+
+        # Keep "hungry" players on
+        tolerance_score -= mult * player.hunger
+    return tolerance_score
 
 def bench_cost(benched):
     # O(n**2), can do better? Not too important for these levels of n

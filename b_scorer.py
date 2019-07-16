@@ -14,6 +14,7 @@ from collections import defaultdict
 from itertools import combinations
 import new_smart_shuffle as nss
 import genetic
+import genetic2
 from math import log
 
 #easily togglable test-mode with players with randomly created abilities
@@ -644,6 +645,14 @@ def sort_by_deservedness(players, num):
 # Make work for multiple versions
 def generate_new_game():
 
+    for court in courts:
+        if court.manual:
+            for player in court.spaces:
+                if player:
+                    player.keep_on = False
+                    player.keep_off = True
+
+
     """Find the best game possible, then add those players to the courts"""
 
     # Quick and dirty rule to always start with random shuffle, then use
@@ -652,18 +661,19 @@ def generate_new_game():
                              enumerate_b.profile]
     if profile == 0:
         players = select_players("Random", all_current_players, court_count)
-        best_game = (enumerate_b.find_best_game(players, courts=court_count))
+        games = (enumerate_b.find_best_game(players, courts=court_count,
+                                            scored=True))
+        print("Score of random", (games[1] - games[2] + games[3] + games[4]))
+        best_game = games[0]
+        #best_game = (enumerate_b.find_best_game(players, courts=court_count))
+
+        #todo: remove temp
 
 
     elif profile == 1:
         players = select_players("Segregated", all_current_players,
                                  court_count)
         best_game = (enumerate_b.find_best_game(players, courts=court_count))
-    elif profile == 4:
-
-        best_game = enumerate_b.find_best_exhaustive(all_current_players, 10, 2)
-        place_on_courts(best_game)
-        return
 
     elif profile == 3:
 
@@ -774,6 +784,31 @@ def generate_new_game():
         # return
         # best_game = enumerate_b.smart_shuffle_trial(all_current_players,
         #                                  courts=court_count)
+
+    elif profile == 4: # Genetic full
+
+        print("Genetic full!")
+        greens, oranges, reds = smart_select(all_current_players, court_count)
+        players = (greens, oranges, reds)
+
+        max_time_ = (enumerate_b.scoring_vars["Trials",
+                                             enumerate_b.profile])*0.04
+        print(max_time_)
+
+        bg = (genetic2.run_ga(players, cands=1, court_num=court_count,
+        mutRate=0.2,
+                              max_time=max_time_
+                              )).players_on_court
+        #print([p.name for p in best_game.players_on_court])
+        best_game = [((bg[(i*4)],bg[(i*4)+1]),(bg[(i*4)+2],bg[(i*4)+3])) for
+                     i in
+                     range(court_count)]
+        place_on_courts(best_game)
+
+
+        # best_game = enumerate_b.find_best_exhaustive(all_current_players, 10, 2)
+        # place_on_courts(best_game)
+        # return
 
 
     elif profile == 2: # Smart Shuffle

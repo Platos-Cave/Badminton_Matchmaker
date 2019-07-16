@@ -1,5 +1,10 @@
 import random
 import time
+from enumerate_b import score_court, tolerance_cost, bench_cost
+from math import log
+import sys
+
+score_dict = {}
 
 class Candidate:
     '''Representing a combination of players, to be tested'''
@@ -44,7 +49,7 @@ class Candidate:
         # print(self.red_bench)
         # print('')
 
-    def generate_mutation(self):
+    def generate_mutation(self, mutrate):
 
         mutated = False
 
@@ -58,22 +63,27 @@ class Candidate:
         # print('\n',self.swappable)
         # print(self.all_swappable)
         # print(self.players_on_court)
+        muts = 0
 
         for i, plyr in enumerate(self.players_on_court):
             if random.random() < self.mutationRate:
                 mutated = True
                 index_1 = i
-                if plyr in self.greens:
+                if self.all_swappable[i] in self.greens:
+                    # should only be swappable with other players on the
+                    # court - not to the bench
                     while True:
                         index_2 = random.randint(0,len(self.swappable)-1)
                         if index_1 != index_2:
                             break
-                if plyr in self.oranges:
+                elif self.all_swappable[i] in self.oranges:
                     while True:
                         index_2 = random.randint(0,len(self.all_swappable)-1)
                         if index_1 != index_2:
                             break
-
+                else:
+                    print("Not in either??")
+                    sys.exit(1)
                 # print(index_1)
                 # print(index_2)
 
@@ -85,6 +95,12 @@ class Candidate:
 
                 self.all_swappable[index_1] = second_swap
                 self.all_swappable[index_2] = first_swap
+
+                muts +=1
+
+
+
+
 
         #print(self.all_swappable)
 
@@ -103,15 +119,35 @@ class Candidate:
 
             for remainer in final:
                 self.new_orange_bench.add(remainer)
+                if (remainer in self.greens):
+                    print("Problem!")
+                    print("no muts", muts)
+                    print(index_1, index_2)
+                    print(remainer.name)
+                    print([p.name for p in self.swappable])
+                    print([p.name for p in self.all_swappable])
+                    sys.exit()
+            # print("Mutation!")
+            # print([p.name for p in poc])
+            # for court in self.new_courts:
+            #     for side in court:
+            #         for plyr in side:
+            #             print(plyr.name)
+            # import sys
+            # sys.exit()
+
+
+
 
             return Candidate(self.population, no_courts=self.no_courts, attrs=(
                 self.new_courts, self.new_orange_bench,
-                self.red_bench), mutation=True, players_on_court = poc)
+                self.red_bench), mutation=True, mutationRate = mutrate,
+                             players_on_court = poc)
 
         else:
             return None
 
-    def get_fitness(self):
+    def get_fitness_OLD(self):
         # Fitness of the candidate
 
         if self.tried:
@@ -121,6 +157,7 @@ class Candidate:
             #print(self.players_on_court)
             for i in range(self.no_courts):
                 court = self.players_on_court[(i*4):(i*4)+4]
+                print("Court is", court)
                 # print(court)
                 self.fitness -= 25 * (((court[0] + court[1]) - (court[2] +
                                                                 court[
@@ -129,6 +166,45 @@ class Candidate:
             self.tried = True
             return self.fitness
 
+    def get_fitness(self, verbose=False):
+        if (self.tried) and not verbose:
+            return self.fitness
+        else:
+            self.fitness = 0
+            scores = 0
+            for i in range(self.no_courts):
+                court = self.players_on_court[(i*4):(i*4)+4]
+
+                set_court = frozenset([frozenset([court[0], court[1]]),
+                                      frozenset([court[2], court[3]])])
+                try:
+                    score = score_dict[set_court]
+                except KeyError:
+                    score = score_court(court, trial_players=None, unpack=False)
+                    score_dict[set_court] = score
+
+                scores -= score
+
+            self.fitness += scores
+
+            self.fitness -= tolerance_cost(self.players_on_court)
+            bench = self.orange_bench.union(self.red_bench)
+            self.fitness += bench_cost(list(bench))
+            self.fitness += bench_cost(self.players_on_court)
+
+            if verbose:
+                print("Court Scores", -scores)
+                print(tolerance_cost(self.players_on_court))
+                print(bench_cost(list(bench)))
+                print(bench_cost(self.players_on_court))
+                print("")
+
+            self.tried = True
+
+            return self.fitness
+
+
+
 def gen_population(court_num=3):
     population = [[10*random.random() for _ in range(court_num*2)],
                   [10*random.random() for _ in range(court_num*4)],
@@ -136,7 +212,10 @@ def gen_population(court_num=3):
     return population
 
 
-def run_ga(population, court_num=3, cands=20, mutRate=0.01, max_time=2):
+def run_ga(population, court_num=3, cands=1, mutRate=0.1, max_time=2.5):
+
+    global score_dict
+    score_dict = {}
 
     # population = [[10*random.random() for _ in range(court_num*2)],
     #               [10*random.random() for _ in range(court_num*4)],
@@ -146,13 +225,15 @@ def run_ga(population, court_num=3, cands=20, mutRate=0.01, max_time=2):
     #Bob = Candidate(population, 3)
     # Jim = Candidate(population, 3)
     # Jim.get_fitness()
+    #global population
+    original_mut = mutRate
 
     candidates = [Candidate(population, no_courts=court_num,
                             mutationRate=mutRate) for i in range(cands)]
 
     t1 = time.time()
 
-    generations = 100000
+    generations = 100000000000
     trials = 0
 
     while trials < generations:
@@ -162,17 +243,30 @@ def run_ga(population, court_num=3, cands=20, mutRate=0.01, max_time=2):
 
         # mut_rate = starting_mut / mod
 
-        # if (trials%(mod) == 0):
-        #     print(f'\nGeneration {trials}')
-        #     for cand in candidates[:3]:
-        #          print(cand.fitness, [round(c,2) for c in \
-        #                  cand.players_on_court])
+        # if trials==1000:
+        #     mutRate = mutRate/5
+        mutRate = original_mut/log(trials + 2)
+
+
+        if (trials%(mod) == 0):
+
+            print(f'\nGeneration {trials}')
+            for cand in candidates[:3]:
+                print(cand.fitness, [c.name for c in \
+                          cand.players_on_court])
+                cand.get_fitness(verbose=True)
+                 # print(cand.fitness, [round(c,2) for c in \
+            print(len(score_dict.keys()))
+            print("Mutation Rate", mutRate)
+
+
+                 #         cand.players_on_court])
 
     # for i in range(1000):
         mutants = []
         for cand in candidates:
             for i in range(1):
-                mutant = cand.generate_mutation()
+                mutant = cand.generate_mutation(mutrate=mutRate)
                 if mutant:
                     mutants.append(mutant)
 
@@ -192,14 +286,15 @@ def run_ga(population, court_num=3, cands=20, mutRate=0.01, max_time=2):
         #print([cand.fitness for cand in candidates])
     t2 = time.time()
 
-    # print('\nDone!')
-    # print(candidates[0].players_on_court)
-    # print(candidates[0].fitness)
-    # print(f'Took {t2-t1}')
-    return candidates[0].fitness
+    print('\nDone!')
+    print([c.name for c in candidates[0].players_on_court])
+    print(candidates[0].fitness)
+    print(f'Took {t2-t1}')
+
+    return candidates[0]
 
 
-def run_experiment(experiments=10, trials=10 0):
+def run_experiment(experiments=10, trials=10):
     fitnesses = []
 
     single_pop = [gen_population(court_num=4) for i in range(trials)]
@@ -212,7 +307,7 @@ def run_experiment(experiments=10, trials=10 0):
         for j in range(trials):
             this_fitness += run_ga(court_num=4, max_time = max_time_,
                                    population=single_pop[i], cands=10,
-                                   mutRate=mutRate_)
+                                   mutRate=mutRate_).fitness
 
         fitness = this_fitness / trials
 
@@ -221,7 +316,7 @@ def run_experiment(experiments=10, trials=10 0):
 
     print(fitnesses)
 
-run_experiment()
+#run_experiment()
 
 
 

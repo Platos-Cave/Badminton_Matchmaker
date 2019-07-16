@@ -24,8 +24,8 @@ class Application(tk.Tk):
 
 
         # A (probably unPythonic) way of randomly loading the bench
-        self.test_mode = False
-        self.init_test_players = 14
+        self.test_mode = True
+        self.init_test_players = 6
 
 
         self.title("Badminton Matchmaker")
@@ -2068,7 +2068,8 @@ class GameStats(tk.Toplevel):
         self.trials_entry = ttk.Entry(self, width=5)
         self.shuffle_combo = ttk.Combobox(self, width=10, state = 'readonly',
                                           values=["Random", "Segregated",
-                                                  "Smart", "Genetic"])
+                                                  "Smart", "Genetic",
+                                                  "Genetic (Full)"])
 
         # not used ATM
         # self.default_button = ttk.Button(self, text="Return to Default",
