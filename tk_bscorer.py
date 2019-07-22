@@ -25,7 +25,7 @@ class Application(tk.Tk):
 
         # A (probably unPythonic) way of randomly loading the bench
         self.test_mode = True
-        self.init_test_players = 6
+        self.init_test_players = 12
 
 
         self.title("Badminton Matchmaker")

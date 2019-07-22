@@ -189,6 +189,7 @@ for i in range(1,4):
 
 
 
+
 ''' For a given combo (e.g. [0,1,6,7], score all three distinct combos
 (i.e. ((0,1),(6,7)), ((0,6),(1,7)) and ((0,7),(1,6))).
 Suppose the second combo had the lowest score, and that score was 8. 

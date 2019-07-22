@@ -187,17 +187,17 @@ class Candidate:
 
             self.fitness += scores
 
-            self.fitness -= tolerance_cost(self.players_on_court)
-            bench = self.orange_bench.union(self.red_bench)
-            self.fitness += bench_cost(list(bench))
-            self.fitness += bench_cost(self.players_on_court)
+            # self.fitness -= tolerance_cost(self.players_on_court)
+            # bench = self.orange_bench.union(self.red_bench)
+            # self.fitness += bench_cost(list(bench))
+            # self.fitness += bench_cost(self.players_on_court)
 
             if verbose:
                 print("Court Scores", -scores)
-                print(tolerance_cost(self.players_on_court))
-                print(bench_cost(list(bench)))
-                print(bench_cost(self.players_on_court))
-                print("")
+                # print(tolerance_cost(self.players_on_court))
+                # print(bench_cost(list(bench)))
+                # print(bench_cost(self.players_on_court))
+                # print("")
 
             self.tried = True
 
@@ -232,6 +232,8 @@ def run_ga(population, court_num=3, cands=1, mutRate=0.1, max_time=2.5):
                             mutationRate=mutRate) for i in range(cands)]
 
     t1 = time.time()
+    generation_times = 0
+
 
     generations = 100000000000
     trials = 0
@@ -258,26 +260,33 @@ def run_ga(population, court_num=3, cands=1, mutRate=0.1, max_time=2.5):
                  # print(cand.fitness, [round(c,2) for c in \
             print(len(score_dict.keys()))
             print("Mutation Rate", mutRate)
-
+        #t = time.perf_counter()
 
                  #         cand.players_on_court])
-
     # for i in range(1000):
         mutants = []
         for cand in candidates:
             for i in range(1):
+
                 mutant = cand.generate_mutation(mutrate=mutRate)
                 if mutant:
                     mutants.append(mutant)
 
+
         new_candidates = candidates[:]
 
+
         for mut in mutants:
+            t= time.perf_counter()
             if mut.get_fitness() not in [cand.get_fitness() for cand in candidates]:
                 new_candidates.append(mut)
+            tt = time.perf_counter()
+            generation_times += tt - t
 
         candidates = sorted(new_candidates, key=lambda x: x.get_fitness(),
                             reverse=True)[:cands]
+
+
 
         if (time.time() - t1) > max_time:
             # print(f"Finished at trial {trials}")
@@ -290,6 +299,7 @@ def run_ga(population, court_num=3, cands=1, mutRate=0.1, max_time=2.5):
     print([c.name for c in candidates[0].players_on_court])
     print(candidates[0].fitness)
     print(f'Took {t2-t1}')
+    print(f'Getting fitness took {generation_times}!')
 
     return candidates[0]
 
