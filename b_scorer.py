@@ -42,6 +42,10 @@ class Player:
         self.partner_affinities = partner_affinities
         self.opponent_affinities = opponent_affinities
 
+        # like an affinity, but for
+        self.leave_affs = []
+
+        # if True: put in game with new player at first opportunity
         self.affinity_for_newbies = False
         # membership status: Member or Casual. Had trouble making
         # backwards-compatible with pickle
@@ -151,6 +155,12 @@ class Player:
                 self.opponent_affinities = affs
             else:
                 return NameError
+
+    def add_leave_affinity(self, name):
+        self.leave_affs.append(name)
+
+    def del_leave_affinity(self, name):
+        self.leave_affs = [p for p in self.leave_affs if p != name]
 
 
     def update_game_count(self):
@@ -663,7 +673,7 @@ def generate_new_game():
         players = select_players("Random", all_current_players, court_count)
         games = (enumerate_b.find_best_game(players, courts=court_count,
                                             scored=True))
-        print("Score of random", (games[1] - games[2] + games[3] + games[4]))
+        # print("Score of random", (games[1] - games[2] + games[3] + games[4]))
         best_game = games[0]
         #best_game = (enumerate_b.find_best_game(players, courts=court_count))
 
@@ -702,7 +712,6 @@ def generate_new_game():
                 return False
         else:
 
-            ### TESTING GENETIC
             counter = 0
             generation = 0
 
@@ -722,6 +731,8 @@ def generate_new_game():
             t_gen = time.time()
 
             while counter < trials:
+                if stop_generation:
+                    return False
                 for comb in combs:
                     if frozenset(comb) in comb_scores.keys():
                         continue
@@ -1460,6 +1471,10 @@ def add_player(player):
             all_current_players)
         player.time_since_last = 1
 
+
+    # Give players easier games on their first round
+    player.hunger = -5
+
     player.penalty_games = average_games
     player.adjusted_games += average_games
     player.accumulate_fee()
@@ -1761,6 +1776,10 @@ if not fake_players:
                 player.mobile_no = ""
                 player.email_address = ""
 
+            if not hasattr(player, 'leave_affs'):
+                player.leave_affs = []
+                # print("Added leave affs!")
+
             if len(player.ability_history) == 0:
                 player.ability_history = [player.ability]
                 print("Added hist!")
@@ -1824,11 +1843,13 @@ fee_structure = {("Casual", 1): 5, ("Casual", 3): 10,
                  ("Member (no feathers)", 3): 3}
 
 # Hackish way of doing "boost", should be better organsied
+final_round_boost = False
 old_seg = False
 old_aff = False
 #for player in every_player:
 #    player.desert = 0
 stop_generation = False
+
 
 ### random trial stuff
 # from pprint import pprint
@@ -1848,7 +1869,7 @@ if fake_players:
 
     for i in range(18):
         ability = 10 * random.random()
-        name = str(round(ability, 2))
+        name = str(round(ability, 1))
         new_player = Player(name, "Male", ability)
         every_player.append(new_player)
 
@@ -1858,7 +1879,8 @@ if fake_players:
     absent_players = [player for player in every_player if player.name not in
                       [player.name for player in all_current_players]]
 
-    print(len(absent_players))
+    #print(len(absent_players))
+
 
 
     # Bench starts full

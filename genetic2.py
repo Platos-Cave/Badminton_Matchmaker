@@ -1,8 +1,9 @@
 import random
 import time
-from enumerate_b import score_court, tolerance_cost, bench_cost
+from enumerate_b import score_court, tolerance_cost, bench_cost, final_game_cost
 from math import log
 import sys
+import b_scorer
 
 score_dict = {}
 
@@ -187,10 +188,15 @@ class Candidate:
 
             self.fitness += scores
 
-            # self.fitness -= tolerance_cost(self.players_on_court)
-            # bench = self.orange_bench.union(self.red_bench)
-            # self.fitness += bench_cost(list(bench))
-            # self.fitness += bench_cost(self.players_on_court)
+            self.fitness -= tolerance_cost(self.players_on_court)
+            bench = self.orange_bench.union(self.red_bench)
+
+            if b_scorer.final_round_boost:
+                self.fitness += final_game_cost(list(bench))
+                self.fitness += final_game_cost(self.players_on_court)
+            else:
+                self.fitness += bench_cost(list(bench))
+                self.fitness += bench_cost(self.players_on_court)
 
             if verbose:
                 print("Court Scores", -scores)

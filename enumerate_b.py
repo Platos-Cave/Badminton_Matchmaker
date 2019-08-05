@@ -37,6 +37,7 @@ import datetime
 import time
 from numpy import sign
 from random import shuffle
+import b_scorer
 
 
 # The user can adjust the weightings of elements of score_courts()
@@ -405,9 +406,12 @@ def score_court(court, trial_players, unpack=True, explain = False):
 
 
     if explain:
-        print("There are {} women in this game, subtracting {} from the game "
-              "score".format(no_women, women_score))
-        print(score)
+        # print("There are {} women in this game, subtracting {} from the game "
+        #       "score".format(no_women, women_score))
+        # print(score)
+        print(f'Imbalance is {round(imbalance, 2)}')
+        print(f'Seg is {round(segregation,2)}')
+        print('')
 
     return score
 
@@ -509,10 +513,15 @@ def find_best_game(players, courts, benched = [], scored=False, log=False):
     tolerance_score = tolerance_cost(players)
     lowest_score += tolerance_score
     # Get a bonus for having players with an affinity be on or be off together
-    bench_score = (bench_cost(benched))*(0.5*scoring_vars[('Affinity',profile)])
-    courts_score = (bench_cost(players)) * (0.3 * scoring_vars[('Affinity',
-                                                           profile)])
 
+
+    if not b_scorer.final_round_boost:
+        bench_score = (bench_cost(benched))*(0.5*scoring_vars[('Affinity',profile)])
+        courts_score = (bench_cost(players)) * (0.3 * scoring_vars[('Affinity',
+                                                               profile)])
+    else:
+        bench_score = final_game_cost(benched)
+        courts_score = final_game_cost(players)
 
     lowest_score -= bench_score
     lowest_score -= courts_score
@@ -594,6 +603,17 @@ def bench_cost(benched):
                     break
 
     return cost
+
+def final_game_cost(players):
+    cost = 0
+    for player in players:
+        for other_player in players:
+            for aff in player.leave_affs:
+                if other_player.name == aff:
+                    cost += 100 # too much? too low?
+    # print("Bench cost", cost)
+    return cost
+
 
 
 #############

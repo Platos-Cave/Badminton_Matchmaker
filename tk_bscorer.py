@@ -746,6 +746,8 @@ class Application(tk.Tk):
             self.generator.start()
 
             self.start_button.config(text="Abort Generation")
+           #self.start_button.config(state="disabled")
+          
             self.start_button.config(command=self.stop_generation)
 
             # cancel for removing purposes
@@ -807,6 +809,7 @@ class Application(tk.Tk):
 
         b_scorer.old_seg = False
         b_scorer.old_aff = False
+        b_scorer.final_round_boost = False
 
 
 
@@ -852,7 +855,11 @@ class Application(tk.Tk):
                     else:
                         name_colour = "yellow"
                     name = b_scorer.courts[i].spaces[j].name
-                    font_size = 50 - 2*len(name) # buggy with names >=25 chars
+                    if len(name) < 10:
+                        font_size = 40 #50 - 2*len(name) # buggy with names >=25
+                    # chars
+                    else:
+                        font_size = 50 - 2*len(name)
                     new_font = "Helvetica", font_size, 'bold'
                     label.config(text=name, fg = name_colour, font = new_font)
 
@@ -1097,8 +1104,8 @@ class CourtFrame(tk.Frame):
 
 
         # padding creates a de facto border
-        self.labels[0].grid(row=0, column=0, sticky="nsew", padx=1, pady=1)
-        self.labels[1].grid(row=0, column=1, sticky="nsew", padx=1, pady=1)
+        self.labels[0].grid(row=0, column=0, sticky="nsew", padx=1, pady=5)
+        self.labels[1].grid(row=0, column=1, sticky="nsew", padx=1, pady=5)
         self.labels[2].grid(row=1, column=0, sticky="nsew", padx=1, pady=1)
         self.labels[3].grid(row=1, column=1, sticky="nsew", padx=1, pady=1)
 
@@ -1151,11 +1158,13 @@ class PlayerStats(tk.Toplevel):
         self.owed_label =  ttk.Label(self, text = "Money Owed ($)")
         self.partner_aff_label = ttk.Label(self, text="Partner Affinities")
         self.opp_aff_label = ttk.Label(self, text="Opponent Affinities")
+        self.leave_with_label = ttk.Label(self, text = "Leave-with Affinities")
         self.aff_newbie_label = ttk.Label(self, text = "Newbie Affinity")
         self.partner_aff_box = ttk.Combobox(self, width=8)
         self.partner_aff_level_box = ttk.Combobox(self, width=8, values=[
             "Low", "Medium", "High", "Maximum"], state='readonly')
         self.opp_aff_box = ttk.Combobox(self, width=8)
+        self.leave_with_box = ttk.Combobox(self, width =8)
         self.opp_aff_level_box = ttk.Combobox(self, width=8,
                                               values=["Low", "Medium",
                                                       "High", "Maximum"],
@@ -1165,6 +1174,8 @@ class PlayerStats(tk.Toplevel):
                                           command=self.new_partner_affinity)
         self.new_opp_aff = ttk.Button(self, text="New", width=4,
                                       command=self.new_opp_affinity)
+        self.new_leave_aff = ttk.Button(self, text="New", width=4,
+                                      command=self.new_leave_aff)
 
         self.save_par_aff_butn = ttk.Button(self, text="Save", width=5,
                                             command=lambda: self.save_affinity(
@@ -1172,6 +1183,11 @@ class PlayerStats(tk.Toplevel):
         self.save_opp_aff_butn = ttk.Button(self, text="Save", width=5,
                                             command=lambda: self.save_affinity(
                                                        "opponent"))
+        self.save_leave_aff_butn = ttk.Button(self, text="Save", width=5,
+                                            command=lambda: self.save_affinity(
+                                                       "leave"))
+
+
 
         self.del_partner_aff = ttk.Button(self, text="Delete", width=6,
                                           command=lambda:
@@ -1179,6 +1195,10 @@ class PlayerStats(tk.Toplevel):
         self.del_opp_aff = ttk.Button(self, text="Delete", width=6,
                                       command=lambda:
                                       self.del_affinity("opponent"))
+        self.del_leave_aff = ttk.Button(self, text="Delete", width=6,
+                command=lambda: self.delete_leave_aff())
+
+
 
         self.name_entry = ttk.Entry(self, width=11)
         self.surname_entry = ttk.Entry(self, width=11)
@@ -1256,6 +1276,7 @@ class PlayerStats(tk.Toplevel):
         # Should move
         self.partner_affs = []
         self.opp_affs = []
+        self.leave_affs = []
 
         # If current player, upload their existing stats
 
@@ -1304,6 +1325,9 @@ class PlayerStats(tk.Toplevel):
             self.opp_aff_box.config(values=[p[0] for p in
                                                 self.opp_affs])
 
+            self.leave_affs = self.player.leave_affs
+            self.leave_with_box.config(values=[p for p in self.leave_affs])
+
             if len(self.partner_affs) > 0:
                 self.partner_aff_box.current(0)
                 self.switch_aff("partner")
@@ -1313,6 +1337,9 @@ class PlayerStats(tk.Toplevel):
                 self.opp_aff_box.current(0)
                 self.switch_aff("opponent")
                 # self.opp_aff_level_box.current()
+
+            if len(self.leave_affs) > 0:
+                self.leave_with_box.current(0)
 
             self.partner_aff_box.bind("<<ComboboxSelected>>",
                                     lambda event: self.switch_aff("partner"))
@@ -1360,6 +1387,7 @@ class PlayerStats(tk.Toplevel):
                                         lambda
                                             event: self.update_game_display())
 
+        e = 2 #  extra lines
 
         self.name_label.grid(column=0, row=1)
         self.name_entry.grid(column=1, row=1, columnspan=3, sticky='ew')
@@ -1399,6 +1427,13 @@ class PlayerStats(tk.Toplevel):
         self.new_opp_aff.grid(column=1, row=13, sticky='ew')
         self.save_opp_aff_butn.grid(column=2, row=13, sticky='ew')
         self.del_opp_aff.grid(column=3, row=13,  sticky='ew')
+        self.leave_with_label.grid(column=0, row=14)
+        self.leave_with_box.grid(column=1, row=14, columnspan=3, sticky='ew')
+        self.new_leave_aff.grid(column=1, row=15, sticky='ew')
+        self.save_leave_aff_butn.grid(column=2, row=15, sticky='ew')
+        self.del_leave_aff.grid(column=3, row=15, sticky='ew')
+
+
 
         # Games played. Irrelevant for new players
         if not self.new:
@@ -1411,31 +1446,31 @@ class PlayerStats(tk.Toplevel):
                 self.view_details_button.grid(column=3, row=3)
                 self.password_entry.grid(column=3, row=4, sticky='ew')
 
-            self.aff_newbie_label.grid(column=0, row=14)
-            self.aff_newbie_cbox.grid(column=1, row=14, sticky='ew')
+            self.aff_newbie_label.grid(column=0, row=14+e)
+            self.aff_newbie_cbox.grid(column=1, row=14+e, sticky='ew')
 
-            self.games_played_label.grid(column=0, row=15)
-            self.games_played_number.grid(column=1, row=15)
+            self.games_played_label.grid(column=0, row=15+e)
+            self.games_played_number.grid(column=1, row=15+e)
             # self.late_penalty_label.grid(column=0, row=12)
             # self.late_penalty_entry.grid(column=1, row=12)
             # self.games_total_label.grid(column=0, row=13)
             # self.games_total_number.grid(column=1, row=13)
-            self.games_off_label.grid(column=0, row=16)
-            self.games_off_number.grid(column=1, row=16)
-            self.games_on_label.grid(column=0, row=17)
-            self.games_on_number.grid(column=1, row=17)
-            self.desert_label.grid(column=0, row=18)
-            self.desert_display.grid(column=1, row=18)
-            self.hunger_label.grid(column=0, row=19)
-            self.hunger_value.grid(column=1, row=19)
-            self.game_history_label.grid(column=0, row=20)
-            self.game_number_combo.grid(column=1, row=20)
-            self.single_game_label.grid(column=0, row=21)
-            self.played_with_label.grid(column=1, row=21)
-            self.played_against_label.grid(column=1, row=22)
+            self.games_off_label.grid(column=0, row=16+e)
+            self.games_off_number.grid(column=1, row=16+e)
+            self.games_on_label.grid(column=0, row=17+e)
+            self.games_on_number.grid(column=1, row=17+e)
+            self.desert_label.grid(column=0, row=18+e)
+            self.desert_display.grid(column=1, row=18+e)
+            self.hunger_label.grid(column=0, row=19+e)
+            self.hunger_value.grid(column=1, row=19+e)
+            self.game_history_label.grid(column=0, row=20+e)
+            self.game_number_combo.grid(column=1, row=20+e)
+            self.single_game_label.grid(column=0, row=21+e)
+            self.played_with_label.grid(column=1, row=21+e)
+            self.played_against_label.grid(column=1, row=22+e)
 
 
-        self.save_player_button.grid(column=1, row=23, columnspan=3)
+        self.save_player_button.grid(column=1, row=23+e, columnspan=3)
 
     def view_personal_details(self):
 
@@ -1524,6 +1559,12 @@ class PlayerStats(tk.Toplevel):
         """Simply clears the combobox"""
         self.opp_aff_box.delete(0, "end")
 
+    def new_leave_aff(self):
+        """Simply clears the combobox"""
+        self.leave_with_box.delete(0, "end")
+
+
+
     def save_affinity(self, side):
 
         # Need to organise this better?
@@ -1533,6 +1574,9 @@ class PlayerStats(tk.Toplevel):
             other_player = self.partner_aff_box.get()
         elif side == "opponent":
             other_player = self.opp_aff_box.get()
+        elif side == "leave":
+            other_player = self.leave_with_box.get()
+
 
         # Can't save your own name as affinity. Seems inconcise
         if self.new:
@@ -1601,6 +1645,19 @@ class PlayerStats(tk.Toplevel):
                         player.add_affinity("opponent", self.player.name, level)
                 self.player.add_affinity("opponent", other_player, level)
 
+        elif side == "leave":
+
+            self.leave_affs.append(other_player)
+
+            self.leave_with_box.config(values=[p[0] for p in
+                                            self.leave_affs])
+
+            if not self.new:
+                for player in b_scorer.every_player:
+                    if player.name == other_player:
+                        player.add_leave_affinity(self.player.name)
+                self.player.add_leave_affinity(other_player)
+
         player_saved = tk.messagebox.showinfo("Success",
                                               "Player's affinity added!",
                                               parent = self)
@@ -1620,6 +1677,7 @@ class PlayerStats(tk.Toplevel):
 
             elif side == "opponent":
                 other_player = self.opp_aff_box.get()
+
 
             # try:
             #     self.partner_affs.remove(other_player)
@@ -1656,6 +1714,36 @@ class PlayerStats(tk.Toplevel):
                 #  How many times do you need to delete an affinity from a
                 # new player?
                 print("I can't be bothered working this out")
+
+    def delete_leave_aff(self):
+        are_you_sure = tk.messagebox.askyesno("Are you sure?",
+                                              "Are you sure you want to "
+                                              "delete this affinity?",
+                                              parent=self)
+        if are_you_sure:
+            other_player = self.leave_with_box.get()
+
+            if not self.new:
+                try:
+                    self.player.del_leave_affinity(other_player)
+                except NameError:
+                    tk.messagebox.showerror("Error", "Error: Name not found")
+                    return
+
+                self.leave_affs = self.player.leave_affs
+                self.leave_with_box.config(values=[p for p in
+                                                    self.leave_affs])
+                self.leave_with_box.delete(0, "end")
+
+                for other in b_scorer.every_player:
+                    if other.name == other_player:
+                        try:
+                            other.del_leave_affinity(self.player.name)
+                        # In case it's new, or not there for some reason
+                        except NameError:
+                            print("Name problem removing affinity!")
+
+
 
     # New player creation should be in b_scorer.py
     def save_player(self):
@@ -1714,6 +1802,12 @@ class PlayerStats(tk.Toplevel):
                                     parent=self)
             return
 
+        if ability <0:
+            tk.messagebox.showerror("Error", "Abilities must be greater than "
+                                             "0.",
+                                    parent=self)
+            return
+
         #If the player is New:
         #Create the player, add them to "every player" and "absent players"
         #Then call the add_player function from b_scorer to add them
@@ -1727,6 +1821,8 @@ class PlayerStats(tk.Toplevel):
             New_Player.player_notes = notes
             New_Player.partner_affinities = self.partner_affs
             New_Player.opponent_affinities = self.opp_affs
+            New_Player.leave_affs = self.leave_affs
+
             New_Player.membership = membership
             b_scorer.every_player.append(New_Player)
             b_scorer.absent_players.append(New_Player)
@@ -1746,6 +1842,9 @@ class PlayerStats(tk.Toplevel):
                 for aff in self.opp_affs:
                     if aff[0] == player.name:
                         player.add_affinity("opponent", name, aff[1])
+                for aff in self.leave_affs:
+                    if aff == player.name:
+                        player.add_leave_affinity(name)
 
                     # print(player.opponent_affinities)
         else:
@@ -2146,6 +2245,9 @@ class GameStats(tk.Toplevel):
                     'Shuffle', day] = self.shuffle_combo.current()
                 b_scorer.enumerate_b.scoring_vars['Trials', day] = int(
                     self.trials_entry.get())
+
+                if b_scorer.old_seg:
+                    b_scorer.final_round_boost = True
 
                 # MMmmmm score pie
                 score_pi = open('score_pi.obj', 'wb')
