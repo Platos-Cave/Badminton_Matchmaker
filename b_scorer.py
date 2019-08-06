@@ -14,7 +14,7 @@ from collections import defaultdict
 from itertools import combinations
 import new_smart_shuffle as nss
 import genetic
-import genetic2
+import full_genetic
 from math import log
 
 #easily togglable test-mode with players with randomly created abilities
@@ -52,7 +52,6 @@ class Player:
         self.membership = membership
         self.money_owed = 0
 
-
         self.total_games = 0
         # if a player arrives late, add extra games for game priority purposes
         self.penalty_games = 0
@@ -69,7 +68,7 @@ class Player:
         # who this player's opponents have been this night
         self.played_against = []
 
-        # NEW: for more efficient matching
+        # history of each other player
         self.partner_histories = defaultdict(float)
         self.opp_histories = defaultdict(float)
 
@@ -115,11 +114,9 @@ class Player:
         else:
             return NameError # is that right?
 
-
         # Uses list comprehension rather than loop - however, loses references
         affs = [(name,level) if player[0] == name else player for player in
                 affs]
-
 
         # Add new affinity otherwise. Seems like I should be able to
         # integrate this with the flow of the above loop?
@@ -205,12 +202,6 @@ class Player:
             del self.played_with[-1]
 
 
-
-        # if self.name == "David":
-        #     keys = sum([v for v in self.opp_histories.values()])
-        #     print(keys)
-
-
     def accumulate_fee(self):
 
         # put this somewhere else!
@@ -265,7 +256,6 @@ class Player:
             pass
 
 
-
 class Court:
     def __init__(self):
 
@@ -280,7 +270,6 @@ class Court:
 
     def update_manual(self):
         self.old_manual = self.manual
-
 
     def view_players(self):
 
@@ -512,10 +501,8 @@ def colour_sorter(players):
     for being due. Used in the GUI for colouring the bench labels.
     Seems out of place/should be integrated into the select_players()
     function?"""
-    # num = 4*len(courts)
-    # players_left = players[:]
+
     colour_dict = {}
-    #
     # # If there are 12 or fewer players, then they're all "due"
     if len(players) <= 4*(court_count):
         for player in players:
@@ -527,33 +514,7 @@ def colour_sorter(players):
                 colour_dict[player] = "light green"
 
         return colour_dict
-    #
-    # # players due on
-    # green_players = []
-    # # players maybe due on
-    # orange_players = []
-    # # players definitely not due on
-    # red_players = []
-    #
-    # # Much the same as select_players()
-    # while len(green_players + orange_players) <=  num:
-    #     most_off = find_most_off(players_left)
-    #     if len(most_off) <= (num - len(green_players + orange_players)):
-    #         for player in most_off:
-    #             green_players.append(player)
-    #     else:
-    #         least_off = find_least_games(most_off)
-    #         if len(least_off) <= (num - len(green_players + orange_players)):
-    #             for player in least_off:
-    #                 green_players.append(player)
-    #         else:
-    #             for player in least_off:
-    #                 orange_players.append(player)
-    #
-    #     players_left = [i for i in players_left if
-    #                     i not in green_players and i not in orange_players]
-    #
-    # red_players = players_left
+
     green_players, orange_players, red_players = smart_select(players,
                                                             court_count)
     for player in green_players:
@@ -569,7 +530,6 @@ def colour_sorter(players):
             colour_dict[player] = "gray"
         elif player.keep_on:
             colour_dict[player] = "white"
-
 
     return colour_dict
 
@@ -597,12 +557,9 @@ def smart_select(players, c_count=3):
     if len(players_left + green_players) <= spaces:
         for player in players_left:
             green_players.append(player)
-        # print([p.name for p in green_players])
-        # print([p.name for p in orange_players])
-        # print([p.name for p in red_players])
         for lst in green_players, orange_players, red_players:
             random.shuffle(lst)
-        return (green_players, orange_players, red_players)
+        return green_players, orange_players, red_players
 
     while len(green_players + orange_players) <= spaces:
         if len(green_players) == spaces:
@@ -623,15 +580,10 @@ def smart_select(players, c_count=3):
 
     for player in players_left:
         red_players.append(player)
-    #
-    # print([p.name for p in green_players])
-    # print([p.name for p in orange_players])
-    # print([p.name for p in red_players])
+
     for lst in green_players, orange_players, red_players:
         random.shuffle(lst)
     return (green_players, orange_players, red_players)
-
-
 
 
 # Not needed in the GUI
@@ -647,7 +599,7 @@ def view_bench():
     for player in bench:
         print("{}. Waiting for: {} rounds. Total games: {}.".format(player.name,
                                                                     player.time_since_last,
-                                                                    player.adjusted_games))
+                                                                   player.adjusted_games))
 
 def sort_by_deservedness(players, num):
     return sorted(players, key=lambda x: x.desert, reverse=True)[:num]
@@ -673,12 +625,7 @@ def generate_new_game():
         players = select_players("Random", all_current_players, court_count)
         games = (enumerate_b.find_best_game(players, courts=court_count,
                                             scored=True))
-        # print("Score of random", (games[1] - games[2] + games[3] + games[4]))
         best_game = games[0]
-        #best_game = (enumerate_b.find_best_game(players, courts=court_count))
-
-        #todo: remove temp
-
 
     elif profile == 1:
         players = select_players("Segregated", all_current_players,
@@ -698,8 +645,6 @@ def generate_new_game():
 
         greens, oranges, reds = smart_select(all_current_players, court_count)
 
-        # oranges = sorted(oranges, key=lambda x: x.desert, reverse=True)
-
         spaces = 4 * court_count
         no_oranges = spaces - len(greens)
 
@@ -718,17 +663,7 @@ def generate_new_game():
             comb_scores = {} #for a combo of oranges: the score
             comb_games = {} #for a combo of oranges: the game
 
-            #combs = genetic.initialise(oranges, no_oranges, no_candidates=1)
-
-            # print("combs", combs)
-            # print(len(combs[0]))
-
             combs = [frozenset(sort_by_deservedness(oranges,no_oranges))]
-            # print(combs2==combs)
-            # print("combs2", combs2)
-            # print(len(combs[0]))
-
-            t_gen = time.time()
 
             while counter < trials:
                 if stop_generation:
@@ -738,7 +673,6 @@ def generate_new_game():
                         continue
                     players = greens[:]
                     players.extend(comb)
-                    #print([p.name for p in players])
                     benched = [p for p in all_current_players if p not in players]
                     cost = (enumerate_b.find_best_game(players, courts=
                             court_count, benched=benched, scored=True))
@@ -746,22 +680,18 @@ def generate_new_game():
                     comb_games[frozenset(comb)] = cost[0]
                     counter += 1
 
-                #print("\nMutation Time!")
                 mutants = set()
 
                 for comb in combs:
-                    #print([i.name for i in comb])
                     new = genetic.mutate(comb, oranges, 0.01)
                     if new:
                         mutants.add(new)
-                        #print("Added mutant!")
 
                 for comb in mutants:
                     if comb in comb_scores.keys():
                         continue
                     players = greens[:]
                     players.extend(comb)
-                    #print([p.name for p in players])
                     benched = [p for p in all_current_players if p not in players]
                     cost = (enumerate_b.find_best_game(players, courts=
                     court_count, benched=benched, scored=True))
@@ -769,36 +699,14 @@ def generate_new_game():
                     comb_games[frozenset(comb)] = cost[0]
                     counter += 1
 
-                    #print(len(comb_scores.keys()))
                     combs = sorted(comb_scores, key = comb_scores.get)[:1]
-                    #print(combs)
-                generation += 1
-                #print(f"Generation {generation} over!")
 
-            # print(f"Best score genetic: {comb_scores[combs[0]]}")
-            t_gen2 = time.time()
-            # print(f"Took {t_gen2 -t_gen}")
+                generation += 1
 
             best_game = comb_games[combs[0]]
-            # print(best_game)
-
-
-
-        # #for i in range(10):
-        # best_game = enumerate_b.find_best_exhaustive(all_current_players,
-        #                                                  0, 0)
-        #     # if not best_game:
-        #     #      print("NOT!")
-        #     #      break
-        # #print("FINISHED")
-        # place_on_courts(best_game)
-        # return
-        # best_game = enumerate_b.smart_shuffle_trial(all_current_players,
-        #                                  courts=court_count)
 
     elif profile == 4: # Genetic full
 
-        print("Genetic full!")
         greens, oranges, reds = smart_select(all_current_players, court_count)
         players = (greens, oranges, reds)
 
@@ -806,20 +714,15 @@ def generate_new_game():
                                              enumerate_b.profile])*0.04
         print(max_time_)
 
-        bg = (genetic2.run_ga(players, cands=1, court_num=court_count,
-        mutRate=0.2,
-                              max_time=max_time_
-                              )).players_on_court
-        #print([p.name for p in best_game.players_on_court])
+        bg = (full_genetic.run_ga(players, cands=1, court_num=court_count,
+                                  mutRate=0.2,
+                                  max_time=max_time_
+                                  )).players_on_court
+
         best_game = [((bg[(i*4)],bg[(i*4)+1]),(bg[(i*4)+2],bg[(i*4)+3])) for
                      i in
                      range(court_count)]
         place_on_courts(best_game)
-
-
-        # best_game = enumerate_b.find_best_exhaustive(all_current_players, 10, 2)
-        # place_on_courts(best_game)
-        # return
 
 
     elif profile == 2: # Smart Shuffle
@@ -837,8 +740,6 @@ def generate_new_game():
 
         greens, oranges, reds = smart_select(all_current_players, court_count)
 
-        #oranges = sorted(oranges, key=lambda x: x.desert, reverse=True)
-
         spaces = 4 * court_count
         no_oranges = spaces - len(greens)
 
@@ -848,11 +749,8 @@ def generate_new_game():
             orange_combos = list(combinations(oranges, no_oranges))
             # if too big, shuffle so the combos selected will be a random sample
             if len(orange_combos) > trials:
-                # if random.random() > 0.5:
-                #     print("Random!")
                 random.shuffle(orange_combos)
-                # else:
-                #     print("Sorted!")
+
 
         else:
             orange_combos = [()]
@@ -862,75 +760,14 @@ def generate_new_game():
         if not best_game:
             return False
 
-        # games = []
-        # scores = []
-        # tolerance_scores = []
-        # bench_scores = []
-        # court_scores = []
-        # t1 = time.time()
-        #
-        # combo_count = 0
-        #
-        #
-        # for i, combo in enumerate(orange_combos):
-        #     if stop_generation:
-        #         return False
-        #
-        #     combo_count +=1
-        #     if combo_count > trials:
-        #         break
-        #
-        #     players = greens[:]
-        #     # print([p.name for p in combo])
-        #     for player in combo:
-        #         players.append(player)
-        #
-        #     #players = select_players("Smart", pickable, court_count)
-        #
-        #     benched = [p for p in all_current_players if p not in players]
-        #     total = (enumerate_b.find_best_game(players, courts =
-        #             court_count, benched = benched, scored = True))
-        #     games.append(total[0])
-        #     scores.append(total[1])
-        #     tolerance_scores.append(total[2])
-        #     bench_scores.append(total[3])
-        #     court_scores.append(total[4])
-        #
-        #
-        # display = False
-        #
-        # index, lowest_score = min(enumerate(scores), key=operator.itemgetter(
-        #     1))
-        # best_game = games[index]
-        #
-        # t2 = time.time()
-        #
-        # if display:
-        #     #print_game(best_game[0])
-        #     # print('')
-        #     #print_game(best_game_2[0])
-        #
-        #     print(f'Max score of {trials} games: {max(scores)}')
-        #     print(f'Mean score of {trials} games: {mean(scores)}')
-        #     tenth_list = scores[:int(len(scores)/10)]
-        #     print(f'Best score of 1/10th of these games: {min(tenth_list)}')
-        #     print(f'Score of this game: {lowest_score} (Tolerance: {tolerance_scores[index]})'
-        #           f'(Bench score: {bench_scores[index]})')
-        #     print(f'Took {t2-t1} seconds')
-
-
-
     else:
         best_game = (enumerate_b.find_best_game(players, courts = court_count))
 
     place_on_courts(best_game)
     return True
-    #return  greens, oranges, reds, games, scores, tolerance_scores, \
-    #        bench_scores, court_scores#if
-        # simulated
 
 def iterate_over_combos(greens, oranges, reds, trials, orange_combos):
-    '''Go over each'''
+    '''For each combo of oranges, find the best game and cost'''
     games = []
     scores = []
     tolerance_scores = []
@@ -949,11 +786,9 @@ def iterate_over_combos(greens, oranges, reds, trials, orange_combos):
             break
 
         players = greens[:]
-        # print([p.name for p in combo])
         for player in combo:
             players.append(player)
 
-        # players = select_players("Smart", pickable, court_count)
 
         benched = [p for p in all_current_players if p not in players]
         total = (enumerate_b.find_best_game(players, courts=
@@ -973,10 +808,6 @@ def iterate_over_combos(greens, oranges, reds, trials, orange_combos):
     t2 = time.time()
 
     if display:
-        # print_game(best_game[0])
-        # print('')
-        # print_game(best_game_2[0])
-
         print(f'Max score of {trials} games: {max(scores)}')
         print(f'Mean score of {trials} games: {mean(scores)}')
         tenth_list = scores[:int(len(scores) / 10)]
@@ -995,7 +826,6 @@ def place_on_courts(best_game):
             continue
         else:
             court.empty()
-
     scores = 0
     count = 0
 
@@ -1003,14 +833,9 @@ def place_on_courts(best_game):
         if court.manual:
             continue
         else:
-            #for i, game in enumerate(best_game):
             for j, side in enumerate(best_game[count]):
                 for k, player in enumerate(side):
                     if player:
-                        # tolerance_score = 10*((abs(player.desert) ** 1.5)
-                        #                       * player.desert/abs(player.desert))
-                        # print(f'{player.name}s tolerance is {tolerance_score}')
-
                         court.spaces[(2 * j) + k] = player
                         if player in bench:
                             bench.remove(player)
@@ -1018,14 +843,10 @@ def place_on_courts(best_game):
 
         scores += enumerate_b.score_court(((0,1),(2,3)),courts[i].spaces,
                                             explain = False)
-    # print(scores)
     enumerate_b.score_num = 0
 
-    calculate_swap_TEST() #todo change name of this: what it does is swap
-
-    # for player in bench:
-    #     print(player.desert)
-    # print('')
+    #
+    court_2_swap_score()
 
 
 def print_game(game):
@@ -1065,7 +886,6 @@ def confirm_game():
                             [i for i in court.spaces[0:2]])
 
     for player in bench:
-        # should be Player Method?
         player.update_when_benched()
 
     for player in all_current_players:
@@ -1087,15 +907,12 @@ def confirm_game():
     today_session.games[-1].append([None for i in range(len(courts))])
 
 
-
     # Updating desert.
     update_desert()
-    # print_desert()
 
-    #todo - trialing out new pvp
+    # Update player_history dictionaries
     update_pvp()
 
-    #todo - trialing court_2_attr
     update_court_2_attr(courts[1].spaces)
 
 def get_game_stats(court):
@@ -1221,10 +1038,11 @@ def update_court_2_attr(court_spaces):
             player.court_2_attr += 1 * (1 +(1/2 * player.court_2_attr))
         # print(player.name, player.court_2_attr)
 
-def calculate_swap_TEST():
+def court_2_swap_score():
+    """Determine which game deserves to be in the middle court, then swap.
+    (Due to the projector on Court 2 in our Badminton Club)"""
 
-    #todo - make sure this doesn't stuff up/do weird with manual games
-    # this probably works?
+    # With a manual game, ignore.
     for court in courts:
         if court.manual:
             return
@@ -1240,13 +1058,8 @@ def calculate_swap_TEST():
         court_2_costs = [player.court_2_attr for player in court.spaces if
                          player]
         average_c2 = sum(court_2_costs)
-        #average_c2 *= 2
-        # print(average_c2)
 
         court_scores.append(ab_cost + average_c2)
-
-    # print(court_scores)
-
 
     val = (court_scores.index(min(court_scores)))
     if val != 1:
@@ -1254,17 +1067,15 @@ def calculate_swap_TEST():
         # print(f"Swapped Court 2 with  Court {val+1}!")
 
 def learn_new_abilities(done_before, round_no):
-    '''From results, update each player's ability'''
 
+    """From results, update each player's ability"""
 
     last_round = today_session.games[round_no]
 
     for i, game in enumerate(last_round[:-2]):
-
         score = last_round[-1][i]
-
         names = []
-
+        # Avoid errors with null players
         for player in game:
             if player is None:
                 names.append("NONE")
@@ -1290,15 +1101,6 @@ def learn_new_abilities(done_before, round_no):
         ability_seg = max(abilities) - min(abilities)
 
 
-        print(f'\n***Court {i+1}***\n')
-        print(f'{names[0]} and {names[1]} VS.')
-        print(f'{names[2]} and {names[3]}')
-        print('')
-        print(f'Score: {score}')
-        print(f'Side 1 ability advantage: {round(ability_diff,2)}')
-        print(f'Span of abilities: {round(ability_seg,2)}')
-        print('')
-
         if score is None: # no score, no update
             print("No results recorded \n")
 
@@ -1314,24 +1116,6 @@ def learn_new_abilities(done_before, round_no):
 
         margin = score[0] - score[1]
 
-        # if done_before:
-        #     #doesn't work if some people's results are not inputted
-        #     abilities = [player.ability_history[-2] for player in game if
-        #                  player]
-        # else:
-        #     abilities = [player.ability for player in game if player]
-        #
-        # if len(abilities) == 4: #doubles
-        #     ability_diff = sum(abilities[0:2]) - sum(abilities[2:4])
-        # else: #singles
-        #     ability_diff = abilities[0] - abilities[1]
-        #
-        # ability_seg = max(abilities) - min(abilities)
-        #
-        # print(f'Score: {score}')
-        # print(f'Side 1 ability advantage: {round(ability_diff,2)}')
-        # print(f'Span of abilities: {round(ability_seg,2)}')
-        # print('')
 
         for i, player in enumerate(game):
             if player:
@@ -1342,18 +1126,11 @@ def learn_new_abilities(done_before, round_no):
                 else:
                     team_margin = margin
                     team_ability = ability_diff
-                #
-                # if player.first_night:
-                #     #quick and dirty way of making
-                #     # abilities adjust quicker for new players
-                #     learning_variable = 20
-                # else:
-                #     learning_variable = 40
+
                 len_ah = 1
                 for i, ab in enumerate(player.ability_history[1:]):
                     if player.ability_history[i] != player.ability_history[
-                        i-1]: #i.e. not a
-                        # duplicate
+                        i-1]: #i.e. not a duplicate
                         len_ah += 1
 
                 print(f'{player.name} had {len_ah} previous results!')
@@ -1361,7 +1138,6 @@ def learn_new_abilities(done_before, round_no):
                 # the more results you input, the less your ability changes with
                 #  each new result. Formula based on simulation results
                 learning_variable = 12 + 10*(log(len_ah))
-
 
                 # ability change is your team's margin minus (plus) a handicap
                 # for an ability advantage, divided by the learning variable
@@ -1393,8 +1169,6 @@ def learn_new_abilities(done_before, round_no):
 
 
 
-
-
 def undo_confirm():
 
     for court in courts:
@@ -1412,21 +1186,8 @@ def undo_confirm():
     global total_rounds
     total_rounds -= 1
 
+    # Delete the last game of the session
     del today_session.games[-1]
-
-
-
-def test_mixing():
-    '''View all the players and their (sorted) game history.
-    Currently not usable in the GUI'''
-    for player in all_current_players:
-        played_with = (sorted(
-            [player.name for game in player.played_with for player in game]))
-        played_against = (sorted(
-            [player.name for game in player.played_against for player in game]))
-        print(player.name)
-        print(played_with)
-        print(played_against)
 
 
 def remove_player(court_number, index, player):
@@ -1455,7 +1216,7 @@ def remove_player(court_number, index, player):
     today_session.player_departures[player] = datetime.now().time()
 
 def add_player(player):
-    '''Add an already saved player to the game'''
+    """Add an already saved player to the game"""
     bench.append(player)
     absent_players.remove(player)
 
@@ -1470,7 +1231,6 @@ def add_player(player):
             [player.adjusted_games for player in all_current_players]) / len(
             all_current_players)
         player.time_since_last = 1
-
 
     # Give players easier games on their first round
     player.hunger = -5
@@ -1491,24 +1251,12 @@ def swap_courts(court_a, court_b):
 
 def empty_courts():
 
-    # greens, oranges, reds = smart_select(all_current_players, court_count)
-    # spaces = 4 * court_count
-    # no_oranges = spaces - len(greens)
-    # if no_oranges > 0:
-    #     orange_combos = combinations(oranges, no_oranges)
-    # for combo in orange_combos:
-    #     players = greens[:]
-    #     #print([p.name for p in combo])
-    #     for player in combo:
-    #         players.append(player)
-    #     print([p.name for p in players])
-
     for court in courts:
         court.empty()
 
 # should be class attribute
 def make_manual(court_no, toggle=True):
-    '''Toggle court on to manual or automatic'''
+    """Toggle court on to manual or automatic"""
 
     if courts[court_no].manual:
         add_court()
@@ -1523,7 +1271,6 @@ def make_manual(court_no, toggle=True):
     # Save the old manual state for undoing purposes
     if toggle:
         courts[court_no].update_manual()
-
 
 # For purposes of manual game court counting
 def remove_court():
@@ -1549,15 +1296,12 @@ def update_desert():
     for player in bench:  # as opposed to checking the courts
         player.desert += 1
 
-
-
 def print_desert():
     for player in every_player:
         #print(player.name, player.total_games)
         #if player.name in ('Henry', 'David', 'Jack', 'Desmond'):
         #print(f'{player.name} played {player.total_games}')
         print(f'{player.name}s desert is {player.desert}')
-
 
 def save_and_quit(pickling=True):
     """Reset everything only when exited properly.
@@ -1587,25 +1331,13 @@ def save_and_quit(pickling=True):
         player.court_2_attr *= 0.3
         player.old_court_2_attr *= 0.3
         player.desert -= av_deserts
-        # deweighting histories.
-        # todo: make sure the following two doen't happen with autosave
         for key in player.partner_histories.keys():
-            player.partner_histories[key] *= 0.3 # 0.5
+            player.partner_histories[key] *= 0.3
         for key in player.opp_histories.keys():
             player.opp_histories[key] *= 0.3
 
         if player.first_night:
             player.first_night = False
-
-        # try: # new players get first_night added
-        #     if player.first_night:
-        #         player.desert = 0
-        # except AttributeError:
-        #     pass
-
-        # deweighting court_2 relevance. Should it be 0.5? set to 0? else?
-
-        #print(f'{player.name} reset!')
 
     # Save departure times
     for player in all_current_players:
@@ -1618,7 +1350,6 @@ def save_and_quit(pickling=True):
     global fake_players
     if fake_players:
         pickling = False
-
     if pickling:
 
         session_data = open('badminton_session_data.obj', 'wb')
@@ -1644,54 +1375,22 @@ courts = [Court() for i in range(3)]
 court_count = len(courts)
 
 
-"""36 sample players, four of each ability level from 1-9. The first letter 
-of their names correspond to their numerical ability, in order to make 
-ability differences more visualisable.
+"""36 random players, with names equal to their ability"""
 
-I've got a feeling it's not a good practice to initialise players like this. 
-Maybe they should be in another file? Or initialised with a function?  
-"""
+rand_abilities = [4.3, 5.3, 3.3, 8.1, 1.8, 7.2, 5.2, 3.0, 7.6, 7.0, 0.7, 8.7,
+                    7.8, 3.5, 9.7, 6.6, 2.0, 5.9, 2.1, 0.5, 6.0, 5.8, 8.3, 2.7,
+                    6.2, 7.9, 0.1, 4.8, 1.5, 1.6, 6.5, 9.8, 2.8, 2.6, 6.3, 4.4]
 
-Aaron = Player("Aaron", "Male", 1)
-Andrew = Player("Andrew", "Male", 1)
-Amanda = Player("Amanda", "Female", 1)
-Anna = Player("Anna", "Female", 1)
-Barry = Player("Barry", "Male", 2)
-Bill = Player("Bill", "Male", 2)
-Beth = Player("Beth", "Female", 2)
-Bob = Player("Bob", "Male", 2)
-Caleb = Player("Caleb", "Male", 3)
-Calvin = Player("Calvin", "Male", 3)
-Cindy = Player("Cindy", "Female", 3, partner_affinities=["Charles"])
-Charles = Player("Charles", "Male", 3, partner_affinities=["Cindy"],
-                 opponent_affinities=["David", "Edward"])
-David = Player("David", "Male", 4, opponent_affinities=["Charles"])
-Derek = Player("Derek", "Male", 4)
-Denise = Player("Denise", "Female", 4)
-Doris = Player("Doris", "Female", 4)
-Edward = Player("Edward", "Male", 5, opponent_affinities=["Charles"])
-Elliot = Player("Elliot", "Male", 5)
-Emma = Player("Emma", "Female", 5)
-Erin = Player("Erin", "Female", 5)
-Fiona = Player("Fiona", "Female", 6, partner_affinities=["Felicity"],
-               opponent_affinities=["Felicity"])
-Felicity = Player("Felicity", "Female", 6, partner_affinities=["Fiona"],
-                  opponent_affinities=["Fiona"])
-Flynn = Player("Flynn", "Male", 6)
-Fred = Player("Fred", "Male", 6)
-Gary = Player("Gary", "Male", 7)
-George = Player("George", "Male", 7)
-Georgina = Player("Georgina", "Female", 7)
-Gordon = Player("Gordon", "Male", 7)
-Hannah = Player("Hannah", "Female", 8, partner_affinities=["Ian"])
-Harry = Player("Harry", "Male", 8)
-Heather = Player("Heather", "Female", 8)
-Hunter = Player("Hunter", "Male", 8)
-Ian = Player("Ian", "Male", 9, partner_affinities=["Hannah"],
-             opponent_affinities=["Isaac"])
-Igor = Player("Igor", "Male", 9)
-Indiana = Player("Indiana", "Male", 9)
-Isaac = Player("Isaac", "Male", 9, opponent_affinities=["Ian"])
+sexes = ['Female', 'Male', 'Male', 'Male', 'Male', 'Male', 'Male', 'Female',
+         'Male', 'Male', 'Male', 'Female', 'Male', 'Male', 'Male', 'Male',
+         'Male', 'Male', 'Male', 'Male', 'Male', 'Female', 'Female', 'Male',
+         'Female', 'Male', 'Female', 'Female', 'Male', 'Male', 'Male', 'Female',
+         'Male', 'Male', 'Male', 'Female']
+
+generated_players = [Player(str(rand_abilities[i]), sexes[i], rand_abilities[i])
+                     for i in range(36)]
+
+
 
 """If you have saved players, pickle them in. Otherwise, use the default 
 players"""
@@ -1707,9 +1406,6 @@ if not fake_players:
             if not hasattr(player, 'consecutive_games_on'):
                 player.consecutive_games_on = 0
                 print("Add consec!")
-            # if not hasattr(player, 'manual_game'):
-            #     player.manual_game = False
-
 
             if not hasattr(player, 'hunger'):
                 player.hunger = player.ability
@@ -1754,16 +1450,8 @@ if not fake_players:
             if not hasattr(player, 'first_night'):
                 player.first_night = False
 
-            # if hasattr(player, 'new_ability'):
-            #     player.ability = player.new_ability
-            # if hasattr(player, 'new_ability'): # TEMPORARY
-            #     player.new_ability = player.ability
-
             if not hasattr(player, 'ability_history'):
                 player.ability_history = [player.ability]
-            #
-            # if hasattr(player, 'ability_history'): # TEMPORARY
-            #     player.ability_history = [player.ability]
 
             if not hasattr(player, 'affinity_for_newbies'):
                 if player.name in ("Henry", "David"):
@@ -1808,11 +1496,7 @@ if not fake_players:
 
 
     except FileNotFoundError:
-        every_player = [Aaron, Andrew, Amanda, Anna, Barry, Beth, Bill, Bob, Caleb,
-                    Calvin, Cindy, Charles, David, Derek, Denise, Doris, Edward,
-                    Elliot, Emma, Erin, Fiona, Felicity, Flynn, Fred, Gary,
-                    George, Georgina, Gordon, Hannah, Harry, Heather, Hunter,
-                    Ian, Igor, Indiana, Isaac]
+        every_player = generated_players
 
         for player in every_player:
             player.membership = "Member (incl. feathers)"
@@ -1851,18 +1535,6 @@ old_aff = False
 stop_generation = False
 
 
-### random trial stuff
-# from pprint import pprint
-#
-# for player in every_player:
-#     print(player.name)
-#     for opp in player.opp_histories.keys():
-#         if player.opp_histories[opp] >1:
-#             print(opp.name, player.opp_histories[opp])
-
-#fake_players = False
-
-# def init_fake_players(num):
 
 if fake_players:
     every_player = []
@@ -1878,11 +1550,4 @@ if fake_players:
     # player not in all_current_players would duplicate it
     absent_players = [player for player in every_player if player.name not in
                       [player.name for player in all_current_players]]
-
-    #print(len(absent_players))
-
-
-
-    # Bench starts full
-
 

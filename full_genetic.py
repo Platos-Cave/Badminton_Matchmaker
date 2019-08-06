@@ -5,7 +5,6 @@ from math import log
 import sys
 import b_scorer
 
-score_dict = {}
 
 class Candidate:
     '''Representing a combination of players, to be tested'''
@@ -20,9 +19,6 @@ class Candidate:
         self.players_on_court = players_on_court
         self.tried = False #haven't retrieved fitness yet
         self.fitness = 0
-        # self.courts = courts
-        # self.orange_bench = set()
-        # self.red_bench = set()
         if not mutation:
             self.generate_from_scratch()
 
@@ -42,16 +38,8 @@ class Candidate:
             new_court = frozenset(frozenset(poc.pop() for i in range(2)) for
                                   j in range(2))
             self.courts.add(new_court)
-            #print(new_court)
-
-        # print(self.courts)
-        # print(self.players_on_court)
-        # print(self.orange_bench)
-        # print(self.red_bench)
-        # print('')
 
     def generate_mutation(self, mutrate):
-
         mutated = False
 
         self.new_courts = set()
@@ -61,9 +49,6 @@ class Candidate:
         self.all_swappable = self.players_on_court + list(self.orange_bench)
         self.original = self.all_swappable[:]
 
-        # print('\n',self.swappable)
-        # print(self.all_swappable)
-        # print(self.players_on_court)
         muts = 0
 
         for i, plyr in enumerate(self.players_on_court):
@@ -99,12 +84,6 @@ class Candidate:
 
                 muts +=1
 
-
-
-
-
-        #print(self.all_swappable)
-
         if mutated:
 
             #players on court, to pass to mutant
@@ -128,15 +107,6 @@ class Candidate:
                     print([p.name for p in self.swappable])
                     print([p.name for p in self.all_swappable])
                     sys.exit()
-            # print("Mutation!")
-            # print([p.name for p in poc])
-            # for court in self.new_courts:
-            #     for side in court:
-            #         for plyr in side:
-            #             print(plyr.name)
-            # import sys
-            # sys.exit()
-
 
 
 
@@ -210,7 +180,6 @@ class Candidate:
             return self.fitness
 
 
-
 def gen_population(court_num=3):
     population = [[10*random.random() for _ in range(court_num*2)],
                   [10*random.random() for _ in range(court_num*4)],
@@ -223,15 +192,6 @@ def run_ga(population, court_num=3, cands=1, mutRate=0.1, max_time=2.5):
     global score_dict
     score_dict = {}
 
-    # population = [[10*random.random() for _ in range(court_num*2)],
-    #               [10*random.random() for _ in range(court_num*4)],
-    #               [10*random.random() for _ in range(court_num)]]
-    # print(population)
-    # print(len(population[0]))
-    #Bob = Candidate(population, 3)
-    # Jim = Candidate(population, 3)
-    # Jim.get_fitness()
-    #global population
     original_mut = mutRate
 
     candidates = [Candidate(population, no_courts=court_num,
@@ -306,9 +266,7 @@ def run_ga(population, court_num=3, cands=1, mutRate=0.1, max_time=2.5):
     print(candidates[0].fitness)
     print(f'Took {t2-t1}')
     print(f'Getting fitness took {generation_times}!')
-
     return candidates[0]
-
 
 def run_experiment(experiments=10, trials=10):
     fitnesses = []
@@ -332,51 +290,7 @@ def run_experiment(experiments=10, trials=10):
 
     print(fitnesses)
 
-#run_experiment()
-
-
-
-
-
-
-
-#new_candidates =
-
-
-
-# print("Jim")
-# print(Jim.courts)
-# print(Jim.orange_bench)
-# print(Jim.red_bench)
-# print("")
-
-
-#mutants = [Jim.generate_mutation() for i in range(10)]
-
-
-# for m in mutants:
-#     if m:
-#         # print("Mutant")
-#         # print(m.courts)
-#         # print(m.orange_bench)
-#         # print(m.red_bench)
-#         b = m.generate_mutation()
-#         if b:
-#             print("Mutate mutant!")
-
-# print("Jim")
-# print(Jim.courts)
-# print(Jim.orange_bench)
-# print(Jim.red_bench)
-# print("")
-
-# t1 = time.time()
-# mutants = [Jim.generate_mutation() for i in range(10000)]
-#
-# t2 = time.time()
-# print(t2-t1)
-
-
+score_dict = {}
 
 
 

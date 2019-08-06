@@ -33,7 +33,6 @@ def desert_score(players):
 
     return tolerance_score
 
-
 def initialise(oranges, no_oranges, no_candidates):
     #oranges = ([p.name for p in oranges])
    #print(no_oranges)
@@ -59,8 +58,6 @@ def initialise(oranges, no_oranges, no_candidates):
     #print(candidates)
     return candidates
 
-# def initialise_2(oranges, no_oranges):
-
 
 def initialise_deserve(oranges, no_oranges, no_candidates):
     '''Create initial candidates, sorted by most deserving'''
@@ -72,7 +69,6 @@ def initialise_deserve(oranges, no_oranges, no_candidates):
     for i in sorted_oranges:
         print(desert_score(i))
         print('')
-
     print(len(sorted_oranges))
     print(no_candidates)
     # If only a few combos
@@ -93,7 +89,6 @@ def initialise_deserve(oranges, no_oranges, no_candidates):
         new_candidate.update(sorted_oranges[indexes[i]])
             #new_candidate.update(oranges[:no_oranges])
         candidates.append(new_candidate)
-    # # print(candidates)
     # return candidates
     for c in candidates:
         print([p.desert for p in c])
@@ -110,7 +105,6 @@ def simple_mutate(candidate, oranges):
     return frozenset(candidate)
 
 def mutate(candidate, oranges, mutationRate):
-
     remaining = set(oranges).difference(set(candidate))
 
     if len(remaining) == 0:
