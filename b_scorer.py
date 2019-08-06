@@ -12,7 +12,6 @@ import time
 from statistics import mean
 from collections import defaultdict
 from itertools import combinations
-import new_smart_shuffle as nss
 import genetic
 import full_genetic
 from math import log

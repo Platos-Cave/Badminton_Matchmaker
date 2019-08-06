@@ -1,0 +1,196 @@
+# Created by .ignore support plugin (hsz.mobi)
+### Python template
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+#  Usually these files are written by a python script from a template
+#  before PyInstaller builds the exe, so as to inject date/other infos into it.
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+
+# Translations
+*.mo
+*.pot
+
+# Django stuff:
+*.log
+local_settings.py
+db.sqlite3
+
+# Flask stuff:
+instance/
+.webassets-cache
+
+# Scrapy stuff:
+.scrapy
+
+# Sphinx documentation
+docs/_build/
+
+# PyBuilder
+target/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# IPython
+profile_default/
+ipython_config.py
+
+# pyenv
+.python-version
+
+# pipenv
+#   According to pypa/pipenv#598, it is recommended to include Pipfile.lock in version control.
+#   However, in case of collaboration, if having platform-specific dependencies or dependencies
+#   having no cross-platform support, pipenv may install dependencies that don't work, or not
+#   install all needed dependencies.
+#Pipfile.lock
+
+# celery beat schedule file
+celerybeat-schedule
+
+# SageMath parsed files
+*.sage.py
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Spyder project settings
+.spyderproject
+.spyproject
+
+# Rope project settings
+.ropeproject
+
+# mkdocs documentation
+/site
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
+
+.csv
+#.gitignore
+.idea/shelf/
+.ipynb_checkpoints/
+4 games.csv
+Bell_Ring.wav
+Desert 2.csv
+Desert 3.csv
+Desert New.csv
+Desert.csv
+FBC 2019.csv
+Smart Shuffle 10.csv
+Smart Shuffle 2nd.csv
+Smart Shuffle First.csv
+Swap Courts.csv
+Untitled.ipynb
+__pycache__/autocomplete.cpython-36.pyc
+__pycache__/b_scorer.cpython-36.pyc
+__pycache__/b_scorer.cpython-37.pyc
+__pycache__/b_sessions.cpython-36.pyc
+__pycache__/combo_gen.cpython-36.pyc
+__pycache__/enumerate_b.cpython-36.pyc
+__pycache__/enumerate_b.cpython-37.pyc
+__pycache__/full_genetic.cpython-36.pyc
+__pycache__/genetic.cpython-36.pyc
+__pycache__/new_smart_shuffle.cpython-36.pyc
+__pycache__/pandas_history.cpython-36.pyc
+__pycache__/player_probs.cpython-36.pyc
+__pycache__/timer.cpython-36.pyc
+__pycache__/tk_bscorer.cpython-36.pyc
+__pycache__/tk_bscorer.cpython-37.pyc
+alarm.wav
+arrival_and_departures.csv
+b2.csv
+badminton_session_data.obj
+board_data.obj
+bob.csv
+bob2.csv
+bob4.csv
+bell_test.py
+combo_gen.py
+cost_pickle.obj
+cost_pickle_medium.obj
+cost_pickle_small.obj
+data_file.json
+every_player_pi_2A.obj
+file_splitter.py
+final_data.csv
+fire_2.wav
+fire_alarm.wav
+go.csv
+new_alarm.wav
+new_alarm_2.wav
+ptest.py
+quickstart.py
+score_pi.obj
+tb.csv
+test2.csv
+test3.csv
+test5.csv
+test_bench.csv
+test_font_changer.py
+test_game.csv
+test_time.csv
+test_times_2.csv
+tk_bscorer.spec
+update_pickle.py
+player_probs.py
+new_smart_shuffle.py
+
