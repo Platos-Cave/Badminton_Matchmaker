@@ -13,20 +13,16 @@ import os
 from threading import Thread, Event
 import time
 import datetime
-from datetime import datetime # huh?
-import player_probs as pp
-
+from datetime import datetime
 
 class Application(tk.Tk):
+
     """The main application"""
     def __init__(self):
         tk.Tk.__init__(self)
-
-
         # A (probably unPythonic) way of randomly loading the bench
         self.test_mode = True
         self.init_test_players = 12
-
 
         self.title("Badminton Matchmaker")
 
@@ -40,12 +36,6 @@ class Application(tk.Tk):
         self.court_menus = {}
         self.space_menus = {}
         self.colour_dict = {}
-
-        # START MENU COMMENTED OUT
-        # start_menu = Menu(self)
-        # self.config(menu=start_menu)
-        #
-        # start_menu.add_cascade(label="Help", command = lambda: self.help())
 
         self.court_labels = [ttk.Label(text="Court {}".format(i + 1),
                                        background=bg_colour,
@@ -126,14 +116,6 @@ class Application(tk.Tk):
             court.grid(column=(5 * i) + 2, row=2, columnspan=1, sticky='e',
                        padx=10, pady=10)
 
-        # self.court_labels[0].grid(column=2, row=2, sticky='nsew',
-        #                padx=10, pady=10, columnspan =1)
-        # self.court_labels[1].grid(column=7, row=2, sticky='nsew',
-        #                           padx=10, pady=10, columnspan =1)
-        # self.court_labels[2].grid(column=13, row=2, sticky='nsew',
-        #
-        #              padx=10, pady=10, columnspan =1)
-        # Add swap menus
         for i, lab1 in enumerate(self.court_labels):
             self.court_label_menus[i] = Menu(self, tearoff=0)
             self.court_label_menus[i].add_command(label = "Make Game Manual",
@@ -173,7 +155,6 @@ class Application(tk.Tk):
         self.bench.grid(column=4, row=16, columnspan=7, rowspan=5,
                         sticky='nsew', padx=1, pady=1)
 
-        #self.rounds_label.grid(column=11, row=15)
         self.timer.grid(column=12, row=15, columnspan =2, sticky='nsew',
                         padx=5, pady=5)
         self.start_button.grid(column=12, row=16, sticky='nsew',
@@ -193,9 +174,6 @@ class Application(tk.Tk):
             self.rowconfigure(i, weight=10)
         for i in range(10,20):
             self.rowconfigure(i, weight=1)
-
-        # for i in range(20):
-        #     self.rowconfigure(i, weight=1)
 
         for i in range(15):
             self.columnconfigure(i, weight=1)
@@ -232,9 +210,9 @@ class Application(tk.Tk):
             b_scorer.today_session = board_data["today_session"]
             self.colour_dict = board_data["colour_dict"]
             self.timer.timer_on = board_data["timer_status"]
-            #self.timer.timer_paused = board_data["timer_paused"]
+
             self.timer.timer_count = board_data["timer_count"]
-           #
+
             if self.timer.timer_on and not self.timer.timer_paused:
                 self.timer.timer_go()
 
@@ -245,8 +223,6 @@ class Application(tk.Tk):
                 self.undo_confirm_button.configure(state = "normal")
             elif str(board_data["confirm_state"]) == "normal":
                 self.undo_confirm_button.configure(state="disabled")
-
-
 
 
             for player in b_scorer.all_current_players:
@@ -265,54 +241,32 @@ class Application(tk.Tk):
 
     def start_in_test_mode(self, max):
 
-
-        # print("Start session, before init")
-        # print(len(b_scorer.every_player))
-        # print(len(b_scorer.absent_players))
-        # print(len(b_scorer.bench))
-
         self.timer.duration = 0
         while len(b_scorer.all_current_players) < max:
-            self.add_players_by_arrival(max)
+            # self.add_players_by_arrival(max)
+            self.add_players_sequentially(max)
 
-        # print("Start session, before init")
-        # print(len(b_scorer.every_player))
-        # print(len(b_scorer.absent_players))
-        # print(len(b_scorer.bench))
+    # def add_players_by_arrival(self, max):
+    #     random.shuffle(b_scorer.absent_players)
+    #     for player in b_scorer.absent_players:
+    #         try:
+    #             if random.random() < pp.arrival_probs[player.name]:
+    #                 b_scorer.add_player(player)
+    #                 self.add_bench_menus(player)
+    #                 self.colour_dict = b_scorer.colour_sorter(
+    #                     b_scorer.all_current_players)
+    #         except KeyError:
+    #             pass
+    #         if len(b_scorer.all_current_players) >=max:
+    #             break
 
-        # for player in b_scorer.every_player[0:32]:
-        #     b_scorer.add_player(player)
-        #     self.add_bench_menus(player)
-        #     self.colour_dict = b_scorer.colour_sorter(
-        #         b_scorer.all_current_players)
+    def add_players_sequentially(self, max):
+        for player in b_scorer.absent_players[:max]:
+            b_scorer.add_player(player)
+            self.add_bench_menus(player)
+            self.colour_dict = b_scorer.colour_sorter(
+                b_scorer.all_current_players)
 
-        # random.shuffle(b_scorer.every_player)
-        # for player in b_scorer.every_player[0:16]:
-        #     b_scorer.add_player(player)
-        #     self.add_bench_menus(player)
-        #     self.colour_dict = b_scorer.colour_sorter(
-        #                          b_scorer.all_current_players)
-        # for player in b_scorer.every_player:
-        #     if player.name.startswith(("A","B","I")):
-        #         b_scorer.add_player(player)
-        #         self.add_bench_menus(player)
-        #         self.colour_dict = b_scorer.colour_sorter(
-        #                     b_scorer.all_current_players)
-        # avoid having to reset timer. Should cancel timer entirely
-
-    def add_players_by_arrival(self, max):
-        random.shuffle(b_scorer.absent_players)
-        for player in b_scorer.absent_players:
-            try:
-                if random.random() < pp.arrival_probs[player.name]:
-                    b_scorer.add_player(player)
-                    self.add_bench_menus(player)
-                    self.colour_dict = b_scorer.colour_sorter(
-                        b_scorer.all_current_players)
-            except KeyError:
-                pass
-            if len(b_scorer.all_current_players) >=max:
-                break
 
 
     def display_swap_menu(self, event, court_no):
@@ -398,30 +352,6 @@ class Application(tk.Tk):
         every_pi = open('every_player_pi_2.obj', 'wb')
         pickle.dump(b_scorer.every_player, every_pi)
         every_pi.close()
-
-    # def autosave_timer_only(self):
-    #     '''Seemed excessive to save the whole state every second?'''
-    #     pickle_in = open('board_data.obj', 'wb')
-    #     t1 = time.time()
-    #
-    #     try:
-    #         pickle_in = open("board_data.obj", "rb")
-    #         board_data = pickle.load(pickle_in)
-    #     except FileNotFoundError:
-    #         board_data = {}
-    #
-    #     board_data["timer_status"] = self.timer.timer_on
-    #     board_data["timer_count"] = self.timer.timer_count
-    #
-    #     pickle.dump(board_data, pickle_in)
-    #     pickle_in.close()
-    #
-    #     t2 = time.time()
-    #     print(t2-t1)
-
-
-
-
 
     def confirm_quit(self):
 
@@ -747,14 +677,8 @@ class Application(tk.Tk):
 
             self.start_button.config(text="Abort Generation")
            #self.start_button.config(state="disabled")
-          
+
             self.start_button.config(command=self.stop_generation)
-
-            # cancel for removing purposes
-
-            # b_scorer.generate_new_game()
-            # self.unchanged_board = False
-            # self.update_board()
 
 
     def confirm(self):
@@ -810,10 +734,6 @@ class Application(tk.Tk):
         b_scorer.old_seg = False
         b_scorer.old_aff = False
         b_scorer.final_round_boost = False
-
-
-
-
 
 
     def undo_confirm(self):
@@ -886,10 +806,6 @@ class Application(tk.Tk):
         # if courts empty: confirm -> disabled
         # if gsmes are the same: confirm -> disabled
         # else: normal
-        # if self.timer.timer_on:
-        #     print("Timer on!")
-        # else:
-        #     print("Timer off!")
 
 
         if self.timer.timer_on or self.timer.reset_button['text'] == \
@@ -1937,12 +1853,6 @@ class PlayerStats(tk.Toplevel):
 
         self.destroy()
 
-# class PasswordInput(tk.Toplevel):
-#     def __init__(self, controller):
-#         tk.Toplevel.__init__(self,controller):
-#
-
-
 class ResultsInput(tk.Toplevel):
     def __init__(self, controller, session):
 
@@ -1975,8 +1885,6 @@ class ResultsInput(tk.Toplevel):
 
 
         if self.round:
-
-
             self.round_combo = ttk.Combobox(self, values=[f"Round {i+1}" for i
                                                           in range(len(
                     self.session.games))], state="readonly")
@@ -1994,8 +1902,6 @@ class ResultsInput(tk.Toplevel):
                         self.names[i].append(plyr.name)
                     else:
                         self.names[i].append("NONE")
-
-
 
             self.player_labels = [((ttk.Label(self, text=(f"{name[0]} and {name[1]}"))),
         (ttk.Label(self, text=(f"{name[2]} and {name[3]}")))) for name in
@@ -2035,10 +1941,9 @@ class ResultsInput(tk.Toplevel):
 
 
     def save_results(self):
-        '''Save results inputted if valid'''
+        '''Save results inputted, if valid'''
         results = []
-        #e.g
-        #results = [(21,17),(15,21),NONE]
+        #e.g results = [(21,17),(15,21),NONE]
 
         for box in self.score_boxes:
             if box[0].get() == '' and box[1].get() == '':
@@ -2109,29 +2014,6 @@ class ResultsInput(tk.Toplevel):
                 if results[i]: # if there was a recorded result
                     box.insert(0, results[i][j])
 
-
-
-
-
-
-
-        # self.player_labels = [
-        #     ((ttk.Label(self, text=(f"{name[0]} and {name[1]}"))),
-        #      (ttk.Label(self, text=(f"{name[2]} and {name[3]}")))) for name in
-        #     self.names]
-
-
-
-
-
-
-
-
-
-
-
-
-
 class GameStats(tk.Toplevel):
     """A Toplevel popup which allows the user to modify the weightings given to
     the various factors of the sorting algorithm"""
@@ -2170,9 +2052,6 @@ class GameStats(tk.Toplevel):
                                                   "Smart", "Genetic",
                                                   "Genetic (Full)"])
 
-        # not used ATM
-        # self.default_button = ttk.Button(self, text="Return to Default",
-        #                                  command=self.return_default_weightings)
         self.boost_button = ttk.Button(self, text = "Final Round Boost",
                                        command = self.boost_weightings)
         self.save_button = ttk.Button(self, text="Save Weightings",
@@ -2274,8 +2153,6 @@ class GameStats(tk.Toplevel):
         self.aff_entry.insert(0, b_scorer.old_aff*3)
 
 
-
-
     def switch_profile(self):
         """When profile_combo selects a new profile, switch to those"""
         # Delete balance entries, and insert the new profile's numbers.
@@ -2330,8 +2207,6 @@ class Timer(tk.Frame):
                                                          60)))
         self.countdown = "{:02d}:{:02d}".format(
             *divmod(self.seconds_left, 60))
-
-
         self.timer_label = ttk.Label(self, textvariable=self.time_str,
                                      font=('helvetica', 30), relief='raised')
         self.plus_one_button = ttk.Button(self, text="+1 min", command=
@@ -2353,9 +2228,7 @@ class Timer(tk.Frame):
         self.pause_button.grid(column=2, row=1, sticky='nsew')
         self.bell_button.grid(column = 3, row = 0, sticky = 'nsew', rowspan = 3)
 
-
     def timer_go(self):
-
         self.timer_on = True
         self.pause_button.config(text="Pause", state='normal')
 
@@ -2376,7 +2249,6 @@ class Timer(tk.Frame):
             # Enable button
             self.controller.config_buttons()
             self.controller.autosave()
-
 
         self.time_str.set(self.countdown)
         self.update()
@@ -2406,11 +2278,6 @@ class Timer(tk.Frame):
             self.go = self.after(1000, lambda: self.timer_go())
         # if unpaused, pause
         elif not self.timer_paused:
-            # when reset, allows this to restart it. Feels dirty
-            # if not self.timer_on:
-            #     self.timer_paused = True
-            #     self.pause()
-            # else:
             self.timer_paused = True
             self.pause_button.config(text="Resume")
             # Stop the timer
@@ -2493,7 +2360,6 @@ class Timer(tk.Frame):
         self.timer_count = 0
         self.update_timer()
 
-
     def ring_bell(self):
         if not self.reset_timer(override=False, bell = True):
             self.bell = Bell()
@@ -2509,8 +2375,6 @@ class HistoryPopup(tk.Toplevel):
         self.controller = controller
 
         self.sessions = []
-        #self.combined_sessions = b_scorer.all_sessions
-            #Get only sessions that have at least 2 games. Maybe in method?
         for i, session in enumerate(b_scorer.all_sessions):
             if len(session.games) > 0:
                 self.sessions.append(session)
@@ -2552,24 +2416,14 @@ class HistoryPopup(tk.Toplevel):
                                                  "CSV",
                                             command=lambda: self.export_to_csv(
                                                 "times"))
-
-
-
         self.every_player_combo = ttk.Combobox(self, width = 20, values =
             sorted([p.name for p in b_scorer.every_player]), state =
         'readonly')
-
         self.every_player_combo.current(0)
 
         self.player_stats_button = ttk.Button(self, text="View Player "
                                                          "History", command
                                               =self.view_player_history)
-
-        # self.print_payments_button = ttk.Button(self, text = "Print "
-        #                                                      "Payments",
-        #                                         command = self.print_payments)
-
-
         self.current_history.grid(column=0, row=0)
         self.print_summary_button.grid(column=0, row=1)
         self.print_history_button.grid(column=0, row=2)
@@ -2585,7 +2439,6 @@ class HistoryPopup(tk.Toplevel):
         self.export_timer_CSV.grid(column = 0, row = 10)
 
     def export_to_csv(self, type):
-
         # first, entry popup to name the .csv. Require input validation.
         # then (ideally in b_sessions module), call export function
         # then tk messagebox "Success" if created
@@ -2612,9 +2465,7 @@ class HistoryPopup(tk.Toplevel):
                     print("--------------------")
 
     def print_current(self):
-
         session = b_scorer.today_session
-
 
         print("Date:", session.date)
         print("Start:", session.start_time)
@@ -2820,25 +2671,12 @@ class Generate(Thread):
         b_scorer.stop_generation = True
 
 
-
-
 class Alarm(Thread):
     '''Multithread so the alarm doesn't freeze the GUI'''
 
     def __init__(self):
         Thread.__init__(self)
         self._stop = Event()
-
-    # Unnecessary as of now: for packaging
-    # def resource_path(self,relative_path):
-    #     """ Get absolute path to resource, works for dev and for PyInstaller """
-    #     try:
-    #         # PyInstaller creates a temp folder and stores path in _MEIPASS
-    #         base_path = sys._MEIPASS
-    #     except Exception:
-    #         base_path = os.path.abspath(".")
-    #
-    #     return os.path.join(base_path, relative_path)
 
     def run(self):
         self._stop.clear()
@@ -2860,9 +2698,6 @@ class Bell(Thread):
         Thread.__init__(self)
     def run(self):
         winsound.PlaySound('Bell_Ring.wav', winsound.SND_FILENAME)
-
-
-
 
 class HelpMenu(tk.Toplevel):
     def __init__(self, controller):
@@ -2887,8 +2722,6 @@ class HelpMenu(tk.Toplevel):
         self.columnconfigure(0, weight=1)
         self.text_widget.grid(column = 0, row = 0, sticky = "NSEW")
         self.scrollbar.grid(column=1, row=0, sticky="NSW")
-
-
 
 
 if __name__ == '__main__':
